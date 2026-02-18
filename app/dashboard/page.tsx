@@ -1,0 +1,49 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabaseBrowser } from "../../lib/supabaseBrowser";
+
+const ROLE_TO_PATH: Record<string, string> = {
+  Core: "/dashboard/core",
+  SPV_Owner: "/dashboard/spv_owner",
+  Vertical: "/dashboard/vertical",
+  Knjigovodja: "/dashboard/knjigovodja",
+  Bank: "/dashboard/bank",
+  Holding: "/dashboard/holding",
+};
+
+export default function DashboardIndex() {
+  const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const { data: authData } = await supabaseBrowser.auth.getUser();
+      const user = authData?.user;
+
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data: profile, error } = await supabaseBrowser
+        .from("user_profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (error || !profile?.role) {
+        router.replace("/login");
+        return;
+      }
+
+      router.replace(ROLE_TO_PATH[profile.role] ?? "/dashboard/core");
+    })();
+  }, [router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="text-sm text-gray-600">Preusmjeravanje...</div>
+    </div>
+  );
+}
