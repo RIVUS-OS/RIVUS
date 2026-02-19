@@ -1,0 +1,2 @@
+import ComingSoon from "@/components/ComingSoon";
+export default function Page() { return <ComingSoon title="Dokumenti" subtitle="Financijski i pravni dokumenti" />; }
