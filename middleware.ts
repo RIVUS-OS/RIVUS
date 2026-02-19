@@ -1,4 +1,4 @@
-// RIVUS v1.0 — Middleware (IDE U ROOT: middleware.ts pored app/)
+// RIVUS v1.0 â€” Middleware (IDE U ROOT: middleware.ts pored app/)
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Not logged in → to /login
+  // Not logged in â†’ to /login
   if (!user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
   const role = profile?.role ?? "SPV_Owner";
   const dashboard = ROLE_DASHBOARDS[role] ?? "/dashboard/owner";
 
-  // Root or /dashboard → send to role dashboard
+  // Root or /dashboard â†’ send to role dashboard
   if (pathname === "/" || pathname === "/dashboard") {
     return NextResponse.redirect(new URL(dashboard, request.url));
   }
@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
       pathname === dashboard || pathname.startsWith(dashboard + "/");
 
     // Special case: allow /dashboard/core/... only for Core, etc.
-    if (!isAllowedBase) {
+    if (!isAllowedBase && role !== "Core") {
       return NextResponse.redirect(new URL(dashboard, request.url));
     }
   }

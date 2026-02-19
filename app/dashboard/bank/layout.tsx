@@ -1,5 +1,5 @@
-import CoreShell from "@/components/layouts/CoreShell";
+import BankShell from "@/components/layouts/BankShell";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <CoreShell>{children}</CoreShell>;
+export default function BankLayout({ children }: { children: React.ReactNode }) {
+  return <BankShell>{children}</BankShell>;
 }

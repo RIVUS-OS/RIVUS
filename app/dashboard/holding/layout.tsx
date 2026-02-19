@@ -1,5 +1,5 @@
-import CoreShell from "@/components/layouts/CoreShell";
+import HoldingShell from "@/components/layouts/HoldingShell";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <CoreShell>{children}</CoreShell>;
+export default function HoldingLayout({ children }: { children: React.ReactNode }) {
+  return <HoldingShell>{children}</HoldingShell>;
 }

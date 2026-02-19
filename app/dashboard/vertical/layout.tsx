@@ -1,5 +1,5 @@
-import CoreShell from "@/components/layouts/CoreShell";
+import VerticalShell from "@/components/layouts/VerticalShell";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <CoreShell>{children}</CoreShell>;
+export default function VerticalLayout({ children }: { children: React.ReactNode }) {
+  return <VerticalShell>{children}</VerticalShell>;
 }
