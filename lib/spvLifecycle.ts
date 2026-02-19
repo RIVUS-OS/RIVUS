@@ -4,11 +4,14 @@
  */
 export const LIFECYCLE_STAGES = [
   "Created",
+  "CORE Review",
+  "Verticals Active",
   "Structured",
   "Financing",
-  "Active",
+  "Active Construction",
   "Completed",
 ] as const;
+
 
 export type SPVStatus = (typeof LIFECYCLE_STAGES)[number];
 

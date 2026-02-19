@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { validateLifecycleStageChange } from "@/lib/spvLifecycle";
+import { validateLifecycleStageChange } from "../../../../lib/spvLifecycle";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -15,6 +15,29 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  // 🔐 get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // 🔐 check role
+  const { data: roleRow } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!roleRow || roleRow.role !== "CORE") {
+    return NextResponse.json(
+      { error: "Only CORE can change lifecycle stage" },
+      { status: 403 }
+    );
+  }
+
   const { data: spv } = await supabase
     .from("spvs")
     .select("*")
@@ -25,22 +48,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SPV not found" }, { status: 404 });
   }
 
-  const result = validateLifecycleStageChange(spv.lifecycle_stage, newStage, spv);
+  const result = validateLifecycleStageChange(
+    spv.lifecycle_stage,
+    newStage,
+    spv
+  );
 
   if (!result.ok) {
-    await supabase.from("activity_log").insert({
-      action: "LIFECYCLE_CHANGE_BLOCKED",
-      entity_type: "SPV",
-      entity_id: spvId,
-      severity: "warning",
-      metadata: {
-        from: spv.lifecycle_stage,
-        to: newStage,
-        reason: result.error,
-      },
-    });
+    const reason =
+      "error" in result && result.error ? result.error : "Blocked";
 
-    return NextResponse.json({ error: result.error }, { status: 400 });
+    return NextResponse.json({ error: reason }, { status: 400 });
   }
 
   const { error } = await supabase
@@ -51,14 +69,6 @@ export async function POST(req: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  await supabase.from("activity_log").insert({
-    action: "LIFECYCLE_CHANGED",
-    entity_type: "SPV",
-    entity_id: spvId,
-    severity: "info",
-    metadata: { from: spv.lifecycle_stage, to: newStage },
-  });
 
   return NextResponse.json({ success: true });
 }

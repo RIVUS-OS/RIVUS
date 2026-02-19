@@ -4,6 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
+const STAGES = [
+  "Created",
+  "CORE Review",
+  "Verticals Active",
+  "Structured",
+  "Financing",
+  "Active Construction",
+  "Completed",
+] as const;
+
 export default function CoreSpvDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -54,7 +64,7 @@ export default function CoreSpvDetailPage() {
     })();
   }, [spvId]);
 
-  async function changeToStructured() {
+  async function proceedTo(stage: string) {
     if (!spv) return;
 
     setChanging(true);
@@ -63,10 +73,7 @@ export default function CoreSpvDetailPage() {
     const res = await fetch("/api/spv/change-stage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        spvId: spv.id,
-        newStage: "Structured",
-      }),
+      body: JSON.stringify({ spvId: spv.id, newStage: stage }),
     });
 
     const data = await res.json();
@@ -87,19 +94,14 @@ export default function CoreSpvDetailPage() {
     setChanging(false);
   }
 
-  if (loading) {
-    return <div className="p-6 text-[13px] text-black/50">Učitavanje...</div>;
-  }
+  if (loading) return <div className="p-6 text-[13px] text-black/50">Učitavanje...</div>;
+  if (!spv) return <div className="p-6 text-[13px] text-black/50">SPV ne postoji.</div>;
 
-  if (!spv) {
-    return <div className="p-6 text-[13px] text-black/50">SPV ne postoji.</div>;
-  }
-
-  const canChange =
-    spv.lifecycle_stage !== "Structured" &&
-    spv.core_approved &&
-    spv.incomplete_mandatory_count === 0 &&
-    spv.pending_documents_count === 0;
+  const currentIndex = STAGES.indexOf(spv.lifecycle_stage as any);
+  const nextStage =
+    currentIndex >= 0 && currentIndex < STAGES.length - 1
+      ? STAGES[currentIndex + 1]
+      : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -118,28 +120,28 @@ export default function CoreSpvDetailPage() {
         </button>
       </div>
 
-      <div className="macos-card shadow-sm p-4 space-y-3">
+      <div className="macos-card shadow-sm p-4 space-y-2">
         <div className="text-[14px] font-semibold">Lifecycle</div>
         <div className="text-[13px]">Stage: <b>{spv.lifecycle_stage}</b></div>
         <div className="text-[13px]">CORE approved: <b>{spv.core_approved ? "DA" : "NE"}</b></div>
         <div className="text-[13px]">Incomplete mandatory: <b>{spv.incomplete_mandatory_count}</b></div>
         <div className="text-[13px]">Pending documents: <b>{spv.pending_documents_count}</b></div>
 
+        <div className="mt-3 text-[12px] text-black/60">
+          Next stage: <b>{nextStage || "—"}</b>
+        </div>
+
         <button
-          disabled={!canChange || changing}
-          onClick={changeToStructured}
+          disabled={!nextStage || changing}
+          onClick={() => nextStage && proceedTo(nextStage)}
           className={`px-4 py-2 rounded text-[13px] ${
-            canChange
-              ? "bg-blue-600 text-white"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            nextStage ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
-          {changing ? "Mijenjam..." : "Promijeni u Structured"}
+          {changing ? "Mijenjam..." : `Proceed to ${nextStage}`}
         </button>
 
-        {errorMsg && (
-          <div className="text-[12px] text-red-600">⚠ {errorMsg}</div>
-        )}
+        {errorMsg && <div className="text-[12px] text-red-600 mt-2">⚠ {errorMsg}</div>}
       </div>
 
       <div className="macos-card shadow-sm p-4">
@@ -169,9 +171,7 @@ export default function CoreSpvDetailPage() {
                 <div className="text-[13px] font-medium">{f.entry_type} · {f.category}</div>
                 <div className="text-[12px] text-black/50">{f.status}</div>
               </div>
-              <div className="text-[14px] font-bold">
-                €{Number(f.amount).toLocaleString()}
-              </div>
+              <div className="text-[14px] font-bold">€{Number(f.amount).toLocaleString()}</div>
             </div>
           ))
         )}
