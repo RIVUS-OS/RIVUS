@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { validateLifecycleStageChange } from "../../../../lib/spvLifecycle";
+import { supabaseServer } from "@/lib/supabaseServer";
+import { validateLifecycleStageChange } from "@/lib/spvLifecycle";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -10,12 +10,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = await supabaseServer();
 
-  // 🔐 get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,14 +20,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // 🔐 check role
-  const { data: roleRow } = await supabase
-    .from("user_roles")
+  const { data: profile } = await supabase
+    .from("user_profiles")
     .select("role")
-    .eq("user_id", user.id)
+    .eq("id", user.id)
     .single();
 
-  if (!roleRow || roleRow.role !== "CORE") {
+  if (!profile || profile.role !== "Core") {
     return NextResponse.json(
       { error: "Only CORE can change lifecycle stage" },
       { status: 403 }
@@ -55,9 +50,7 @@ export async function POST(req: Request) {
   );
 
   if (!result.ok) {
-    const reason =
-      "error" in result && result.error ? result.error : "Blocked";
-
+    const reason = "error" in result && result.error ? result.error : "Blocked";
     return NextResponse.json({ error: reason }, { status: 400 });
   }
 
