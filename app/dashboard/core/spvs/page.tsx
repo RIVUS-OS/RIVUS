@@ -56,7 +56,7 @@ export default function CoreSpvListPage() {
                     {r.spv_code}
                   </td>
                   <td className="px-4 py-2 text-[13px]">
-                    {r.project_name || "—"}
+                    {r.project_name || "â€”"}
                   </td>
                   <td className="px-4 py-2 text-[13px]">
                     {r.lifecycle_stage}

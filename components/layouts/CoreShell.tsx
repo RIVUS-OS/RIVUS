@@ -4,42 +4,18 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useState } from "react";
 import {
-  Home,
-  Shield,
-  Building2,
-  BarChart3,
-  Landmark,
-  Euro,
-  FileText,
-  FolderOpen,
-  CheckSquare,
-  Download,
-  Users,
-  Bell,
-  Settings,
-  Eye,
-  Layers,
-  Zap,
-  AlertTriangle,
-  CheckCircle,
-  BookOpen,
-  Briefcase,
-  UserCog,
-  FileStack,
-  Plus,
-  GitBranch,
-  AlertCircle as AlertCircleIcon,
-  ShieldCheck,
-  DollarSign,
+  Home, Shield, Building2, BarChart3, Landmark, Euro, FileText,
+  FolderOpen, CheckSquare, Download, Users, Bell, Settings, Eye,
+  Layers, Zap, AlertTriangle, CheckCircle, BookOpen, Briefcase,
+  UserCog, FileStack, GitBranch, AlertCircle, ShieldCheck, DollarSign,
+  ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle,
 } from "lucide-react";
 
 type NavItem = {
   label: string;
   href: string;
   icon: any;
-  actionHref?: string; // Optional "+" action
-  actionLabel?: string; // Tooltip for "+" button
-  disabled?: boolean; // For "later" features
+  disabled?: boolean;
   disabledTooltip?: string;
 };
 
@@ -48,178 +24,209 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
+  // === DETECT CONTEXT ===
+  const spvMatch = pathname.match(/^\/dashboard\/core\/spv\/([^/]+)/);
+  const isInsideSpv = !!spvMatch;
+  const spvId = spvMatch ? spvMatch[1] : null;
+  const spvBase = spvId ? `/dashboard/core/spv/${spvId}` : "";
+
+  const coreDooPages = [
+    "/dashboard/core/core-dashboard", "/dashboard/core/prihodi",
+    "/dashboard/core/rashodi", "/dashboard/core/knjigovodstvo",
+    "/dashboard/core/core-dokumenti", "/dashboard/core/core-ugovori",
+    "/dashboard/core/izvoz"
+  ];
+  const isInsideCoreDoo = coreDooPages.some(p => pathname.startsWith(p));
+
+  // === HEADER NAV ===
   const headerNav = [
-    // GRUPA 1: OPERATIVNI NADZOR
     { label: "Pentagon", href: "/dashboard/core/pentagon", icon: Shield },
-    { label: "SPV", href: "/dashboard/core/spv-control", icon: Building2 },
-    { label: "Vertikale", href: "/dashboard/core/vertical-control", icon: Users },
-    { label: "Financije", href: "/dashboard/core/accounting-control", icon: Euro },
-    { label: "Banka", href: "/dashboard/core/bank", icon: Landmark },
-
-    // SEPARATOR
+    { label: "SPV Monitoring", href: "/dashboard/core/spv-pipeline", icon: Building2 },
+    { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: Users },
+    { label: "Financije", href: "/dashboard/core/financije-nadzor", icon: Euro },
+    { label: "Banka", href: "/dashboard/core/banke-nadzor", icon: Landmark },
     { label: "separator", href: "", icon: null },
-
-    // GRUPA 2: RIZIK I KONTROLA
-    { label: "Rizik", href: "/dashboard/core/risk", icon: AlertTriangle },
-    { label: "Odobrenja", href: "/dashboard/core/approvals", icon: CheckCircle },
-    { label: "Dijagnostika", href: "/dashboard/core/diagnostics", icon: Eye },
-
-    // SEPARATOR
+    { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
+    { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
+    { label: "Dijagnostika", href: "/dashboard/core/compliance", icon: Eye },
     { label: "separator", href: "", icon: null },
-
-    // GRUPA 3: ANALITIKA I IZVJEŠTAJI
-    { label: "Dnevnik", href: "/dashboard/core/event-log", icon: BookOpen },
-    { label: "Aktivnosti", href: "/dashboard/core/activities", icon: Zap },
-    { label: "Statistika", href: "/dashboard/core/statistics", icon: BarChart3 },
-    { label: "Izvještaji", href: "/dashboard/core/reports", icon: FileStack },
+    { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
+    { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
+    { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
   ];
 
-  const navSections = [
+  // === SIDEBAR: SPV DETAIL ===
+  const spvSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
-      items: [{ label: "Nadzorna ploča", href: "/dashboard/core", icon: Home }],
+      items: [
+        { label: "Pregled", href: `${spvBase}`, icon: Home },
+        { label: "Zadaci", href: `${spvBase}/zadaci`, icon: CheckSquare },
+        { label: "Dokumenti", href: `${spvBase}/dokumenti`, icon: FolderOpen },
+        { label: "Financije", href: `${spvBase}/financije`, icon: Euro },
+        { label: "Vertikale", href: `${spvBase}/vertikale`, icon: Briefcase },
+        { label: "Banka", href: `${spvBase}/banka`, icon: Landmark },
+        { label: "Knjigovodstvo", href: `${spvBase}/knjigovodstvo`, icon: FileText },
+        { label: "Obvezni uvjeti", href: `${spvBase}/mandatory`, icon: AlertCircle },
+        { label: "Odobrenja", href: `${spvBase}/odobrenja`, icon: CheckCircle },
+        { label: "RIVUS naplata", href: `${spvBase}/rivus-billing`, icon: Receipt },
+        { label: "Korisnici", href: `${spvBase}/korisnici`, icon: Users },
+      ],
     },
     {
-      title: "PROJEKTI (SPV)",
+      title: "EVIDENCIJA",
       items: [
-        {
-          label: "SPV lista",
-          href: "/dashboard/core/spvs",
-          icon: Building2,
-          actionHref: "/dashboard/core/add-spv",
-          actionLabel: "Dodaj novi SPV",
-        },
-        {
-          label: "Zadaci",
-          href: "/dashboard/core/tasks",
-          icon: CheckSquare,
-          actionHref: "/dashboard/core/add-task",
-          actionLabel: "Novi zadatak",
-        },
-        {
-          label: "Dokumenti projekata",
-          href: "/dashboard/core/documents",
-          icon: FolderOpen,
-          actionHref: "/dashboard/core/upload-document",
-          actionLabel: "Upload dokument",
-        },
-        {
-          label: "Lifecycle",
-          href: "/dashboard/core/lifecycle",
-          icon: GitBranch,
-          disabled: true,
-          disabledTooltip: "Uskoro - workflow u izradi",
-        },
-        {
-          label: "Mandatory",
-          href: "/dashboard/core/mandatory",
-          icon: AlertCircleIcon,
-          disabled: true,
-          disabledTooltip: "Uskoro - mandatory task sustav",
-        },
-      ] as NavItem[],
+        { label: "TOK", href: `${spvBase}/tok`, icon: MessageCircle },
+        { label: "Dnevnik", href: `${spvBase}/dnevnik`, icon: BookOpen },
+        { label: "Postavke", href: `${spvBase}/postavke`, icon: Settings },
+      ],
+    },
+  ];
+
+  // === SIDEBAR: CORE D.O.O. ===
+  const coreDooSidebar: { title: string; items: NavItem[] }[] = [
+    {
+      title: "",
+      items: [
+        { label: "CORE nadzorna ploča", href: "/dashboard/core/core-dashboard", icon: Home },
+      ],
     },
     {
-      title: "IZVRŠITELJI",
+      title: "FINANCIJE",
       items: [
-        {
-          label: "Vertikale",
-          href: "/dashboard/core/verticals",
-          icon: Briefcase,
-          actionHref: "/dashboard/core/add-vertical",
-          actionLabel: "Dodaj vertikalu",
-        },
-        {
-          label: "Knjigovođe",
-          href: "/dashboard/core/accountants",
-          icon: UserCog,
-          actionHref: "/dashboard/core/add-accountant",
-          actionLabel: "Dodaj knjigovođu",
-        },
-        {
-          label: "Banke",
-          href: "/dashboard/core/banks",
-          icon: Landmark,
-          actionHref: "/dashboard/core/add-bank",
-          actionLabel: "Dodaj banku",
-        },
-      ] as NavItem[],
+        { label: "Prihodi", href: "/dashboard/core/prihodi", icon: Euro },
+        { label: "Rashodi", href: "/dashboard/core/rashodi", icon: DollarSign },
+        { label: "Knjigovodstvo", href: "/dashboard/core/knjigovodstvo", icon: FileText },
+      ],
     },
     {
-      title: "CORE D.O.O.",
+      title: "DOKUMENTI",
       items: [
-        { label: "CORE Dashboard", href: "/dashboard/core-company", icon: Home },
-        {
-          label: "Računi (prihodi)",
-          href: "/dashboard/core/invoices",
-          icon: Euro,
-          actionHref: "/dashboard/core/add-invoice",
-          actionLabel: "Novi račun",
-        },
-        {
-          label: "Obveze",
-          href: "/dashboard/core/expenses",
-          icon: DollarSign,
-          actionHref: "/dashboard/core/add-expense",
-          actionLabel: "Nova obveza",
-        },
-        {
-          label: "Knjigovodstvo",
-          href: "/dashboard/core/accounting",
-          icon: FileText,
-          actionHref: "/dashboard/core/accounting-request",
-          actionLabel: "Novi zahtjev",
-        },
-        {
-          label: "CORE Dokumenti",
-          href: "/dashboard/core/core-documents",
-          icon: FolderOpen,
-          actionHref: "/dashboard/core/upload-core-document",
-          actionLabel: "Upload dokument",
-        },
-        {
-          label: "CORE Ugovori",
-          href: "/dashboard/core/contracts",
-          icon: FileStack,
-          disabled: true,
-          disabledTooltip: "Uskoro - contract management",
-        },
-        { label: "Izvoz", href: "/dashboard/core/export", icon: Download },
-      ] as NavItem[],
+        { label: "CORE dokumenti", href: "/dashboard/core/core-dokumenti", icon: FolderOpen },
+        { label: "CORE ugovori", href: "/dashboard/core/core-ugovori", icon: FileStack, disabled: true, disabledTooltip: "Uskoro" },
+        { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
+      ],
+    },
+  ];
+
+  // === SIDEBAR: MONITORING (Control Room) ===
+  const controlRoomSidebar: { title: string; items: NavItem[] }[] = [
+    {
+      title: "",
+      items: [
+        { label: "Nadzorna ploča", href: "/dashboard/core", icon: Home },
+      ],
+    },
+    {
+      title: "NADZOR",
+      items: [
+        { label: "Nadzor vertikala", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
+        { label: "Nadzor knjigovođa", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
+        { label: "Nadzor banaka", href: "/dashboard/core/banke-nadzor", icon: Landmark },
+        { label: "Nadzor financija", href: "/dashboard/core/financije-nadzor", icon: Euro },
+      ],
+    },
+    {
+      title: "KONTROLA",
+      items: [
+        { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
+        { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
+        { label: "Blokade", href: "/dashboard/core/blokade", icon: Lock },
+        { label: "Usklađenost", href: "/dashboard/core/compliance", icon: ShieldCheck },
+        { label: "Orkestracija", href: "/dashboard/core/orkestracija", icon: GitBranch },
+      ],
+    },
+    {
+      title: "USLUGE I PROVIZIJE",
+      items: [
+        { label: "Nadzorna ploča usluga", href: "/dashboard/core/service-dashboard", icon: BarChart3 },
+        { label: "SPV naplata", href: "/dashboard/core/spv-billing", icon: Receipt },
+        { label: "Naplata vertikala", href: "/dashboard/core/vertikale-billing", icon: DollarSign },
+        { label: "Naknade platforme", href: "/dashboard/core/platform-fees", icon: Euro },
+        { label: "Nenaplaćeno", href: "/dashboard/core/nenaplaceno", icon: AlertCircle },
+      ],
+    },
+    {
+      title: "",
+      items: [
+        { label: "CORE D.O.O.", href: "/dashboard/core/core-dashboard", icon: Building2 },
+      ],
+    },
+    {
+      title: "EVIDENCIJA",
+      items: [
+        { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
+        { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
+        { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
+      ],
     },
     {
       title: "SUSTAV",
       items: [
-        {
-          label: "Korisnici",
-          href: "/dashboard/core/users",
-          icon: Users,
-          actionHref: "/dashboard/core/add-user",
-          actionLabel: "Dodaj korisnika",
-        },
-        { label: "Uloge i dozvole", href: "/dashboard/core/roles", icon: ShieldCheck },
-        { label: "Obavijesti", href: "/dashboard/core/notifications", icon: Bell },
-        { label: "Postavke", href: "/dashboard/core/settings", icon: Settings },
-      ] as NavItem[],
+        { label: "Korisnici", href: "/dashboard/core/korisnici", icon: Users },
+        { label: "Uloge i dozvole", href: "/dashboard/core/uloge", icon: ShieldCheck },
+        { label: "Obavijesti", href: "/dashboard/core/obavijesti", icon: Bell },
+        { label: "Postavke", href: "/dashboard/core/postavke", icon: Settings },
+      ],
+    },
+    {
+      title: "TOK",
+      items: [
+        { label: "TOK kontrola", href: "/dashboard/core/tok", icon: MessageCircle },
+        { label: "Eskalacije", href: "/dashboard/core/tok/eskalacije", icon: AlertTriangle },
+        { label: "SLA", href: "/dashboard/core/tok/sla", icon: ClipboardList },
+      ],
     },
   ];
+
+  // === ACTIVE SIDEBAR ===
+  const activeSidebar = isInsideSpv ? spvSidebar : isInsideCoreDoo ? coreDooSidebar : controlRoomSidebar;
+  const showBackButton = isInsideSpv || isInsideCoreDoo;
 
   async function handleLogout() {
     const supabase = supabaseBrowser;
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/login");
   }
 
   return (
-    <div className="flex h-screen macos-app-bg">
-      <aside className="w-[240px] border-r border-[#d1d1d6] macos-sidebar-bg flex flex-col">
+    <div className="flex h-screen bg-[#f5f5f7]">
+      {/* SIDEBAR */}
+      <aside className="w-[240px] border-r border-[#d1d1d6] bg-[#fafafa] flex flex-col">
         <div className="h-14 border-b border-[#d1d1d6] flex items-center px-4 gap-2">
           <Layers size={18} className="text-[#007AFF]" />
           <div className="text-[15px] font-bold text-black tracking-tight">RIVUS OS</div>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {navSections.map((section, idx) => (
+          {/* Back button */}
+          {showBackButton && (
+            <button
+              onClick={() => router.push("/dashboard/core")}
+              className="w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-md text-[13px] font-medium text-[#007AFF] hover:bg-[#007AFF]/10 transition-all"
+            >
+              <ArrowLeft size={16} strokeWidth={2} />
+              <span>Natrag na Monitoring</span>
+            </button>
+          )}
+
+          {/* SPV header */}
+          {isInsideSpv && (
+            <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
+              <div className="text-[11px] font-semibold text-[#007AFF] uppercase">SPV</div>
+              <div className="text-[14px] font-bold text-black mt-0.5">{spvId}</div>
+            </div>
+          )}
+
+          {/* CORE D.O.O. header */}
+          {isInsideCoreDoo && (
+            <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
+              <div className="text-[11px] font-semibold text-[#007AFF] uppercase">Interna firma</div>
+              <div className="text-[14px] font-bold text-black mt-0.5">RIVUS CORE d.o.o.</div>
+            </div>
+          )}
+
+          {activeSidebar.map((section, idx) => (
             <div key={idx} className="mb-5">
               {section.title && (
                 <div className="px-2 mb-2 text-[11px] font-semibold tracking-wide text-black/50 uppercase">
@@ -228,53 +235,39 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               )}
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname === item.href ||
+                    (item.href !== "/dashboard/core" && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const isDisabled = item.disabled || false;
 
                   return (
-                    <div key={item.href} className="relative group">
-                      <button
-                        onClick={() => !isDisabled && router.push(item.href)}
-                        disabled={isDisabled}
-                        className={`
-                          w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all
-                          ${
-                            isActive
-                              ? "bg-[#007AFF] text-white shadow-sm"
-                              : isDisabled
-                                ? "text-black/30 cursor-not-allowed"
-                                : "text-black hover:bg-black/[0.05]"
-                          }
-                        `}
-                        title={isDisabled ? item.disabledTooltip : undefined}
-                      >
-                        <Icon
-                          size={16}
-                          strokeWidth={2}
-                          className={
-                            isActive ? "text-white" : isDisabled ? "text-black/30" : "text-[#8E8E93]"
-                          }
-                        />
-                        <span className="flex-1 text-left truncate">{item.label}</span>
-
-                        {isDisabled && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/10 text-black/40 font-bold uppercase">
-                            Soon
-                          </span>
-                        )}
-                      </button>
-
-                      {item.actionHref && !isDisabled && (
-                        <button
-                          onClick={() => router.push(item.actionHref!)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/50 rounded"
-                          title={item.actionLabel}
-                        >
-                          <Plus size={14} className="text-[#007AFF]" strokeWidth={2.5} />
-                        </button>
+                    <button
+                      key={item.href}
+                      onClick={() => !isDisabled && router.push(item.href)}
+                      disabled={isDisabled}
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all
+                        ${isActive
+                          ? "bg-[#007AFF] text-white shadow-sm"
+                          : isDisabled
+                            ? "text-black/30 cursor-not-allowed"
+                            : "text-black hover:bg-black/[0.05]"
+                        }
+                      `}
+                      title={isDisabled ? item.disabledTooltip : undefined}
+                    >
+                      <Icon
+                        size={16}
+                        strokeWidth={2}
+                        className={isActive ? "text-white" : isDisabled ? "text-black/30" : "text-[#8E8E93]"}
+                      />
+                      <span className="flex-1 text-left truncate">{item.label}</span>
+                      {isDisabled && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/10 text-black/40 font-bold uppercase">
+                          Uskoro
+                        </span>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -287,35 +280,33 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium text-black/70 hover:bg-black/[0.05] transition-all"
           >
-            <span>⎋</span>
-            <span>Logout</span>
+            <span>Odjava</span>
           </button>
           <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.0.0</div>
         </div>
       </aside>
 
+      {/* MAIN */}
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-14 border-b border-[#d1d1d6] bg-white flex items-center justify-between px-6">
-          <div className="flex items-center gap-3 overflow-x-auto">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {headerNav.map((item, idx) => {
               if (item.label === "separator") {
-                return <div key={`sep-${idx}`} className="h-6 w-px bg-[#d1d1d6] flex-shrink-0" />;
+                return <div key={`sep-${idx}`} className="h-6 w-px bg-[#d1d1d6] mx-1 flex-shrink-0" />;
               }
-
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               const Icon = item.icon;
-
               return (
                 <button
-                  key={item.href}
+                  key={item.href + idx}
                   onClick={() => router.push(item.href)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${
                     isActive
                       ? "text-[#007AFF] bg-[#007AFF]/10"
-                      : "text-black/70 hover:text-black hover:bg-black/[0.04]"
+                      : "text-black/60 hover:text-black hover:bg-black/[0.04]"
                   }`}
                 >
-                  {Icon && <Icon size={16} strokeWidth={2} />}
+                  {Icon && <Icon size={14} strokeWidth={2} />}
                   <span>{item.label}</span>
                 </button>
               );
@@ -324,7 +315,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3 flex-shrink-0">
             <button className="relative p-2 hover:bg-black/[0.04] rounded-lg transition-colors">
-              <Bell size={20} className="text-black/70" />
+              <Bell size={18} className="text-black/70" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
             </button>
 
@@ -346,22 +337,20 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl border border-[#d1d1d6] shadow-lg overflow-hidden z-50">
                   <div className="p-3 border-b border-[#d1d1d6]">
                     <div className="text-[13px] font-bold text-black">Jurke Maričić</div>
-                    <div className="text-[12px] font-medium text-black/50 mt-0.5">
-                      CORE Administrator
-                    </div>
+                    <div className="text-[12px] font-medium text-black/50 mt-0.5">CORE Administrator</div>
                   </div>
                   <div className="p-1.5">
-                    <button className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/70 hover:bg-black/[0.04] transition-all">
-                      ⚙️ Postavke
-                    </button>
-                    <button className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/70 hover:bg-black/[0.04] transition-all">
-                      👤 Profil
+                    <button
+                      onClick={() => { router.push("/dashboard/core/postavke"); setUserMenuOpen(false); }}
+                      className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/70 hover:bg-black/[0.04]"
+                    >
+                      Postavke
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-all"
+                      className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-semibold text-red-600 hover:bg-red-50"
                     >
-                      ⎋ Logout
+                      Odjava
                     </button>
                   </div>
                 </div>
@@ -370,7 +359,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto macos-app-bg p-6">{children}</div>
+        <div className="flex-1 overflow-auto bg-[#f5f5f7] p-6">{children}</div>
       </main>
     </div>
   );

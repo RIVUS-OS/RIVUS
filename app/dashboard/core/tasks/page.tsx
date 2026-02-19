@@ -41,11 +41,11 @@ export default function CoreTasksPage() {
     const todayISO = today.toISOString();
 
     if (filter === "overdue") {
-      return rows.filter((t) => t.status !== "Završen" && t.due_date && t.due_date < todayISO);
+      return rows.filter((t) => t.status !== "ZavrÅ¡en" && t.due_date && t.due_date < todayISO);
     }
 
     if (filter === "mandatory") {
-      return rows.filter((t) => t.status !== "Završen" && t.is_mandatory === true);
+      return rows.filter((t) => t.status !== "ZavrÅ¡en" && t.is_mandatory === true);
     }
 
     return rows;
@@ -62,7 +62,7 @@ export default function CoreTasksPage() {
 
       <div className="macos-card shadow-sm overflow-x-auto">
         {loading ? (
-          <div className="p-4 text-[13px] text-black/50">Učitavanje...</div>
+          <div className="p-4 text-[13px] text-black/50">UÄitavanje...</div>
         ) : (
           <table className="w-full">
             <thead className="bg-[#f5f5f7] border-b border-[#d1d1d6]">
@@ -83,11 +83,11 @@ export default function CoreTasksPage() {
               ) : (
                 filtered.map((r) => (
                   <tr key={r.id} className="border-b border-[#d1d1d6]">
-                    <td className="px-4 py-2 text-[13px]">{r.title || "—"}</td>
-                    <td className="px-4 py-2 text-[13px]">{r.status || "—"}</td>
+                    <td className="px-4 py-2 text-[13px]">{r.title || "â€”"}</td>
+                    <td className="px-4 py-2 text-[13px]">{r.status || "â€”"}</td>
                     <td className="px-4 py-2 text-[13px]">{r.is_mandatory ? "DA" : "NE"}</td>
                     <td className="px-4 py-2 text-[13px]">
-                      {r.due_date ? new Date(r.due_date).toLocaleDateString("hr-HR") : "—"}
+                      {r.due_date ? new Date(r.due_date).toLocaleDateString("hr-HR") : "â€”"}
                     </td>
                   </tr>
                 ))

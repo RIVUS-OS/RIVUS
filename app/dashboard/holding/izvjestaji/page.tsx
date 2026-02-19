@@ -1,2 +1,2 @@
 import ComingSoon from "@/components/ComingSoon";
-export default function Page() { return <ComingSoon title="Izvještaji" subtitle="Generirani izvještaji" />; }
+export default function Page() { return <ComingSoon title="IzvjeÅ¡taji" subtitle="Generirani izvjeÅ¡taji" />; }

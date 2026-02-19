@@ -42,7 +42,7 @@ export default function CoreDocumentsPage() {
                   <td className="px-4 py-2 text-[13px]">{r.file_name}</td>
                   <td className="px-4 py-2 text-[13px]">{r.document_type}</td>
                   <td className="px-4 py-2 text-[13px]">{r.status}</td>
-                  <td className="px-4 py-2 text-[13px]">{r.created_at ? new Date(r.created_at).toLocaleDateString("hr-HR") : "—"}</td>
+                  <td className="px-4 py-2 text-[13px]">{r.created_at ? new Date(r.created_at).toLocaleDateString("hr-HR") : "â€”"}</td>
                 </tr>
               ))
             )}
