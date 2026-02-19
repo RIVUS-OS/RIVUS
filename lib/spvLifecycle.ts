@@ -1,173 +1,90 @@
-// ============================================================================
-// RIVUS Core OS - SPV Lifecycle State Machine
-// ============================================================================
-// This module defines the SPV lifecycle states, allowed transitions,
-// and validation logic. Designed for institutional-grade control.
-// ============================================================================
-
-export type SPVStatus =
-  | "Created"
-  | "Start Requested"
-  | "Core Review"
-  | "Vertical Assigned"
-  | "Structured"
-  | "Financing"
-  | "Active"
-  | "Completed";
-
-export const SPV_STATUSES: SPVStatus[] = [
+/**
+ * Ordered SPV lifecycle stages. Transitions must follow this order;
+ * skipping stages is not allowed.
+ */
+export const LIFECYCLE_STAGES = [
   "Created",
-  "Start Requested",
-  "Core Review",
-  "Vertical Assigned",
   "Structured",
   "Financing",
   "Active",
   "Completed",
-];
+] as const;
 
-// ============================================================================
-// Allowed State Transitions
-// ============================================================================
-// Defines which status transitions are permitted in the lifecycle.
-// Any transition not listed here is BLOCKED.
-
-type TransitionMap = {
-  [K in SPVStatus]: SPVStatus[];
-};
-
-export const ALLOWED_TRANSITIONS: TransitionMap = {
-  Created: ["Start Requested"],
-  "Start Requested": ["Core Review", "Created"],
-  "Core Review": ["Vertical Assigned", "Start Requested", "Created"],
-  "Vertical Assigned": ["Structured", "Core Review"],
-  Structured: ["Financing", "Vertical Assigned"],
-  Financing: ["Active", "Structured"],
-  Active: ["Completed", "Financing"],
-  Completed: ["Active"], // Allow reactivation if needed
-};
-
-// ============================================================================
-// Validation Functions
-// ============================================================================
+export type SPVStatus = (typeof LIFECYCLE_STAGES)[number];
 
 /**
- * Check if a status transition is allowed
+ * Returns true if transition from current to new is allowed (exactly one step forward).
  */
 export function isTransitionAllowed(
-  currentStatus: SPVStatus,
-  newStatus: SPVStatus
+  currentStage: string,
+  newStage: string
 ): boolean {
-  if (currentStatus === newStatus) return true; // No change
-  return ALLOWED_TRANSITIONS[currentStatus].includes(newStatus);
+  const currentIdx = LIFECYCLE_STAGES.indexOf(currentStage as SPVStatus);
+  const newIdx = LIFECYCLE_STAGES.indexOf(newStage as SPVStatus);
+  if (currentIdx === -1 || newIdx === -1) return false;
+  return newIdx === currentIdx + 1;
 }
 
-/**
- * Get next allowed statuses from current state
- */
-export function getNextAllowedStatuses(currentStatus: SPVStatus): SPVStatus[] {
-  return ALLOWED_TRANSITIONS[currentStatus];
-}
+export type ValidateStageChangeResult =
+  | { ok: true }
+  | { ok: false; error: string };
 
 /**
- * Get previous status (for rollback scenarios)
+ * Pure validation for changing an SPV's lifecycle stage.
+ * - Enforces ordered stages (only next stage allowed).
+ * - Prevents skipping stages.
+ * - For transition to "Structured": requires core_approved, no incomplete
+ *   mandatory tasks, no pending documents.
+ *
+ * @param currentStage - Current lifecycle_stage
+ * @param newStage - Requested new lifecycle_stage
+ * @param spv - SPV record (must have core_approved, incomplete_mandatory_count, pending_documents_count for Structured check)
+ * @returns { ok: true } or { ok: false, error: string }
  */
-export function getPreviousStatus(currentStatus: SPVStatus): SPVStatus | null {
-  for (const [fromStatus, toStatuses] of Object.entries(ALLOWED_TRANSITIONS)) {
-    if (toStatuses.includes(currentStatus)) {
-      return fromStatus as SPVStatus;
-    }
+export function validateLifecycleStageChange(
+  currentStage: string,
+  newStage: string,
+  spv: {
+    core_approved?: boolean;
+    incomplete_mandatory_count?: number;
+    pending_documents_count?: number;
+    [key: string]: unknown;
   }
-  return null;
-}
-
-/**
- * Validate transition and return error message if invalid
- */
-export function validateTransition(
-  currentStatus: SPVStatus,
-  newStatus: SPVStatus
-): { valid: boolean; error?: string } {
-  if (currentStatus === newStatus) {
-    return { valid: true };
+): ValidateStageChangeResult {
+  if (currentStage === newStage) {
+    return { ok: true };
   }
 
-  if (!isTransitionAllowed(currentStatus, newStatus)) {
+  const currentIdx = LIFECYCLE_STAGES.indexOf(currentStage as SPVStatus);
+  const newIdx = LIFECYCLE_STAGES.indexOf(newStage as SPVStatus);
+
+  if (currentIdx === -1) {
+    return { ok: false, error: `Unknown current stage: ${currentStage}` };
+  }
+  if (newIdx === -1) {
+    return { ok: false, error: `Unknown stage: ${newStage}` };
+  }
+
+  if (newIdx !== currentIdx + 1) {
     return {
-      valid: false,
-      error: `Invalid transition: ${currentStatus} → ${newStatus}. Allowed: ${ALLOWED_TRANSITIONS[currentStatus].join(", ")}`,
+      ok: false,
+      error: `Cannot skip stages: allowed next stage is ${LIFECYCLE_STAGES[currentIdx + 1] ?? "none"}`,
     };
   }
 
-  return { valid: true };
-}
+  if (newStage === "Structured") {
+    if (!spv.core_approved) {
+      return { ok: false, error: "CORE approval required" };
+    }
+    const incomplete = spv.incomplete_mandatory_count ?? 0;
+    if (incomplete > 0) {
+      return { ok: false, error: "Mandatory tasks incomplete" };
+    }
+    const pending = spv.pending_documents_count ?? 0;
+    if (pending > 0) {
+      return { ok: false, error: "Pending documents exist" };
+    }
+  }
 
-// ============================================================================
-// Lifecycle Metadata
-// ============================================================================
-
-type StatusMetadata = {
-  label: string;
-  description: string;
-  color: "gray" | "yellow" | "blue" | "green" | "red";
-  requiresCoreAction: boolean;
-};
-
-export const STATUS_METADATA: Record<SPVStatus, StatusMetadata> = {
-  Created: {
-    label: "Created",
-    description: "SPV inicijaliziran, čeka start request",
-    color: "gray",
-    requiresCoreAction: false,
-  },
-  "Start Requested": {
-    label: "Start Requested",
-    description: "SPV Owner poslao zahtjev za pokretanje",
-    color: "yellow",
-    requiresCoreAction: true,
-  },
-  "Core Review": {
-    label: "Core Review",
-    description: "Core pregledava zahtjev i strukturu",
-    color: "blue",
-    requiresCoreAction: true,
-  },
-  "Vertical Assigned": {
-    label: "Vertical Assigned",
-    description: "Vertikale dodijeljene, čeka dovršenje taskova",
-    color: "blue",
-    requiresCoreAction: false,
-  },
-  Structured: {
-    label: "Structured",
-    description: "Struktura kompletna, spreman za financiranje",
-    color: "green",
-    requiresCoreAction: false,
-  },
-  Financing: {
-    label: "Financing",
-    description: "U procesu financiranja",
-    color: "yellow",
-    requiresCoreAction: false,
-  },
-  Active: {
-    label: "Active",
-    description: "Projekt aktivan, u izvršenju",
-    color: "green",
-    requiresCoreAction: false,
-  },
-  Completed: {
-    label: "Completed",
-    description: "Projekt završen",
-    color: "gray",
-    requiresCoreAction: false,
-  },
-};
-
-// ============================================================================
-// Helper: Get status display info
-// ============================================================================
-
-export function getStatusInfo(status: SPVStatus): StatusMetadata {
-  return STATUS_METADATA[status];
+  return { ok: true };
 }
