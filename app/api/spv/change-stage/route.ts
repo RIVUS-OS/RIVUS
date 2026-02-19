@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { validateLifecycleStageChange } from "@/lib/spvLifecycle";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -24,27 +25,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SPV not found" }, { status: 404 });
   }
 
-  if (newStage === "Structured") {
-    if (!spv.core_approved) {
-      return NextResponse.json(
-        { error: "CORE approval required" },
-        { status: 400 }
-      );
-    }
+  const result = validateLifecycleStageChange(spv.lifecycle_stage, newStage, spv);
 
-    if (spv.incomplete_mandatory_count > 0) {
-      return NextResponse.json(
-        { error: "Mandatory tasks incomplete" },
-        { status: 400 }
-      );
-    }
+  if (!result.ok) {
+    await supabase.from("activity_log").insert({
+      action: "LIFECYCLE_CHANGE_BLOCKED",
+      entity_type: "SPV",
+      entity_id: spvId,
+      severity: "warning",
+      metadata: {
+        from: spv.lifecycle_stage,
+        to: newStage,
+        reason: result.error,
+      },
+    });
 
-    if (spv.pending_documents_count > 0) {
-      return NextResponse.json(
-        { error: "Pending documents exist" },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
   const { error } = await supabase
@@ -61,8 +57,8 @@ export async function POST(req: Request) {
     entity_type: "SPV",
     entity_id: spvId,
     severity: "info",
+    metadata: { from: spv.lifecycle_stage, to: newStage },
   });
 
   return NextResponse.json({ success: true });
 }
-
