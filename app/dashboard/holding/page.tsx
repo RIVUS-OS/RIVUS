@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 
 const MOCK_PORTFOLIO = [
-  { code: "SAN-01", name: "Sandora Petőfia 1", status: "Verticals Active", expenses: 4500, risk: "Nizak" },
-  { code: "SAN-02", name: "Sandora Petőfia 2", status: "Verticals Active", expenses: 2200, risk: "Nizak" },
+  { code: "SAN-01", name: "Sandora Petőfia 1", status: "Vertikale aktivne", expenses: 4500, risk: "Nizak" },
+  { code: "SAN-02", name: "Sandora Petőfia 2", status: "Vertikale aktivne", expenses: 2200, risk: "Nizak" },
 ];
 
 export default function HoldingDashboard() {

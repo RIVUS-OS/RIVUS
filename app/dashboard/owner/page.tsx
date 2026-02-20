@@ -11,7 +11,7 @@ const MOCK_SPVS = [
   {
     code: "SAN-01",
     name: "Sandora Petőfia 1",
-    status: "Verticals Active",
+    status: "Vertikale aktivne",
     tasks: { total: 8, completed: 3, overdue: 1 },
     finance: { expenses: 4500 },
     created: "15.01.2026.",
@@ -19,7 +19,7 @@ const MOCK_SPVS = [
   {
     code: "SAN-02",
     name: "Sandora Petőfia 2",
-    status: "Verticals Active",
+    status: "Vertikale aktivne",
     tasks: { total: 5, completed: 2, overdue: 0 },
     finance: { expenses: 2200 },
     created: "15.01.2026.",

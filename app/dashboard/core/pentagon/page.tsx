@@ -10,25 +10,25 @@ import {
 
 // === MOCK DATA ===
 const MOCK_STAGES = [
-  { stage: "Created", count: 0, color: "#8E8E93", description: "SPV kreiran, inicijalni setup" },
-  { stage: "CORE Review", count: 0, color: "#5AC8FA", description: "CORE pregled i validacija" },
-  { stage: "Verticals Active", count: 2, color: "#AF52DE", description: "Vertikale dodijeljene i aktivne" },
-  { stage: "Structured", count: 0, color: "#007AFF", description: "Pravna struktura, ugovori" },
-  { stage: "Financing", count: 0, color: "#FF9500", description: "Financiranje, capital raising" },
-  { stage: "Active Construction", count: 0, color: "#34C759", description: "Izvođenje radova, gradnja" },
-  { stage: "Completed", count: 0, color: "#5856D6", description: "Projekt završen, zatvaranje SPV-a" },
+  { stage: "Kreirano", count: 0, color: "#8E8E93", description: "SPV kreiran, inicijalni setup" },
+  { stage: "CORE pregled", count: 0, color: "#5AC8FA", description: "CORE pregled i validacija" },
+  { stage: "Vertikale aktivne", count: 2, color: "#AF52DE", description: "Vertikale dodijeljene i aktivne" },
+  { stage: "Strukturirano", count: 0, color: "#007AFF", description: "Pravna struktura, ugovori" },
+  { stage: "Financiranje", count: 0, color: "#FF9500", description: "Financiranje, capital raising" },
+  { stage: "Aktivna gradnja", count: 0, color: "#34C759", description: "Izvođenje radova, gradnja" },
+  { stage: "Završeno", count: 0, color: "#5856D6", description: "Projekt završen, zatvaranje SPV-a" },
 ];
 
 const MOCK_RISKY_SPVS = [
-  { code: "SAN-01", name: "Sandora Petőfia 1", riskScore: 2, status: "Verticals Active", issue: "Kasni zadatak: geodetski elaborat" },
-  { code: "SAN-02", name: "Sandora Petőfia 2", riskScore: 0, status: "Verticals Active", issue: "Nema otvorenih rizika" },
+  { code: "SAN-01", name: "Sandora Petőfia 1", riskScore: 2, status: "Vertikale aktivne", issue: "Kasni zadatak: geodetski elaborat" },
+  { code: "SAN-02", name: "Sandora Petőfia 2", riskScore: 0, status: "Vertikale aktivne", issue: "Nema otvorenih rizika" },
 ];
 
 const MOCK_ACTIVITIES = [
   { id: 1, action: "SPV SAN-01 kreiran", user: "core@rivus.hr", time: "Danas, 09:15", type: "create" },
   { id: 2, action: "SPV SAN-02 kreiran", user: "core@rivus.hr", time: "Danas, 09:20", type: "create" },
-  { id: 3, action: "Lifecycle SAN-01 → Verticals Active", user: "sustav", time: "Danas, 09:45", type: "transition" },
-  { id: 4, action: "Lifecycle SAN-02 → Verticals Active", user: "sustav", time: "Danas, 09:46", type: "transition" },
+  { id: 3, action: "Lifecycle SAN-01 → Vertikale aktivne", user: "sustav", time: "Danas, 09:45", type: "transition" },
+  { id: 4, action: "Lifecycle SAN-02 → Vertikale aktivne", user: "sustav", time: "Danas, 09:46", type: "transition" },
   { id: 5, action: "Korisnik core@rivus.hr prijavljen", user: "sustav", time: "Danas, 10:00", type: "auth" },
 ];
 

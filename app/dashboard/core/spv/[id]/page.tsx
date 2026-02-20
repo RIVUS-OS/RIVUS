@@ -23,7 +23,7 @@ const MOCK_SPV_DATA: Record<string, {
 }> = {
   "SAN-01": {
     name: "Sandora Petőfia 1",
-    status: "Verticals Active",
+    status: "Vertikale aktivne",
     director: "Jurke Maričić",
     oib: "12345678901",
     created: "15.01.2026.",
@@ -45,7 +45,7 @@ const MOCK_SPV_DATA: Record<string, {
   },
   "SAN-02": {
     name: "Sandora Petőfia 2",
-    status: "Verticals Active",
+    status: "Vertikale aktivne",
     director: "Jurke Maričić",
     oib: "12345678901",
     created: "15.01.2026.",
@@ -66,13 +66,13 @@ const MOCK_SPV_DATA: Record<string, {
 };
 
 const LIFECYCLE_STAGES = [
-  "Created",
-  "CORE Review",
-  "Verticals Active",
-  "Structured",
-  "Financing",
-  "Active Construction",
-  "Completed",
+  "Kreirano",
+  "CORE pregled",
+  "Vertikale aktivne",
+  "Strukturirano",
+  "Financiranje",
+  "Aktivna gradnja",
+  "Završeno",
 ];
 
 const STAGE_COLORS = [

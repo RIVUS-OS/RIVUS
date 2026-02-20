@@ -15,8 +15,8 @@ type LifecycleFunnelProps = {
 };
 
 export function LifecycleFunnelPanel({ stages, totalSPVs }: LifecycleFunnelProps) {
-  const createdCount = stages.find(s => s.stage === "Created")?.count || 0;
-  const activeCount = stages.find(s => s.stage === "Active Construction")?.count || 0;
+  const createdCount = stages.find(s => s.stage === "Kreirano")?.count || 0;
+  const activeCount = stages.find(s => s.stage === "Aktivna gradnja")?.count || 0;
   const conversionRate = createdCount > 0 ? ((activeCount / createdCount) * 100).toFixed(0) : "0";
 
   const bottleneck = [...stages].sort((a, b) => b.count - a.count)[0];
@@ -135,17 +135,17 @@ export function LifecycleFunnelPanel({ stages, totalSPVs }: LifecycleFunnelProps
 
 export function generateLifecycleData(spvList: any[]): LifecycleStage[] {
   const stageCounts = {
-    "Created": 0,
-    "CORE Review": 0,
-    "Verticals Active": 0,
-    "Structured": 0,
-    "Financing": 0,
-    "Active Construction": 0,
-    "Completed": 0,
+    "Kreirano": 0,
+    "CORE pregled": 0,
+    "Vertikale aktivne": 0,
+    "Strukturirano": 0,
+    "Financiranje": 0,
+    "Aktivna gradnja": 0,
+    "Završeno": 0,
   };
 
   spvList.forEach((spv) => {
-    const status = spv.lifecycle_stage || "Created";
+    const status = spv.lifecycle_stage || "Kreirano";
     if (status in stageCounts) {
       stageCounts[status as keyof typeof stageCounts]++;
     } else {
@@ -154,12 +154,12 @@ export function generateLifecycleData(spvList: any[]): LifecycleStage[] {
   });
 
   return [
-    { stage: "Created", count: stageCounts["Created"], color: "#8E8E93", description: "SPV kreiran, inicijalni setup" },
-    { stage: "CORE Review", count: stageCounts["CORE Review"], color: "#5AC8FA", description: "CORE pregled i validacija" },
-    { stage: "Verticals Active", count: stageCounts["Verticals Active"], color: "#AF52DE", description: "Vertikale dodijeljene i aktivne" },
-    { stage: "Structured", count: stageCounts["Structured"], color: "#007AFF", description: "Pravna struktura, ugovori" },
-    { stage: "Financing", count: stageCounts["Financing"], color: "#FF9500", description: "Financiranje, capital raising" },
-    { stage: "Active Construction", count: stageCounts["Active Construction"], color: "#34C759", description: "Izvođenje radova, gradnja" },
-    { stage: "Completed", count: stageCounts["Completed"], color: "#5856D6", description: "Projekt završen, zatvaranje SPV-a" },
+    { stage: "Kreirano", count: stageCounts["Kreirano"], color: "#8E8E93", description: "SPV kreiran, inicijalni setup" },
+    { stage: "CORE pregled", count: stageCounts["CORE pregled"], color: "#5AC8FA", description: "CORE pregled i validacija" },
+    { stage: "Vertikale aktivne", count: stageCounts["Vertikale aktivne"], color: "#AF52DE", description: "Vertikale dodijeljene i aktivne" },
+    { stage: "Strukturirano", count: stageCounts["Strukturirano"], color: "#007AFF", description: "Pravna struktura, ugovori" },
+    { stage: "Financiranje", count: stageCounts["Financiranje"], color: "#FF9500", description: "Financiranje, capital raising" },
+    { stage: "Aktivna gradnja", count: stageCounts["Aktivna gradnja"], color: "#34C759", description: "Izvođenje radova, gradnja" },
+    { stage: "Završeno", count: stageCounts["Završeno"], color: "#5856D6", description: "Projekt završen, zatvaranje SPV-a" },
   ];
 }
