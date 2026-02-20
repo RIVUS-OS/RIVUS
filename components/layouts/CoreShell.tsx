@@ -34,7 +34,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     "/dashboard/core/core-dashboard", "/dashboard/core/prihodi",
     "/dashboard/core/rashodi", "/dashboard/core/knjigovodstvo",
     "/dashboard/core/core-dokumenti", "/dashboard/core/core-ugovori",
-    "/dashboard/core/izvoz"
+    "/dashboard/core/izvoz",
+    "/dashboard/core/core-postavke"
   ];
   const isInsideCoreDoo = coreDooPages.some(p => pathname.startsWith(p));
 
@@ -105,6 +106,12 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "CORE dokumenti", href: "/dashboard/core/core-dokumenti", icon: FolderOpen },
         { label: "CORE ugovori", href: "/dashboard/core/core-ugovori", icon: FileStack, disabled: true, disabledTooltip: "Uskoro" },
         { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
+      ],
+    },
+    {
+      title: "POSTAVKE",
+      items: [
+        { label: "Postavke firme", href: "/dashboard/core/core-postavke", icon: Settings },
       ],
     },
   ];
