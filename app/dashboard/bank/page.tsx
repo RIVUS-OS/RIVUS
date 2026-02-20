@@ -1,110 +1,44 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { KpiCard, KpiGrid } from "@/components/KpiCard";
-import {
-  Building2, ArrowRight, ClipboardCheck, Archive,
-} from "lucide-react";
+import { SPVS, BANKS } from "@/lib/mock-data";
 
-const MOCK_EVALUATIONS = [
-  { code: "SAN-01", name: "Sandora Petőfia 1", status: "Čeka evaluaciju", submitted: "01.02.2026.", riskScore: "—" },
-  { code: "SAN-02", name: "Sandora Petőfia 2", status: "Čeka evaluaciju", submitted: "05.02.2026.", riskScore: "—" },
-];
-
-const MOCK_ARCHIVE: { code: string; name: string; result: string; date: string }[] = [];
-
-export default function BankDashboard() {
+export default function BankDashboardPage() {
   const router = useRouter();
+  const evalPending = SPVS.filter(p => BANKS.some(b => b.evaluationPending === p.id));
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-black">Nadzorna ploča</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Evaluacija SPV projekata</p>
-      </div>
-
-      <KpiGrid>
-        <KpiCard
-          title="Čekaju evaluaciju"
-          value={MOCK_EVALUATIONS.length}
-          icon="📋"
-          color="amber"
-          subtitle="Novi zahtjevi"
-          onClick={() => router.push("/dashboard/bank/evaluacije")}
-        />
-        <KpiCard
-          title="Završene evaluacije"
-          value={MOCK_ARCHIVE.length}
-          icon="✅"
-          color="green"
-          subtitle="U arhivi"
-          onClick={() => router.push("/dashboard/bank/arhiva")}
-        />
-        <KpiCard
-          title="Prosječno vrijeme"
-          value="— dana"
-          icon="⏱️"
-          color="blue"
-          subtitle="Od zahtjeva do odluke"
-        />
-        <KpiCard
-          title="Odobreno"
-          value="—"
-          icon="🏦"
-          color="blue"
-          subtitle="Ukupni iznos"
-        />
-      </KpiGrid>
-
-      {/* SPV-OVI ZA EVALUACIJU */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="border-b border-gray-100 px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ClipboardCheck size={16} className="text-[#5856D6]" />
-            <span className="text-[14px] font-semibold text-black">SPV-ovi za evaluaciju</span>
+      <div><h1 className="text-[22px] font-bold text-black">Banka - Nadzorna ploca</h1><p className="text-[13px] text-black/50 mt-0.5">{BANKS.length} banaka | {SPVS.length} SPV-ova</p></div>
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "SPV-ova", value: SPVS.length, color: "text-blue-600" },
+          { label: "Evaluacije", value: evalPending.length, color: evalPending.length > 0 ? "text-amber-600" : "text-green-600" },
+          { label: "Banke", value: BANKS.length, color: "text-blue-600" },
+        ].map(k => (
+          <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className={`text-xl font-bold ${k.color}`}>{k.value}</div>
+            <div className="text-[12px] text-black/50">{k.label}</div>
           </div>
-          <button
-            onClick={() => router.push("/dashboard/bank/evaluacije")}
-            className="text-[12px] text-[#007AFF] font-medium hover:underline flex items-center gap-1"
-          >
-            Sve evaluacije <ArrowRight size={12} />
-          </button>
-        </div>
-        <div className="divide-y divide-gray-50">
-          {MOCK_EVALUATIONS.map((spv) => (
-            <button
-              key={spv.code}
-              onClick={() => router.push(`/dashboard/bank/spv/${spv.code}`)}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors text-left"
-            >
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-[#5856D6]/10 flex items-center justify-center">
-                  <Building2 size={18} className="text-[#5856D6]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-black">{spv.code}</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
-                      {spv.status}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-black/50 mt-0.5">{spv.name} • Predano: {spv.submitted}</p>
-                </div>
-              </div>
-              <ArrowRight size={16} className="text-black/30" />
-            </button>
+        ))}
+      </div>
+      {evalPending.length > 0 && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+          <div className="text-[14px] font-bold text-amber-700 mb-2">Evaluacije u tijeku ({evalPending.length})</div>
+          {evalPending.map(p => (
+            <div key={p.id} className="text-[12px] text-amber-600 py-1">{p.id} - {p.name}</div>
           ))}
         </div>
-      </div>
-
-      {/* ARHIVA */}
+      )}
       <div className="bg-white rounded-xl border border-gray-200">
-        <div className="border-b border-gray-100 px-5 py-3 flex items-center gap-2">
-          <Archive size={16} className="text-black/40" />
-          <span className="text-[14px] font-semibold text-black">Arhiva evaluacija</span>
-        </div>
-        <div className="px-5 py-8 text-center text-[13px] text-black/40">
-          Nema završenih evaluacija
+        <div className="px-5 py-3 border-b border-gray-100 text-[14px] font-bold">Projekti</div>
+        <div className="divide-y divide-gray-50">
+          {SPVS.map(p => (
+            <div key={p.id} onClick={() => router.push("/dashboard/bank/spv/" + p.id)} className="px-5 py-3 flex items-center justify-between hover:bg-gray-50 cursor-pointer">
+              <div><span className="text-[14px] font-bold">{p.id}</span><span className="text-[12px] text-black/50 ml-2">{p.name}</span></div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${p.status === "aktivan" ? "bg-green-100 text-green-700" : p.status === "blokiran" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>{p.status}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

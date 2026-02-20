@@ -1,2 +1,48 @@
-import ComingSoon from "@/components/ComingSoon";
-export default function Page() { return <ComingSoon title="Financije" subtitle="Agregirani pregled" />; }
+"use client";
+
+import { SPVS, getIssuedBySpv, getReceivedBySpv, formatEur, PNL_MONTHS } from "@/lib/mock-data";
+
+export default function HoldingFinancijePage() {
+  const totalBudget = SPVS.reduce((s, p) => s + p.totalBudget, 0);
+  const totalProfit = SPVS.reduce((s, p) => s + p.estimatedProfit, 0);
+  const totalIssued = SPVS.reduce((s, p) => s + getIssuedBySpv(p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
+  const totalReceived = SPVS.reduce((s, p) => s + getReceivedBySpv(p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
+
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Financije</h1><p className="text-[13px] text-black/50 mt-0.5">Holding pregled</p></div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Ukupni budzet", value: formatEur(totalBudget), color: "text-black" },
+          { label: "Proc. profit", value: formatEur(totalProfit), color: "text-green-600" },
+          { label: "Izdano", value: formatEur(totalIssued), color: "text-blue-600" },
+          { label: "Primljeno", value: formatEur(totalReceived), color: "text-amber-600" },
+        ].map(k => (
+          <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className={`text-lg font-bold ${k.color}`}>{k.value}</div>
+            <div className="text-[12px] text-black/50">{k.label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <h3 className="text-[14px] font-bold text-black mb-3">Mjesecni P&L (CORE)</h3>
+        <table className="w-full text-[12px]">
+          <thead><tr className="border-b border-gray-100">
+            <th className="text-left py-2 font-semibold text-black/70">Mjesec</th>
+            <th className="text-right py-2 font-semibold text-green-700">Prihodi</th>
+            <th className="text-right py-2 font-semibold text-red-700">Rashodi</th>
+            <th className="text-right py-2 font-semibold text-black/70">Neto</th>
+          </tr></thead>
+          <tbody>{PNL_MONTHS.map(m => (
+            <tr key={m.month} className="border-b border-gray-50">
+              <td className="py-2 text-black">{m.month}</td>
+              <td className="py-2 text-right text-green-600">{formatEur(m.revenue)}</td>
+              <td className="py-2 text-right text-red-600">{formatEur(m.expenses)}</td>
+              <td className={`py-2 text-right font-bold ${m.net >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur(m.net)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

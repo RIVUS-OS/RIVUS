@@ -1,2 +1,31 @@
-import ComingSoon from "@/components/ComingSoon";
-export default function Page() { return <ComingSoon title="Zahtjevi" subtitle="Otvoreni zahtjevi" />; }
+"use client";
+
+import { SPVS, getTokBySpv } from "@/lib/mock-data";
+
+export default function AccountingZahtjeviPage() {
+  const allTok = SPVS.flatMap(p => getTokBySpv(p.id)).filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Otvoreni zahtjevi</h1><p className="text-[13px] text-black/50 mt-0.5">{allTok.length} aktivnih zahtjeva</p></div>
+      <div className="space-y-2">
+        {allTok.map(t => (
+          <div key={t.id} className={`bg-white rounded-xl border p-4 ${t.slaBreached ? "border-red-200" : "border-gray-200"}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[14px] font-bold text-black">{t.id}</span>
+                <span className="text-[12px] text-black/50 ml-2">{t.spvId}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {t.slaBreached && <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-100 text-red-700 font-semibold">SLA PROBIJEN</span>}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.priority === "critical" ? "bg-red-100 text-red-700" : t.priority === "high" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{t.priority}</span>
+              </div>
+            </div>
+            <div className="text-[13px] text-black mt-1">{t.title}</div>
+            <div className="text-[11px] text-black/40 mt-0.5">Dodijeljen: {t.assignedTo} | Rok: {t.dueDate}</div>
+          </div>
+        ))}
+        {allTok.length === 0 && <div className="bg-white rounded-xl border border-green-200 p-8 text-center text-green-600 text-[14px] font-semibold">Nema otvorenih zahtjeva</div>}
+      </div>
+    </div>
+  );
+}
