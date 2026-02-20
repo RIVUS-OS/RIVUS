@@ -104,7 +104,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "Prihodi", href: "/dashboard/core/prihodi", icon: Euro },
         { label: "Rashodi", href: "/dashboard/core/rashodi", icon: DollarSign },
         { label: "Rezultat (P&L)", href: "/dashboard/core/neto", icon: BarChart3 },
-        { label: "Marže", href: icon: TrendingUp },
+
       ],
     },
     {
