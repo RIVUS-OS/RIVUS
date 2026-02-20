@@ -15,7 +15,7 @@ const ROLE_DASHBOARDS: Record<string, string> = {
   Holding: "/dashboard/holding",
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public / static / assets
@@ -92,3 +92,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|public).*)"],
 };
+

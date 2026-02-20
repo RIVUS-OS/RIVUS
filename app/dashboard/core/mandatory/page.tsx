@@ -1,2 +1,13 @@
-import ComingSoon from "@/components/ComingSoon";
-export default function Page() { return <ComingSoon title="Mandatory" subtitle="Mandatory task sustav" />; }
+"use client";
+import { SPVS, DOCUMENTS } from "@/lib/mock-data";
+export default function CoreMandatoryPage() {
+  const required = ["Izvadak iz sudskog registra", "Rjesenje o osnivanju", "OIB potvrda", "Ugovor o poslovnom racunu", "Polica osiguranja"];
+  const coverage = SPVS.map(p => { const docs = DOCUMENTS.filter(d => d.spvId === p.id); return { id: p.id, name: p.name, has: docs.length, missing: Math.max(0, required.length - docs.length) }; });
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Obvezna dokumentacija</h1><p className="text-[13px] text-black/50 mt-0.5">{required.length} obveznih dokumenata po SPV</p></div>
+      <div className="bg-white rounded-xl border border-gray-200 p-4"><div className="text-[13px] font-semibold mb-2">Obvezni dokumenti:</div>{required.map(r => <div key={r} className="text-[12px] text-black/50 py-0.5">• {r}</div>)}</div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold">SPV</th><th className="text-right px-3 py-2.5 font-semibold">Ima</th><th className="text-right px-3 py-2.5 font-semibold">Nedostaje</th></tr></thead><tbody>{coverage.map(c => (<tr key={c.id} className="border-b border-gray-50"><td className="px-3 py-2.5 font-bold">{c.id}</td><td className="px-3 py-2.5 text-right text-green-600">{c.has}</td><td className={`px-3 py-2.5 text-right font-bold ${c.missing > 0 ? "text-red-600" : "text-green-600"}`}>{c.missing}</td></tr>))}</tbody></table></div>
+    </div>
+  );
+}

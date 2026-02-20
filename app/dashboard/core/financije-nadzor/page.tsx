@@ -1,2 +1,11 @@
-import ComingSoon from "@/components/ComingSoon";
-export default function Page() { return <ComingSoon title="Nadzor financija" subtitle="Novcani tok svih SPV-ova" />; }
+"use client";
+import { SPVS, getIssuedBySpv, getReceivedBySpv, formatEur } from "@/lib/mock-data";
+export default function CoreFinancijeNadzorPage() {
+  const data = SPVS.map(p => { const rev = getIssuedBySpv(p.id).reduce((s,i)=>s+i.totalAmount,0); const exp = getReceivedBySpv(p.id).reduce((s,i)=>s+i.totalAmount,0); return {id:p.id,name:p.name,rev,exp,net:rev-exp}; });
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Financije - Nadzor</h1></div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold text-black/70">SPV</th><th className="text-right px-3 py-2.5 font-semibold text-green-700">Prihod</th><th className="text-right px-3 py-2.5 font-semibold text-red-700">Rashod</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Neto</th></tr></thead><tbody>{data.map(d => (<tr key={d.id} className="border-b border-gray-50"><td className="px-3 py-2.5 font-bold">{d.id} <span className="text-black/50 font-normal">{d.name}</span></td><td className="px-3 py-2.5 text-right text-green-600">{formatEur(d.rev)}</td><td className="px-3 py-2.5 text-right text-red-600">{formatEur(d.exp)}</td><td className={`px-3 py-2.5 text-right font-bold ${d.net >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur(d.net)}</td></tr>))}</tbody></table></div>
+    </div>
+  );
+}
