@@ -149,7 +149,7 @@ export function generateLifecycleData(spvList: any[]): LifecycleStage[] {
     if (status in stageCounts) {
       stageCounts[status as keyof typeof stageCounts]++;
     } else {
-      stageCounts.Created++;
+      stageCounts.Kreirano++;
     }
   });
 
