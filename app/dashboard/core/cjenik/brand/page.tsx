@@ -1,18 +1,4 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Brand licenca"
-    subtitle="Cijena korištenja RIVUS branda na SPV projektu"
-    columns={[
-      { key: "spv", label: "SPV" },
-      { key: "cijena", label: "Cijena (EUR/mj)", align: "right" },
-      { key: "pocetak", label: "Od" },
-      { key: "status", label: "Status" },
-    ]}
-    data={[
-      { spv: "SPV SAN-01", cijena: "200,00", pocetak: "01.01.2026.", status: "Aktivan" },
-      { spv: "SPV SAN-02", cijena: "200,00", pocetak: "15.01.2026.", status: "Aktivan" },
-    ]}
-  />;
+export default function CjenikBrandPage() {
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Cjenik - Brand licenca</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6"><div className="grid grid-cols-2 gap-6"><div><div className="text-[12px] text-black/50">Mjesecna licenca</div><div className="text-2xl font-bold text-blue-600">200 EUR/mj</div></div><div><div className="text-[12px] text-black/50">Godisnja licenca</div><div className="text-2xl font-bold text-green-600">2.000 EUR/god</div><div className="text-[11px] text-green-500">Usteda 17%</div></div></div><div className="mt-4 pt-4 border-t border-gray-100 text-[12px] text-black/50">Ukljucuje: RIVUS branding, marketing materijali, website listing, quality seal</div></div></div>);
 }

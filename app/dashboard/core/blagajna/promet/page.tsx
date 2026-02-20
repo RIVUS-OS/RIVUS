@@ -1,20 +1,10 @@
-"use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Dnevni promet"
-    subtitle="Sve transakcije žiro računa — dnevni pregled"
-    columns={[
-      { key: "datum", label: "Datum" },
-      { key: "opis", label: "Opis" },
-      { key: "uplata", label: "Uplata (EUR)", align: "right" },
-      { key: "isplata", label: "Isplata (EUR)", align: "right" },
-      { key: "saldo", label: "Saldo (EUR)", align: "right" },
-    ]}
-    data={[
-      { datum: "20.02.2026.", opis: "SPV SAN-01 — platform fee", uplata: "300,00", isplata: "", saldo: "18.450,00" },
-      { datum: "19.02.2026.", opis: "Odvjetnik d.o.o.", uplata: "", isplata: "750,00", saldo: "18.150,00" },
-      { datum: "18.02.2026.", opis: "Vertikala provizija", uplata: "1.200,00", isplata: "", saldo: "18.900,00" },
-    ]}
-  />;
+﻿"use client";
+import { TRANSACTIONS, formatEur } from "@/lib/mock-data";
+export default function BlagajnaPrometPage() {
+  const uplate = TRANSACTIONS.filter(t => t.credit > 0).reduce((s,t) => s + (t.credit > 0 ? t.credit : t.debit), 0);
+  const isplate = TRANSACTIONS.filter(t => t.debit > 0).reduce((s,t) => s + (t.credit > 0 ? t.credit : t.debit), 0);
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Blagajna - Promet</h1></div><div className="grid grid-cols-3 gap-3"><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-green-600">{formatEur(uplate)}</div><div className="text-[12px] text-black/50">Uplate</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-red-600">{formatEur(isplate)}</div><div className="text-[12px] text-black/50">Isplate</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className={`text-xl font-bold ${uplate - isplate >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur(uplate - isplate)}</div><div className="text-[12px] text-black/50">Neto</div></div></div></div>);
 }
+
+
+

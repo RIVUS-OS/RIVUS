@@ -1,18 +1,30 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Po dobavljaču"
-    subtitle="Grupirano po dobavljaču"
-    columns={[
-      { key: "broj", label: "Br. računa" },
-      { key: "dobavljac", label: "Dobavljač" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "status", label: "Status" },
-    ]}
-    data={[
-      { broj: "UR-001", dobavljac: "Odvjetnik d.o.o.", iznos: "750,00", status: "Proknjižen" },
-      { broj: "UR-002", dobavljac: "Geodet d.o.o.", iznos: "3.500,00", status: "Čeka" },
-    ]}
-  />;
+
+import { RECEIVED_INVOICES, formatEur } from "@/lib/mock-data";
+
+export default function PrimljeniPoDobavljacuPage() {
+  const byClient: Record<string, { count: number; total: number }> = {};
+  RECEIVED_INVOICES.forEach(i => { byClient[i.client] = byClient[i.client] || { count: 0, total: 0 }; byClient[i.client].count++; byClient[i.client].total += i.totalAmount; });
+
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Primljeni racuni - Po dobavljacu</h1></div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <table className="w-full text-[12px]">
+          <thead><tr className="border-b border-gray-100 bg-gray-50/50">
+            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Dobavljac</th>
+            <th className="text-right px-3 py-2.5 font-semibold text-black/70">Racuna</th>
+            <th className="text-right px-3 py-2.5 font-semibold text-black/70">Ukupno</th>
+          </tr></thead>
+          <tbody>{Object.entries(byClient).sort((a, b) => b[1].total - a[1].total).map(([client, data]) => (
+            <tr key={client} className="border-b border-gray-50 hover:bg-gray-50">
+              <td className="px-3 py-2.5 font-medium text-black">{client}</td>
+              <td className="px-3 py-2.5 text-right">{data.count}</td>
+              <td className="px-3 py-2.5 text-right font-bold">{formatEur(data.total)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
 }

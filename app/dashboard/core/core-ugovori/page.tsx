@@ -1,28 +1,28 @@
-"use client";
+﻿"use client";
 import FinancePage from "@/components/core/FinancePage";
 export default function Page() {
   const tabs = [
     { label: "SPV", href: "/dashboard/core/core-ugovori/spv" },
     { label: "Vertikale", href: "/dashboard/core/core-ugovori/vertikale" },
     { label: "Banke", href: "/dashboard/core/core-ugovori/banke" },
-    { label: "Knjigovođe", href: "/dashboard/core/core-ugovori/knjigovodje" },
+    { label: "KnjigovoÄ‘e", href: "/dashboard/core/core-ugovori/knjigovodje" },
     { label: "NDA", href: "/dashboard/core/core-ugovori/nda" },
-    { label: "Istječu", href: "/dashboard/core/core-ugovori/istjecu" },
+    { label: "IstjeÄu", href: "/dashboard/core/core-ugovori/istjecu" },
   ];
   return <FinancePage
     title="CORE ugovori"
-    subtitle="Ugovori sa SPV-ovima, vertikalama, bankama, knjigovođama"
+    subtitle="Ugovori sa SPV-ovima, vertikalama, bankama, knjigovoÄ‘ama"
     tabs={tabs}
     summary={[
       { label: "Aktivni ugovori", value: "8" },
-      { label: "Istječu uskoro", value: "1", color: "text-amber-600" },
+      { label: "IstjeÄu uskoro", value: "1", color: "text-amber-600" },
       { label: "NDA potpisani", value: "5" },
     ]}
     columns={[
       { key: "broj", label: "Br. ugovora" },
       { key: "strana", label: "Druga strana" },
       { key: "tip", label: "Tip" },
-      { key: "pocetak", label: "Početak" },
+      { key: "pocetak", label: "PoÄetak" },
       { key: "kraj", label: "Kraj" },
       { key: "status", label: "Status" },
     ]}

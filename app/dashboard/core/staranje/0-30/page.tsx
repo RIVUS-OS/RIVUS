@@ -1,18 +1,6 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Potraživanja 0-30 dana"
-    subtitle="Računi stari do 30 dana"
-    columns={[
-      { key: "klijent", label: "Klijent" },
-      { key: "racun", label: "Br. računa" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "dani", label: "Starost (dana)", align: "right" },
-    ]}
-    data={[
-      { klijent: "Arhitekt d.o.o.", racun: "IR-2026-003", iznos: "1.200,00", dani: "10" },
-      { klijent: "SPV SAN-01", racun: "IR-2026-004", iznos: "2.500,00", dani: "15" },
-    ]}
-  />;
+import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+export default function Staranje030Page() {
+  const items = ISSUED_INVOICES.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; }).slice(0, 3);
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Staranje: 0-30 dana</h1><p className="text-[13px] text-black/50 mt-0.5">{items.length} racuna</p></div><div className="bg-white rounded-xl border border-amber-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-amber-50/50"><th className="text-left px-3 py-2 font-semibold">Broj</th><th className="text-left px-3 py-2 font-semibold">Klijent</th><th className="text-right px-3 py-2 font-semibold">Iznos</th></tr></thead><tbody>{items.map(i => (<tr key={i.id} className="border-b border-gray-50"><td className="px-3 py-2 font-bold">{i.number}</td><td className="px-3 py-2">{i.client}</td><td className="px-3 py-2 text-right font-bold">{formatEur(i.totalAmount)}</td></tr>))}</tbody></table></div></div>);
 }

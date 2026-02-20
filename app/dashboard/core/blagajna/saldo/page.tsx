@@ -1,25 +1,10 @@
-"use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Saldo"
-    subtitle="Dnevno stanje žiro računa — kretanje salda"
-    summary={[
-      { label: "Trenutno stanje", value: "18.450 EUR", color: "text-green-600" },
-      { label: "Min (30d)", value: "15.200 EUR" },
-      { label: "Max (30d)", value: "19.800 EUR" },
-      { label: "Prosjek (30d)", value: "17.300 EUR" },
-    ]}
-    columns={[
-      { key: "datum", label: "Datum" },
-      { key: "saldo", label: "Saldo (EUR)", align: "right" },
-      { key: "promjena", label: "Promjena", align: "right" },
-    ]}
-    data={[
-      { datum: "20.02.2026.", saldo: "18.450,00", promjena: "+300,00" },
-      { datum: "19.02.2026.", saldo: "18.150,00", promjena: "-750,00" },
-      { datum: "18.02.2026.", saldo: "18.900,00", promjena: "+1.200,00" },
-      { datum: "17.02.2026.", saldo: "17.700,00", promjena: "+500,00" },
-    ]}
-  />;
+﻿"use client";
+import { TRANSACTIONS, formatEur } from "@/lib/mock-data";
+export default function BlagajnaSaldoPage() {
+  let running = 0;
+  const rows = TRANSACTIONS.map(t => { running += t.credit > 0 ? (t.credit > 0 ? t.credit : t.debit) : -(t.credit > 0 ? t.credit : t.debit); return { ...t, saldo: running }; });
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Blagajna - Saldo</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6 text-center"><div className="text-[12px] text-black/50">Trenutni saldo</div><div className={`text-3xl font-bold ${running >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur(running)}</div></div><div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2 font-semibold">Datum</th><th className="text-left px-3 py-2 font-semibold">Opis</th><th className="text-right px-3 py-2 font-semibold">Iznos</th><th className="text-right px-3 py-2 font-semibold">Saldo</th></tr></thead><tbody>{rows.map(r => (<tr key={r.id} className="border-b border-gray-50"><td className="px-3 py-2 text-black/50">{r.date}</td><td className="px-3 py-2">{r.description}</td><td className={`px-3 py-2 text-right font-bold ${r.credit > 0 ? "text-green-600" : "text-red-600"}`}>{r.credit > 0 ? "+" : "-"}{formatEur(r.balance)}</td><td className="px-3 py-2 text-right font-medium">{formatEur(r.saldo)}</td></tr>))}</tbody></table></div></div>);
 }
+
+
+

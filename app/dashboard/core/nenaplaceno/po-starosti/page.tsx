@@ -1,26 +1,26 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Nenaplaćeno po starosti"
-    subtitle="Aging analiza nenaplaćenih računa"
-    summary={[
-      { label: "0-30 dana", value: "3.700 EUR", color: "text-green-600" },
-      { label: "31-60 dana", value: "2.100 EUR", color: "text-amber-600" },
-      { label: "61-90 dana", value: "0 EUR" },
-      { label: "90+ dana", value: "0 EUR" },
-    ]}
-    columns={[
-      { key: "kategorija", label: "Kategorija" },
-      { key: "brojRacuna", label: "Br. računa", align: "right" },
-      { key: "ukupno", label: "Ukupno (EUR)", align: "right" },
-      { key: "udio", label: "Udio (%)", align: "right" },
-    ]}
-    data={[
-      { kategorija: "0-30 dana", brojRacuna: "3", ukupno: "3.700,00", udio: "63.8%" },
-      { kategorija: "31-60 dana", brojRacuna: "1", ukupno: "2.100,00", udio: "36.2%" },
-      { kategorija: "61-90 dana", brojRacuna: "0", ukupno: "0,00", udio: "0%" },
-      { kategorija: "90+ dana", brojRacuna: "0", ukupno: "0,00", udio: "0%" },
-    ]}
-  />;
+
+import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+
+export default function NenaPlPoStarostiPage() {
+  const unpaid = ISSUED_INVOICES.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
+  const aging = [
+    { label: "0-30 dana", items: unpaid.slice(0, 3), color: "text-amber-600" },
+    { label: "31-60 dana", items: unpaid.slice(3, 5), color: "text-orange-600" },
+    { label: "61-90 dana", items: unpaid.slice(5, 7), color: "text-red-600" },
+    { label: "90+ dana", items: unpaid.slice(7), color: "text-red-700" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Nenaplaceno - Po starosti</h1></div>
+      <div className="grid grid-cols-4 gap-3">{aging.map(a => (
+        <div key={a.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+          <div className="text-[12px] text-black/50">{a.label}</div>
+          <div className={`text-xl font-bold ${a.color}`}>{a.items.length}</div>
+          <div className="text-[11px] text-black/40">{formatEur(a.items.reduce((s, i) => s + i.totalAmount, 0))}</div>
+        </div>
+      ))}</div>
+    </div>
+  );
 }

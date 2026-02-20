@@ -1,21 +1,10 @@
-"use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="URA — Ulazni računi"
-    subtitle="Knjiga ulaznih računa (informativno, ne službena evidencija)"
-    columns={[
-      { key: "broj", label: "Br. računa" },
-      { key: "datum", label: "Datum" },
-      { key: "dobavljac", label: "Dobavljač" },
-      { key: "osnovica", label: "Osnovica (EUR)", align: "right" },
-      { key: "pdv", label: "PDV (EUR)", align: "right" },
-      { key: "ukupno", label: "Ukupno (EUR)", align: "right" },
-    ]}
-    data={[
-      { broj: "UR-001", datum: "18.02.2026.", dobavljac: "Odvjetnik d.o.o.", osnovica: "600,00", pdv: "150,00", ukupno: "750,00" },
-      { broj: "UR-002", datum: "12.02.2026.", dobavljac: "Vercel Inc.", osnovica: "20,00", pdv: "0,00", ukupno: "20,00" },
-      { broj: "UR-003", datum: "10.02.2026.", dobavljac: "Geodet d.o.o.", osnovica: "2.800,00", pdv: "700,00", ukupno: "3.500,00" },
-    ]}
-  />;
+﻿"use client";
+import { RECEIVED_INVOICES, formatEur } from "@/lib/mock-data";
+export default function PdvUraPage() {
+  const total = RECEIVED_INVOICES.reduce((s, i) => s + i.totalAmount, 0);
+  const pdv = total * 0.25;
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Knjiga URA</h1><p className="text-[13px] text-black/50 mt-0.5">Primljeni racuni - PDV evidencija</p></div><div className="grid grid-cols-3 gap-3"><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-black">{RECEIVED_INVOICES.length}</div><div className="text-[12px] text-black/50">Racuna</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-blue-600">{formatEur(total)}</div><div className="text-[12px] text-black/50">Osnovica</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-green-600">{formatEur(pdv)}</div><div className="text-[12px] text-black/50">Pretporez</div></div></div>
+  <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2 font-semibold text-black/70">Broj</th><th className="text-left px-3 py-2 font-semibold text-black/70">Datum</th><th className="text-left px-3 py-2 font-semibold text-black/70">Dobavljac</th><th className="text-right px-3 py-2 font-semibold text-black/70">Osnovica</th><th className="text-right px-3 py-2 font-semibold text-black/70">Pretporez</th></tr></thead><tbody>{RECEIVED_INVOICES.map(i => (<tr key={i.id} className="border-b border-gray-50"><td className="px-3 py-2 font-bold">{i.number}</td><td className="px-3 py-2 text-black/50">{i.date}</td><td className="px-3 py-2">{i.client}</td><td className="px-3 py-2 text-right">{formatEur(i.totalAmount)}</td><td className="px-3 py-2 text-right text-green-600">{formatEur(i.totalAmount * 0.25)}</td></tr>))}</tbody></table></div></div>);
 }
+
+

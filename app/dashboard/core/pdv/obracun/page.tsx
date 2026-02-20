@@ -1,19 +1,7 @@
-"use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="PDV obračun"
-    subtitle="Kvartalni obračun PDV-a (management pregled)"
-    columns={[
-      { key: "kvartal", label: "Kvartal" },
-      { key: "ulazni", label: "Ulazni PDV (EUR)", align: "right" },
-      { key: "izlazni", label: "Izlazni PDV (EUR)", align: "right" },
-      { key: "razlika", label: "Razlika (EUR)", align: "right" },
-      { key: "status", label: "Status" },
-    ]}
-    data={[
-      { kvartal: "Q1 2026", ulazni: "3.575,00", izlazni: "5.650,00", razlika: "2.075,00", status: "U pripremi" },
-      { kvartal: "Q4 2025", ulazni: "2.800,00", izlazni: "4.200,00", razlika: "1.400,00", status: "Plaćeno" },
-    ]}
-  />;
+﻿"use client";
+import { PDV_QUARTERS, formatEur } from "@/lib/mock-data";
+export default function PdvObracunPage() {
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">PDV obracun</h1><p className="text-[13px] text-black/50 mt-0.5">Kvartalni pregled</p></div><div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold text-black/70">Kvartal</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Izlazni PDV</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Pretporez</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Obveza</th></tr></thead><tbody>{PDV_QUARTERS.map(q => (<tr key={q.quarter} className="border-b border-gray-50"><td className="px-3 py-2.5 font-bold">{q.quarter}</td><td className="px-3 py-2.5 text-right text-amber-600">{formatEur(q.outputVat)}</td><td className="px-3 py-2.5 text-right text-green-600">{formatEur(q.inputVat)}</td><td className={`px-3 py-2.5 text-right font-bold ${q.difference >= 0 ? "text-red-600" : "text-green-600"}`}>{formatEur(q.difference)}</td></tr>))}</tbody></table></div></div>);
 }
+
+

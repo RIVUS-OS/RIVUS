@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TRANSACTIONS, getCurrentBalance, formatEur } from "@/lib/mock-data";
 
@@ -66,3 +66,5 @@ export default function BlagajnaPage() {
     </div>
   );
 }
+
+

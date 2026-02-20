@@ -1,19 +1,5 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Prihodi po mjesecima"
-    subtitle="Mjesečni pregled prihoda"
-    columns={[
-      { key: "mjesec", label: "Mjesec" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "udio", label: "Udio (%)", align: "right" },
-      { key: "trend", label: "Trend" },
-    ]}
-    data={[
-      { mjesec: "SAN-01 / Grupa A", iznos: "12.400,00", udio: "45%", trend: "↑ +12%" },
-      { mjesec: "SAN-02 / Grupa B", iznos: "8.200,00", udio: "30%", trend: "↑ +5%" },
-      { mjesec: "Ostalo", iznos: "6.800,00", udio: "25%", trend: "→ 0%" },
-    ]}
-  />;
+import { PNL_MONTHS, formatEur } from "@/lib/mock-data";
+export default function PrihodiMjesecnoPage() {
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Prihodi - Mjesecno</h1></div><div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold text-black/70">Mjesec</th><th className="text-right px-3 py-2.5 font-semibold text-green-700">Prihod</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Kumulativno</th></tr></thead><tbody>{PNL_MONTHS.reduce((acc: {month: string; revenue: number; cum: number}[], m) => { const cum = (acc.length > 0 ? acc[acc.length-1].cum : 0) + m.revenue; acc.push({month: m.month, revenue: m.revenue, cum}); return acc; }, []).map(m => (<tr key={m.month} className="border-b border-gray-50"><td className="px-3 py-2.5 font-bold">{m.month}</td><td className="px-3 py-2.5 text-right text-green-600 font-medium">{formatEur(m.revenue)}</td><td className="px-3 py-2.5 text-right text-black/50">{formatEur(m.cum)}</td></tr>))}</tbody></table></div></div>);
 }

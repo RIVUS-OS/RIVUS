@@ -1,18 +1,4 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Success fee"
-    subtitle="Postotak od neto profita SPV-a"
-    columns={[
-      { key: "spv", label: "SPV" },
-      { key: "postotak", label: "Postotak" },
-      { key: "procjenaProfit", label: "Procjena profita (EUR)", align: "right" },
-      { key: "procjenaFee", label: "Procjena fee (EUR)", align: "right" },
-    ]}
-    data={[
-      { spv: "SPV SAN-01", postotak: "10%", procjenaProfit: "65.000,00", procjenaFee: "6.500,00" },
-      { spv: "SPV SAN-02", postotak: "10%", procjenaProfit: "45.000,00", procjenaFee: "4.500,00" },
-    ]}
-  />;
+export default function CjenikSuccessFeePage() {
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Cjenik - Success Fee</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6"><div className="text-center"><div className="text-3xl font-bold text-green-600">3-5%</div><div className="text-[14px] text-black/50 mt-2">od prodajne cijene nekretnine</div></div><div className="mt-6 pt-4 border-t border-gray-100 space-y-2 text-[12px]"><div className="flex justify-between"><span className="text-black/50">Minimalni fee</span><span className="font-bold">5.000 EUR</span></div><div className="flex justify-between"><span className="text-black/50">Obracun</span><span className="font-bold">Po realizaciji prodaje</span></div><div className="flex justify-between"><span className="text-black/50">Rok placanja</span><span className="font-bold">15 dana od realizacije</span></div></div></div></div>);
 }

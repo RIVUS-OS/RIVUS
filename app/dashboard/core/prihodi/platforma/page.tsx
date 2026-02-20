@@ -1,19 +1,7 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Platformske naknade"
-    subtitle="Brand, platforma, PM naknade"
-    columns={[
-      { key: "tip", label: "Tip" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "udio", label: "Udio (%)", align: "right" },
-      { key: "trend", label: "Trend" },
-    ]}
-    data={[
-      { tip: "SAN-01 / Grupa A", iznos: "12.400,00", udio: "45%", trend: "↑ +12%" },
-      { tip: "SAN-02 / Grupa B", iznos: "8.200,00", udio: "30%", trend: "↑ +5%" },
-      { tip: "Ostalo", iznos: "6.800,00", udio: "25%", trend: "→ 0%" },
-    ]}
-  />;
+import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+export default function PrihodiPlatformaPage() {
+  const platform = ISSUED_INVOICES.filter(i => i.category === "platform_fee");
+  const total = platform.reduce((s, i) => s + i.totalAmount, 0);
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Prihodi - Platforma</h1><p className="text-[13px] text-black/50 mt-0.5">{platform.length} platform fee racuna</p></div><div className="bg-white rounded-xl border border-gray-200 p-6 text-center"><div className="text-3xl font-bold text-green-600">{formatEur(total)}</div><div className="text-[12px] text-black/50 mt-1">Ukupni platform fee prihod</div></div></div>);
 }

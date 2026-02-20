@@ -1,19 +1,23 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Nenaplaćeno po klijentu"
-    subtitle="Neplaćeni računi grupirani po klijentu"
-    columns={[
-      { key: "klijent", label: "Klijent" },
-      { key: "brojRacuna", label: "Br. računa", align: "right" },
-      { key: "ukupno", label: "Ukupno (EUR)", align: "right" },
-      { key: "najstariji", label: "Najstariji (dana)", align: "right" },
-    ]}
-    data={[
-      { klijent: "SPV SAN-01", brojRacuna: "2", ukupno: "2.500,00", najstariji: "15" },
-      { klijent: "SPV SAN-02", brojRacuna: "1", ukupno: "2.100,00", najstariji: "45" },
-      { klijent: "Arhitekt d.o.o.", brojRacuna: "1", ukupno: "1.200,00", najstariji: "10" },
-    ]}
-  />;
+
+import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+
+export default function NenaPlPoKlijentuPage() {
+  const unpaid = ISSUED_INVOICES.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
+  const byClient: Record<string, { count: number; total: number }> = {};
+  unpaid.forEach(i => { byClient[i.client] = byClient[i.client] || { count: 0, total: 0 }; byClient[i.client].count++; byClient[i.client].total += i.totalAmount; });
+
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Nenaplaceno - Po klijentu</h1><p className="text-[13px] text-black/50 mt-0.5">{unpaid.length} nenaplacenih racuna</p></div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <table className="w-full text-[12px]">
+          <thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold text-black/70">Klijent</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Racuna</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Ukupno</th></tr></thead>
+          <tbody>{Object.entries(byClient).sort((a,b) => b[1].total - a[1].total).map(([c, d]) => (
+            <tr key={c} className="border-b border-gray-50"><td className="px-3 py-2.5 font-medium">{c}</td><td className="px-3 py-2.5 text-right">{d.count}</td><td className="px-3 py-2.5 text-right font-bold text-red-600">{formatEur(d.total)}</td></tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
 }

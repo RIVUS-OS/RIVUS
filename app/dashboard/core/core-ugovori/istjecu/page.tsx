@@ -1,21 +1,27 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Istječu uskoro"
-    subtitle="Ugovori koji istječu u sljedećih 90 dana"
-    summary={[
-      { label: "Istječe uskoro", value: "1", color: "text-amber-600" },
-    ]}
-    columns={[
-      { key: "broj", label: "Br. ugovora" },
-      { key: "strana", label: "Druga strana" },
-      { key: "tip", label: "Tip" },
-      { key: "istice", label: "Datum isteka" },
-      { key: "danaOstalo", label: "Dana ostalo", align: "right" },
-    ]}
-    data={[
-      { broj: "UG-001", strana: "SPV SAN-01", tip: "CORE-SPV", istice: "31.12.2026.", danaOstalo: "313" },
-    ]}
-  />;
+
+import { CONTRACTS } from "@/lib/mock-data";
+
+export default function CoreUgovoriIstjecuPage() {
+  const expiring = CONTRACTS.filter(c => c.endDate <= "2026-06-30").sort((a, b) => a.endDate.localeCompare(b.endDate));
+  return (
+    <div className="space-y-6">
+      <div><h1 className="text-[22px] font-bold text-black">Ugovori koji istjecu</h1><p className="text-[13px] text-black/50 mt-0.5">{expiring.length} u narednih 6 mjeseci</p></div>
+      {expiring.length > 0 ? (
+        <div className="space-y-2">{expiring.map(c => (
+          <div key={c.id} className="bg-white rounded-xl border-2 border-amber-200 p-4">
+            <div className="flex justify-between">
+              <div>
+                <div className="text-[14px] font-bold">{c.partyA} ↔ {c.partyB}</div>
+                <div className="text-[12px] text-black/50">{c.type}</div>
+              </div>
+              <span className="text-[13px] font-bold text-amber-600">{c.endDate}</span>
+            </div>
+          </div>
+        ))}</div>
+      ) : (
+        <div className="bg-white rounded-xl border border-green-200 p-8 text-center text-green-600 font-semibold">Nema ugovora koji istjecu uskoro</div>
+      )}
+    </div>
+  );
 }

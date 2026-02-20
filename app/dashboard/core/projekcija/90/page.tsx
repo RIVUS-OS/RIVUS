@@ -1,20 +1,8 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Cash flow — 90 dana"
-    subtitle="Projekcija novčanog toka za sljedećih 90 dana"
-    columns={[
-      { key: "mjesec", label: "Mjesec" },
-      { key: "ocPrihodi", label: "Oč. prihodi (EUR)", align: "right" },
-      { key: "ocRashodi", label: "Oč. rashodi (EUR)", align: "right" },
-      { key: "neto", label: "Neto (EUR)", align: "right" },
-      { key: "kumulativ", label: "Kumulativ (EUR)", align: "right" },
-    ]}
-    data={[
-      { mjesec: "Ožujak 2026.", ocPrihodi: "8.200,00", ocRashodi: "5.100,00", neto: "+3.100,00", kumulativ: "21.550,00" },
-      { mjesec: "Travanj 2026.", ocPrihodi: "9.000,00", ocRashodi: "5.500,00", neto: "+3.500,00", kumulativ: "25.050,00" },
-      { mjesec: "Svibanj 2026.", ocPrihodi: "10.200,00", ocRashodi: "6.000,00", neto: "+4.200,00", kumulativ: "29.250,00" },
-    ]}
-  />;
+import { PNL_MONTHS, formatEur } from "@/lib/mock-data";
+export default function Projekcija90Page() {
+  const last3 = PNL_MONTHS.slice(-3);
+  const avgRev = last3.reduce((s,m)=>s+m.revenue,0)/3;
+  const avgExp = last3.reduce((s,m)=>s+m.expenses,0)/3;
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Projekcija - 90 dana</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6"><div className="grid grid-cols-3 gap-4 text-center"><div><div className="text-[12px] text-black/50">Proj. prihod (3mj)</div><div className="text-xl font-bold text-green-600">{formatEur(avgRev * 3)}</div></div><div><div className="text-[12px] text-black/50">Proj. rashod (3mj)</div><div className="text-xl font-bold text-red-600">{formatEur(avgExp * 3)}</div></div><div><div className="text-[12px] text-black/50">Proj. neto (3mj)</div><div className={`text-xl font-bold ${avgRev - avgExp >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur((avgRev - avgExp) * 3)}</div></div></div></div></div>);
 }

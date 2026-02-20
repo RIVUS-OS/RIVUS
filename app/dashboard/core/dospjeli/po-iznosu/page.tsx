@@ -1,18 +1,6 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Dospjeli po iznosu"
-    subtitle="Dospjeli računi sortirani po iznosu (najviši prvo)"
-    columns={[
-      { key: "broj", label: "Br. računa" },
-      { key: "klijent", label: "Klijent" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "kasnjenje", label: "Kašnjenje (dana)", align: "right" },
-    ]}
-    data={[
-      { broj: "IR-2026-004", klijent: "SPV SAN-01", iznos: "2.500,00", kasnjenje: "0" },
-      { broj: "IR-2025-048", klijent: "SPV SAN-02", iznos: "2.100,00", kasnjenje: "46" },
-    ]}
-  />;
+import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+export default function DospjeliPoIznosuPage() {
+  const overdue = ISSUED_INVOICES.filter(i => (i.status as string) === "kasni").sort((a, b) => b.totalAmount - a.totalAmount);
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Dospjeli - Po iznosu</h1><p className="text-[13px] text-black/50 mt-0.5">Sortirano od najveceg</p></div><div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold text-black/70">Broj</th><th className="text-left px-3 py-2.5 font-semibold text-black/70">Klijent</th><th className="text-left px-3 py-2.5 font-semibold text-black/70">SPV</th><th className="text-right px-3 py-2.5 font-semibold text-black/70">Iznos</th></tr></thead><tbody>{overdue.map(i => (<tr key={i.id} className="border-b border-gray-50 bg-red-50/30"><td className="px-3 py-2.5 font-bold">{i.number}</td><td className="px-3 py-2.5">{i.client}</td><td className="px-3 py-2.5 text-black/50">{i.spvId}</td><td className="px-3 py-2.5 text-right font-bold text-red-600">{formatEur(i.totalAmount)}</td></tr>))}</tbody></table></div></div>);
 }

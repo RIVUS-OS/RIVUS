@@ -1,19 +1,7 @@
 "use client";
-import FinancePage from "@/components/core/FinancePage";
-export default function Page() {
-  return <FinancePage
-    title="Projekcije prihoda"
-    subtitle="Očekivani prihodi — 30/90/365 dana"
-    columns={[
-      { key: "razdoblje", label: "Razdoblje" },
-      { key: "iznos", label: "Iznos (EUR)", align: "right" },
-      { key: "udio", label: "Udio (%)", align: "right" },
-      { key: "trend", label: "Trend" },
-    ]}
-    data={[
-      { razdoblje: "SAN-01 / Grupa A", iznos: "12.400,00", udio: "45%", trend: "↑ +12%" },
-      { razdoblje: "SAN-02 / Grupa B", iznos: "8.200,00", udio: "30%", trend: "↑ +5%" },
-      { razdoblje: "Ostalo", iznos: "6.800,00", udio: "25%", trend: "→ 0%" },
-    ]}
-  />;
+import { PNL_MONTHS, formatEur } from "@/lib/mock-data";
+export default function PrihodiProjekcijePage() {
+  const avg = PNL_MONTHS.reduce((s, m) => s + m.revenue, 0) / PNL_MONTHS.length;
+  const projected = avg * 12;
+  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Projekcije prihoda</h1></div><div className="grid grid-cols-3 gap-3"><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-blue-600">{formatEur(avg)}</div><div className="text-[12px] text-black/50">Prosjek/mj</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-green-600">{formatEur(projected)}</div><div className="text-[12px] text-black/50">Proj. godisnje</div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-center"><div className="text-xl font-bold text-amber-600">120.000 EUR</div><div className="text-[12px] text-black/50">Target Phase 1</div></div></div><div className="bg-white rounded-xl border border-gray-200 p-4 text-[11px] text-black/40 italic">Projekcija bazirana na prosjeku {PNL_MONTHS.length} mjeseci. Phase 1 target: 120.000 EUR ukupno iz 3 SPV projekta.</div></div>);
 }
