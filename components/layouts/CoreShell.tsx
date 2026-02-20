@@ -115,6 +115,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "Nenaplaćeno", href: "/dashboard/core/nenaplaceno", icon: Clock },
         { label: "Dospjeli", href: "/dashboard/core/dospjeli", icon: AlertTriangle },
         { label: "Storna", href: "/dashboard/core/storna", icon: RefreshCw },
+        { label: "eRačuni", href: "/dashboard/core/eracuni", icon: FileText },
       ],
     },
     {
