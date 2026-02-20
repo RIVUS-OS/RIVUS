@@ -129,7 +129,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "POREZNO",
       items: [
-        { label: "PDV evidencija", href: "/dashboard/core/pdv", icon: FileText },
+        { label: "PDV pregled (simulacija)", href: "/dashboard/core/pdv", icon: FileText },
         { label: "Porez na dobit", href: "/dashboard/core/dobit", icon: DollarSign },
         { label: "Predujmovi", href: "/dashboard/core/predujmovi", icon: Clock },
       ],
@@ -137,8 +137,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "IZVJEŠTAJI",
       items: [
-        { label: "Bilanca", href: "/dashboard/core/bilanca", icon: BarChart3 },
-        { label: "Bruto bilanca", href: "/dashboard/core/bruto", icon: BarChart3 },
+        { label: "Bilanca (informativna)", href: "/dashboard/core/bilanca", icon: BarChart3 },
+        { label: "Bruto bilanca (informativna)", href: "/dashboard/core/bruto", icon: BarChart3 },
         { label: "Staranje potraživanja", href: "/dashboard/core/staranje", icon: AlertTriangle },
         { label: "Analitičke kartice", href: "/dashboard/core/analitika", icon: Search },
       ],
@@ -176,8 +176,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: "Nadzor vertikala", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
         { label: "Nadzor knjigovođa", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
-        { label: "Nadzor banaka", href: "/dashboard/core/banke-nadzor", icon: Landmark },
-        { label: "Nadzor financija", href: "/dashboard/core/financije-nadzor", icon: Euro },
+        { label: "Bankarske interakcije", href: "/dashboard/core/banke-nadzor", icon: Landmark },
+        { label: "Financije (management)", href: "/dashboard/core/financije-nadzor", icon: Euro },
       ],
     },
     {
