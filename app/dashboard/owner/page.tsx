@@ -1,172 +1,94 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { KpiCard, KpiGrid } from "@/components/KpiCard";
-import {
-  Building2, CheckSquare, ArrowRight, Clock, AlertTriangle,
-} from "lucide-react";
+import { SPVS, getTasksBySpv, getMissingDocs, getTokBySpv, formatEur } from "@/lib/mock-data";
 
-// === MOCK DATA ===
-const MOCK_SPVS = [
-  {
-    code: "SAN-01",
-    name: "Sandora Petőfia 1",
-    status: "Vertikale aktivne",
-    tasks: { total: 8, completed: 3, overdue: 1 },
-    finance: { expenses: 4500 },
-    created: "15.01.2026.",
-  },
-  {
-    code: "SAN-02",
-    name: "Sandora Petőfia 2",
-    status: "Vertikale aktivne",
-    tasks: { total: 5, completed: 2, overdue: 0 },
-    finance: { expenses: 2200 },
-    created: "15.01.2026.",
-  },
-];
-
-const MOCK_RECENT_TASKS = [
-  { title: "Geodetski elaborat", spv: "SAN-01", status: "Kasni", due: "10.02.2026." },
-  { title: "Idejni projekt", spv: "SAN-01", status: "U tijeku", due: "28.02.2026." },
-  { title: "Provjera katastra", spv: "SAN-02", status: "U tijeku", due: "20.02.2026." },
-  { title: "Idejno rješenje", spv: "SAN-02", status: "Čeka", due: "10.03.2026." },
-  { title: "Pripremni radovi — ponude", spv: "SAN-01", status: "Čeka", due: "15.03.2026." },
-];
-
-export default function OwnerDashboard() {
+export default function OwnerDashboardPage() {
   const router = useRouter();
+  const mySpvs = SPVS;
 
-  const totalTasks = MOCK_SPVS.reduce((sum, s) => sum + s.tasks.total, 0);
-  const completedTasks = MOCK_SPVS.reduce((sum, s) => sum + s.tasks.completed, 0);
-  const overdueTasks = MOCK_SPVS.reduce((sum, s) => sum + s.tasks.overdue, 0);
-  const totalExpenses = MOCK_SPVS.reduce((sum, s) => sum + s.finance.expenses, 0);
+  const totalProfit = mySpvs.reduce((s, p) => s + p.estimatedProfit, 0);
+  const blocked = mySpvs.filter(p => p.status === "blokiran");
+  const active = mySpvs.filter(p => p.status === "aktivan");
+  const allMissing = getMissingDocs();
+  const allOpenTasks = mySpvs.flatMap(p => getTasksBySpv(p.id).filter(t => (t.status as string) !== "završen"));
+  const allOpenTok = mySpvs.flatMap(p => getTokBySpv(p.id).filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran"));
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
       <div>
-        <h1 className="text-[22px] font-bold text-black">Nadzorna ploča</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Pregled mojih projekata</p>
+        <h1 className="text-[22px] font-bold text-black">Moji projekti</h1>
+        <p className="text-[13px] text-black/50 mt-0.5">{mySpvs.length} SPV-ova | Pregled portfelja</p>
       </div>
 
-      {/* KPI */}
-      <KpiGrid>
-        <KpiCard
-          title="Moji SPV-ovi"
-          value={MOCK_SPVS.length}
-          icon="🏗️"
-          color="blue"
-          subtitle="Aktivni projekti"
-          onClick={() => router.push("/dashboard/owner/projekti")}
-        />
-        <KpiCard
-          title="Ukupno zadataka"
-          value={`${completedTasks}/${totalTasks}`}
-          icon="✅"
-          color={overdueTasks > 0 ? "red" : "green"}
-          subtitle={overdueTasks > 0 ? `${overdueTasks} kasni` : "Sve u roku"}
-          onClick={() => router.push("/dashboard/owner/zadaci")}
-        />
-        <KpiCard
-          title="Ukupni rashodi"
-          value={`${totalExpenses.toLocaleString("hr-HR")} €`}
-          icon="💶"
-          color="amber"
-          subtitle="Svi projekti"
-          onClick={() => router.push("/dashboard/owner/financije")}
-        />
-        <KpiCard
-          title="Prekoračeni zadaci"
-          value={overdueTasks}
-          icon="⏰"
-          color={overdueTasks > 0 ? "red" : "green"}
-          subtitle={overdueTasks > 0 ? "Potrebna pažnja" : "Nema kašnjenja"}
-        />
-      </KpiGrid>
-
-      {/* MOJI SPV-ovi */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="border-b border-gray-100 px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 size={16} className="text-[#34C759]" />
-            <span className="text-[14px] font-semibold text-black">Moji projekti</span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Ukupno SPV", value: mySpvs.length, color: "text-blue-600" },
+          { label: "Aktivni", value: active.length, color: "text-green-600" },
+          { label: "Blokirani", value: blocked.length, color: blocked.length > 0 ? "text-red-600" : "text-green-600" },
+          { label: "Proc. profit", value: formatEur(totalProfit), color: "text-blue-600" },
+        ].map(k => (
+          <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className={`text-xl font-bold ${k.color}`}>{k.value}</div>
+            <div className="text-[12px] text-black/50">{k.label}</div>
           </div>
-          <button
-            onClick={() => router.push("/dashboard/owner/projekti")}
-            className="text-[12px] text-[#007AFF] font-medium hover:underline flex items-center gap-1"
-          >
-            Svi projekti <ArrowRight size={12} />
-          </button>
-        </div>
-        <div className="divide-y divide-gray-50">
-          {MOCK_SPVS.map((spv) => (
-            <button
-              key={spv.code}
-              onClick={() => router.push(`/dashboard/owner/spv/${spv.code}`)}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors text-left"
-            >
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-[#34C759]/10 flex items-center justify-center">
-                  <Building2 size={18} className="text-[#34C759]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-black">{spv.code}</span>
-                    <span className="text-[12px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-semibold">
-                      {spv.status}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-black/50 mt-0.5">{spv.name} • Kreiran: {spv.created}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <div className="text-[13px] font-semibold text-black">{spv.tasks.completed}/{spv.tasks.total}</div>
-                  <div className="text-[11px] text-black/40">Zadaci</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[13px] font-semibold text-black">{spv.finance.expenses.toLocaleString("hr-HR")} €</div>
-                  <div className="text-[11px] text-black/40">Rashodi</div>
-                </div>
-                <ArrowRight size={16} className="text-black/30" />
-              </div>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* ZADNJE ZADACI CROSS-SPV */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="border-b border-gray-100 px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckSquare size={16} className="text-[#007AFF]" />
-            <span className="text-[14px] font-semibold text-black">Zadnje aktivni zadaci</span>
-          </div>
-          <button
-            onClick={() => router.push("/dashboard/owner/zadaci")}
-            className="text-[12px] text-[#007AFF] font-medium hover:underline flex items-center gap-1"
-          >
-            Svi zadaci <ArrowRight size={12} />
-          </button>
-        </div>
-        <div className="divide-y divide-gray-50">
-          {MOCK_RECENT_TASKS.map((task, idx) => (
-            <div key={idx} className="px-5 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-[13px] font-medium text-black">{task.title}</p>
-                <p className="text-[11px] text-black/40 mt-0.5">{task.spv} • Rok: {task.due}</p>
-              </div>
-              <span className={`text-[11px] px-2.5 py-1 rounded-full font-semibold whitespace-nowrap ${
-                task.status === "Kasni" ? "bg-red-100 text-red-700" :
-                task.status === "U tijeku" ? "bg-blue-100 text-blue-700" :
-                task.status === "Završeno" ? "bg-green-100 text-green-700" :
-                "bg-gray-100 text-gray-600"
-              }`}>
-                {task.status}
-              </span>
+      {blocked.length > 0 && (
+        <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
+          <div className="text-[14px] font-bold text-red-700 mb-2">Blokirani projekti ({blocked.length})</div>
+          {blocked.map(p => (
+            <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-red-100/50 mb-1 text-[12px]">
+              <span className="font-bold text-red-700">{p.id} - {p.name}</span>
+              <span className="text-red-600">{p.blockReason}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Otvoreni zadaci", value: allOpenTasks.length, color: allOpenTasks.length > 0 ? "text-amber-600" : "text-green-600" },
+          { label: "Nedostaje dok.", value: allMissing.length, color: allMissing.length > 0 ? "text-red-600" : "text-green-600" },
+          { label: "TOK zahtjevi", value: allOpenTok.length, color: allOpenTok.length > 0 ? "text-amber-600" : "text-green-600" },
+        ].map(k => (
+          <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className={`text-xl font-bold ${k.color}`}>{k.value}</div>
+            <div className="text-[12px] text-black/50">{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200">
+        <div className="px-5 py-3 border-b border-gray-100 text-[14px] font-bold text-black">Svi projekti</div>
+        <div className="divide-y divide-gray-50">
+          {mySpvs.map(p => {
+            const openT = getTasksBySpv(p.id).filter(t => (t.status as string) !== "završen").length;
+            const missing = getMissingDocs().filter(d => d.spvId === p.id).length;
+            return (
+              <div key={p.id} onClick={() => router.push("/dashboard/owner/spv/" + p.id)}
+                className="px-5 py-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition-colors">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] font-bold text-black">{p.id}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      p.status === "aktivan" ? "bg-green-100 text-green-700" :
+                      p.status === "blokiran" ? "bg-red-100 text-red-700" :
+                      p.status === "u_izradi" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                    }`}>{p.status}</span>
+                  </div>
+                  <div className="text-[12px] text-black/50 mt-0.5">{p.name} | {p.sectorLabel} | {p.city}</div>
+                </div>
+                <div className="flex items-center gap-6 text-[12px]">
+                  <div className="text-right"><div className="text-black/40">Faza</div><div className="font-medium">{p.phase}</div></div>
+                  <div className="text-right"><div className="text-black/40">Zadaci</div><div className={openT > 0 ? "text-amber-600 font-medium" : "text-green-600"}>{openT} otv.</div></div>
+                  <div className="text-right"><div className="text-black/40">Dok.</div><div className={missing > 0 ? "text-red-600 font-medium" : "text-green-600"}>{missing > 0 ? missing + " ned." : "OK"}</div></div>
+                  <div className="text-right"><div className="text-black/40">Budzet</div><div className="font-bold">{formatEur(p.totalBudget)}</div></div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
