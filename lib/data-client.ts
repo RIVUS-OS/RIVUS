@@ -637,7 +637,7 @@ export function useActiveContracts(): UseDataResult<Contract[]> {
 export function useExpiringContracts(): UseDataResult<Contract[]> {
   return useSupabaseQuery(async () => {
     const c = await fetchContractsRaw();
-    return c.filter((x) => x.status === "istjece");
+    return c.filter((x) => (x.status as string) === "istjece");
   }, []);
 }
 
