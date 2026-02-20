@@ -8,7 +8,7 @@ import {
   FolderOpen, CheckSquare, Download, Users, Bell, Settings, Eye,
   Layers, Zap, AlertTriangle, CheckCircle, BookOpen, Briefcase,
   UserCog, FileStack, GitBranch, AlertCircle, ShieldCheck, DollarSign,
-  ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle,
+  ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle, TrendingUp, Clock, RefreshCw, Globe, Search,
 } from "lucide-react";
 
 type NavItem = {
@@ -31,11 +31,17 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const spvBase = spvId ? `/dashboard/core/spv/${spvId}` : "";
 
   const coreDooPages = [
-    "/dashboard/core/core-dashboard", "/dashboard/core/prihodi",
-    "/dashboard/core/rashodi", "/dashboard/core/knjigovodstvo",
-    "/dashboard/core/core-dokumenti", "/dashboard/core/core-ugovori",
-    "/dashboard/core/izvoz",
-    "/dashboard/core/core-postavke"
+    "/dashboard/core/core-dashboard", "/dashboard/core/prihodi", "/dashboard/core/rashodi",
+    "/dashboard/core/neto", "/dashboard/core/place",
+    "/dashboard/core/it", "/dashboard/core/marketing", "/dashboard/core/pravni",
+    "/dashboard/core/izdani-racuni", "/dashboard/core/primljeni-racuni", "/dashboard/core/eracuni",
+    "/dashboard/core/nenaplaceno", "/dashboard/core/dospjeli", "/dashboard/core/storna",
+    "/dashboard/core/blagajna", "/dashboard/core/devizni", "/dashboard/core/projekcija",
+    "/dashboard/core/pdv", "/dashboard/core/dobit", "/dashboard/core/predujmovi",
+    "/dashboard/core/bilanca", "/dashboard/core/bruto", "/dashboard/core/staranje", "/dashboard/core/analitika",
+    "/dashboard/core/core-dokumenti", "/dashboard/core/core-ugovori", "/dashboard/core/cjenik", "/dashboard/core/izvoz",
+    "/dashboard/core/core-postavke", "/dashboard/core/bankovni-racuni", "/dashboard/core/porezne-stope",
+    "/dashboard/core/knjigovodstvo"
   ];
   const isInsideCoreDoo = coreDooPages.some(p => pathname.startsWith(p));
 
@@ -89,22 +95,59 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "",
       items: [
-        { label: "CORE nadzorna ploča", href: "/dashboard/core/core-dashboard", icon: Home },
+        { label: "Nadzorna ploča", href: "/dashboard/core/core-dashboard", icon: Home },
       ],
     },
     {
-      title: "FINANCIJE",
+      title: "PRIHODI & RASHODI",
       items: [
         { label: "Prihodi", href: "/dashboard/core/prihodi", icon: Euro },
         { label: "Rashodi", href: "/dashboard/core/rashodi", icon: DollarSign },
-        { label: "Knjigovodstvo", href: "/dashboard/core/knjigovodstvo", icon: FileText },
+        { label: "Rezultat (P&L)", href: "/dashboard/core/neto", icon: BarChart3 },
+        { label: "Marže", href: icon: TrendingUp },
+      ],
+    },
+    {
+      title: "FAKTURIRANJE",
+      items: [
+        { label: "Izdani računi", href: "/dashboard/core/izdani-racuni", icon: FileText },
+        { label: "Primljeni računi", href: "/dashboard/core/primljeni-racuni", icon: FileText },
+        { label: "Nenaplaćeno", href: "/dashboard/core/nenaplaceno", icon: Clock },
+        { label: "Dospjeli", href: "/dashboard/core/dospjeli", icon: AlertTriangle },
+        { label: "Storna", href: "/dashboard/core/storna", icon: RefreshCw },
+      ],
+    },
+    {
+      title: "NOVČANI TOK",
+      items: [
+        { label: "Žiro račun", href: "/dashboard/core/blagajna", icon: Landmark },
+        { label: "Devizni račun", href: "/dashboard/core/devizni", icon: Globe },
+        { label: "Cash flow", href: "/dashboard/core/projekcija", icon: TrendingUp },
+      ],
+    },
+    {
+      title: "POREZNO",
+      items: [
+        { label: "PDV evidencija", href: "/dashboard/core/pdv", icon: FileText },
+        { label: "Porez na dobit", href: "/dashboard/core/dobit", icon: DollarSign },
+        { label: "Predujmovi", href: "/dashboard/core/predujmovi", icon: Clock },
+      ],
+    },
+    {
+      title: "IZVJEŠTAJI",
+      items: [
+        { label: "Bilanca", href: "/dashboard/core/bilanca", icon: BarChart3 },
+        { label: "Bruto bilanca", href: "/dashboard/core/bruto", icon: BarChart3 },
+        { label: "Staranje potraživanja", href: "/dashboard/core/staranje", icon: AlertTriangle },
+        { label: "Analitičke kartice", href: "/dashboard/core/analitika", icon: Search },
       ],
     },
     {
       title: "DOKUMENTI",
       items: [
-        { label: "CORE dokumenti", href: "/dashboard/core/core-dokumenti", icon: FolderOpen },
-        { label: "CORE ugovori", href: "/dashboard/core/core-ugovori", icon: FileStack, disabled: true, disabledTooltip: "Uskoro" },
+        { label: "Dokumenti", href: "/dashboard/core/core-dokumenti", icon: FolderOpen },
+        { label: "Ugovori", href: "/dashboard/core/core-ugovori", icon: FileStack },
+        { label: "Cjenik usluga", href: "/dashboard/core/cjenik", icon: DollarSign },
         { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
       ],
     },
@@ -112,6 +155,9 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       title: "POSTAVKE",
       items: [
         { label: "Postavke firme", href: "/dashboard/core/core-postavke", icon: Settings },
+        { label: "Bankovni računi", href: "/dashboard/core/bankovni-racuni", icon: Landmark },
+        { label: "Porezne stope", href: "/dashboard/core/porezne-stope", icon: FileText },
+        { label: "Knjigovodstvo", href: "/dashboard/core/knjigovodstvo", icon: BookOpen },
       ],
     },
   ];
