@@ -15,9 +15,16 @@ export default function RegisterPage() {
     setLoading(true);
     setMsg(null);
 
-    const { error } = await supabaseBrowser.auth.signUp({ email, password });
-    if (error) setMsg(error.message);
-    else setMsg("Registracija kreirana. Ako treba, potvrdi email pa se prijavi.");
+    const { error } = await supabaseBrowser.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      setMsg(error.message);
+    } else {
+      setMsg("Registracija uspješna. Provjeri email za potvrdu računa.");
+    }
 
     setLoading(false);
   };
@@ -26,21 +33,28 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#f5f5f7]">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <div className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">RIVUS</div>
-          <div className="text-sm text-[#6e6e73] mt-1">Registracija</div>
+          <div className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">
+            RIVUS
+          </div>
+          <div className="text-sm text-[#6e6e73] mt-1">
+            Registracija
+          </div>
         </div>
 
         <div className="rounded-2xl bg-white border border-[#d2d2d7] shadow-sm p-6 space-y-3">
           <input
             className="w-full rounded-xl border border-[#d2d2d7] px-4 py-3 bg-white text-[#1d1d1f] placeholder:text-[#6e6e73] outline-none focus:ring-2 focus:ring-[#0071e3]/25 focus:border-[#0071e3]"
             placeholder="Email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+
           <input
             type="password"
             className="w-full rounded-xl border border-[#d2d2d7] px-4 py-3 bg-white text-[#1d1d1f] placeholder:text-[#6e6e73] outline-none focus:ring-2 focus:ring-[#0071e3]/25 focus:border-[#0071e3]"
             placeholder="Lozinka"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -65,6 +79,10 @@ export default function RegisterPage() {
           >
             Nazad na prijavu
           </button>
+        </div>
+
+        <div className="mt-6 text-center text-xs text-[#6e6e73]">
+          © {new Date().getFullYear()} RIVUS
         </div>
       </div>
     </div>
