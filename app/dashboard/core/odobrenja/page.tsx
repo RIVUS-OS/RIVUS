@@ -1,6 +1,6 @@
 "use client";
 
-import { useDecisions, usePendingDecisions } from "@/lib/data-client";;
+import { useDecisions, usePendingDecisions } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "odobreno": "bg-green-100 text-green-700",
@@ -17,9 +17,9 @@ const statusLabels: Record<string, string> = {
 export default function OdobrenjaPage() {
   const { data: decisions, loading: decisionsLoading } = useDecisions();
 
+  const { data: pending } = usePendingDecisions();
   if (decisionsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const { data: pending } = usePendingDecisions();
   const approved = decisions.filter(d => d.status === "odobreno");
   const rejected = decisions.filter(d => d.status === "odbijeno");
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "plaćen": "bg-green-100 text-green-700",

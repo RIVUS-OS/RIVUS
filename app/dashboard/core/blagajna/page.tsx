@@ -1,13 +1,13 @@
 ﻿"use client";
 
-import { useTransactions, useCurrentBalance, formatEur } from "@/lib/data-client";;
+import { useTransactions, useCurrentBalance, formatEur } from "@/lib/data-client";
 
 export default function BlagajnaPage() {
   const { data: transactions, loading: transactionsLoading } = useTransactions();
 
+  const { data: balance } = useCurrentBalance();
   if (transactionsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const { data: balance } = useCurrentBalance();
   const totalCredit = transactions.reduce((s, t) => s + t.credit, 0);
   const totalDebit = transactions.reduce((s, t) => s + t.debit, 0);
 

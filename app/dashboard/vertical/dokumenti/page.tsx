@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useDocuments } from "@/lib/data-client";;
+import { useSpvs, useDocuments } from "@/lib/data-client";
 
 export default function VerticalDokumentiPage() {
   const { data: _docsAll } = useDocuments();

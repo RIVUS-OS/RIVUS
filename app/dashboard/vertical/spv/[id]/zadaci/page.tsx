@@ -1,15 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useTasks } from "@/lib/data-client";;
+import { useSpvById, useTasks } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = { otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700", "završen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700" };
 
 export default function VertSpvZadaciPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: tasks } = useTasks(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   return (
     <div className="space-y-6">

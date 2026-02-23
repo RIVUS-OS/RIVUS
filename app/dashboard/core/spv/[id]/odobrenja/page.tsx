@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useDecisions } from "@/lib/data-client";;
+import { useSpvById, useDecisions } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = { "odobreno": "bg-green-100 text-green-700", "odbijeno": "bg-red-100 text-red-700", "na_čekanju": "bg-amber-100 text-amber-700" };
 const statusLabels: Record<string, string> = { "odobreno": "Odobreno", "odbijeno": "Odbijeno", "na_čekanju": "Na cekanju" };
@@ -9,8 +9,8 @@ const statusLabels: Record<string, string> = { "odobreno": "Odobreno", "odbijeno
 export default function SpvOdobrenjaPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: decisions } = useDecisions(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const pending = decisions.filter(d => d.status === "na_čekanju");
 
   return (

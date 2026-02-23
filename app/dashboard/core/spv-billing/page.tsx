@@ -1,5 +1,5 @@
 "use client";
-import { useSpvs, useContracts, formatEur } from "@/lib/data-client";;
+import { useSpvs, useContracts, formatEur } from "@/lib/data-client";
 export default function CoreSpvBillingPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: contracts, loading: contractsLoading } = useContracts();

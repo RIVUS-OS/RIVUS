@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";;
+import { exportSpvZip } from "@/lib/export-spv";
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";
 
 export default function SpvCommandPage() {
   const params = useParams();
@@ -9,15 +11,6 @@ export default function SpvCommandPage() {
   const id = params.id as string;
   const { data: spv } = useSpvById(id);
 
-  if (!spv) {
-    return (
-      <div className="p-8 text-center">
-        <h1 className="text-[18px] font-bold text-red-600">SPV nije pronadjen: {id}</h1>
-        <button onClick={() => router.push("/dashboard/core/spv-pipeline")}
-          className="mt-4 text-[13px] text-blue-600 underline">Nazad na pipeline</button>
-      </div>
-    );
-  }
 
   const { data: issued } = useIssuedInvoices(id);
   const { data: received } = useReceivedInvoices(id);
@@ -44,6 +37,34 @@ export default function SpvCommandPage() {
     return s === "na_čekanju" || s === "na_cekanju";
   });
   const openTok = tokRequests.filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
+
+  const [exporting, setExporting] = useState(false);
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportSpvZip({
+        spv: spv as unknown as Record<string, unknown>,
+        issued: issued as unknown as Record<string, unknown>[],
+        received: received as unknown as Record<string, unknown>[],
+        tasks: tasks as unknown as Record<string, unknown>[],
+        documents: docs as unknown as Record<string, unknown>[],
+        decisions: decisions as unknown as Record<string, unknown>[],
+        tokRequests: tokRequests as unknown as Record<string, unknown>[],
+        activity: activity as unknown as Record<string, unknown>[],
+        verticals: verticals as unknown as Record<string, unknown>[],
+        accountant: accountant as unknown as Record<string, unknown> | null,
+        missingDocs: missingDocs as unknown as Record<string, unknown>[],
+      });
+    } catch (e) { console.error("Export failed", e); }
+    setExporting(false);
+  };
+  if (!spv) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-[14px] text-black/40">Ucitavanje SPV...</div>
+      </div>
+    );
+  }
 
   const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
     aktivan: { bg: "bg-green-100", text: "text-green-700", label: "Aktivan" },
@@ -76,7 +97,7 @@ export default function SpvCommandPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-[22px] font-bold text-black">{spv.id}</h1>
+            <h1 className="text-[22px] font-bold text-black">{spv.name || spv.id}</h1>
             <span className={`px-3 py-1 rounded-full text-[12px] font-semibold ${st.bg} ${st.text}`}>{st.label}</span>
             <span className="text-[12px] px-2 py-0.5 rounded bg-gray-100 text-gray-600">{spv.phase}</span>
           </div>
@@ -87,6 +108,10 @@ export default function SpvCommandPage() {
           <div>{spv.sectorLabel} | {spv.city}</div>
           <div>OIB: {spv.oib} | Osnovan: {spv.founded}</div>
           <div>Budzet: {formatEur(spv.totalBudget)} | Proc. profit: {formatEur(spv.estimatedProfit)}</div>
+          <button onClick={handleExport} disabled={exporting}
+            className="mt-2 px-3 py-1.5 rounded-lg bg-black text-white text-[11px] font-semibold hover:bg-black/80 disabled:opacity-50">
+            {exporting ? "Exportiranje..." : "⬇ Export ZIP"}
+          </button>
         </div>
       </div>
 

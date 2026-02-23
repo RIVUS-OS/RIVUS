@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSpvs, formatEur } from "@/lib/data-client";
-import { SECTORS } from "@/lib/mock-data";;;;
+import { SECTORS } from "@/lib/mock-data";
 
 const statusColors: Record<string, string> = {
   aktivan: "bg-green-100 text-green-700",
@@ -22,11 +22,11 @@ const phaseColors: Record<string, string> = {
 };
 
 export default function SpvPipelinePage() {
+  const router = useRouter();
   const { data: spvs, loading: spvsLoading } = useSpvs();
 
   if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const router = useRouter();
   const active = spvs.filter(s => s.status === "aktivan" || s.status === "blokiran").length;
   const completed = spvs.filter(s => s.status === "zavrsen").length;
   const totalBudget = spvs.reduce((sum, s) => sum + s.totalBudget, 0);

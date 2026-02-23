@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useBanks, formatEur } from "@/lib/data-client";;
+import { useSpvs, useBanks, formatEur } from "@/lib/data-client";
 
 export default function BankEvaluacijePage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();

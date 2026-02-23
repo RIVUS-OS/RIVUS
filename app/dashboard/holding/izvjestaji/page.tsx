@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, formatEur } from "@/lib/data-client";;
+import { useSpvs, formatEur } from "@/lib/data-client";
 
 export default function HoldingIzvjestajiPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();

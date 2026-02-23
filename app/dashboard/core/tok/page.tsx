@@ -1,6 +1,6 @@
 "use client";
 
-import { useTokRequests, useOpenTokRequests, useEscalatedTok, useSlaBreached } from "@/lib/data-client";;
+import { useTokRequests, useOpenTokRequests, useEscalatedTok, useSlaBreached } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "otvoren": "bg-blue-100 text-blue-700",
@@ -28,11 +28,11 @@ const priorityColors: Record<string, string> = {
 export default function TokPage() {
   const { data: tokRequests, loading: tokRequestsLoading } = useTokRequests();
 
-  if (tokRequestsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
-
   const { data: open } = useOpenTokRequests();
   const { data: escalated } = useEscalatedTok();
   const { data: slaBreached } = useSlaBreached();
+  if (tokRequestsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const resolved = tokRequests.filter(t => t.status === "riješen" || t.status === "zatvoren");
 
   return (

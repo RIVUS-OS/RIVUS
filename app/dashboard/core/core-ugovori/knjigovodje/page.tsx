@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useAccountants, formatEur } from "@/lib/data-client";;
+import { useAccountants, formatEur } from "@/lib/data-client";
 export default function CoreUgovoriKnjigovodjePage() {
   const { data: accountants, loading: accountantsLoading } = useAccountants();
 

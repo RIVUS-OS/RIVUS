@@ -1,5 +1,5 @@
 "use client";
-import { useSpvs, useVerticals, useAccountants, useBanks } from "@/lib/data-client";;
+import { useSpvs, useVerticals, useAccountants, useBanks } from "@/lib/data-client";
 export default function CoreOrkestacijaPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: verticals, loading: verticalsLoading } = useVerticals();

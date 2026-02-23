@@ -1,16 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useIssuedInvoices, useReceivedInvoices, useDocuments, useActivityLog, formatEur } from "@/lib/data-client";;
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, useDocuments, useActivityLog, formatEur } from "@/lib/data-client";
 
 export default function AccountingSpvPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: issued } = useIssuedInvoices(id as string);
   const { data: received } = useReceivedInvoices(id as string);
   const { data: docs } = useDocuments(id as string);
   const { data: _raw_activity } = useActivityLog(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const activity = _raw_activity.filter(a => a.category === "billing" || a.category === "document");
   const unpaid = issued.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
 

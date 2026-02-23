@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSpvs, useAccountants, useIssuedInvoices, useReceivedInvoices, useTokRequests, formatEur } from "@/lib/data-client";;
+import { useSpvs, useAccountants, useIssuedInvoices, useReceivedInvoices, useTokRequests, formatEur } from "@/lib/data-client";
 
 export default function AccountingDashboardPage() {
   const { data: _recvAll } = useReceivedInvoices();
@@ -9,9 +9,9 @@ export default function AccountingDashboardPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: accountants, loading: accountantsLoading } = useAccountants();
 
+  const router = useRouter();
   if (spvsLoading || accountantsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const router = useRouter();
   const mySpvs = spvs; // In production filtered by accountant auth
 
   const allTok = mySpvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id).filter(t => t.status === "otvoren" || t.status === "u_tijeku"));

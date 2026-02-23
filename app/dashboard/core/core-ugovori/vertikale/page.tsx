@@ -1,6 +1,6 @@
 "use client";
 
-import { useContracts, useVerticals } from "@/lib/data-client";;
+import { useContracts, useVerticals } from "@/lib/data-client";
 
 export default function CoreUgovoriVertikalePage() {
   const { data: contracts, loading: contractsLoading } = useContracts();

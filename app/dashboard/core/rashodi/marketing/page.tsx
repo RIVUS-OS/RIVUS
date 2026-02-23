@@ -1,5 +1,5 @@
 "use client";
-import { useReceivedInvoices, formatEur } from "@/lib/data-client";;
+import { useReceivedInvoices, formatEur } from "@/lib/data-client";
 export default function RashodiMarketingPage() {
   const { data: receivedInvoices, loading: receivedInvoicesLoading } = useReceivedInvoices();
 

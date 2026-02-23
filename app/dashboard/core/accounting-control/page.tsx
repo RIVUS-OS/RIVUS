@@ -1,5 +1,5 @@
 "use client";
-import { useAccountants, useSpvs } from "@/lib/data-client";;
+import { useAccountants, useSpvs } from "@/lib/data-client";
 export default function CoreAccountingControlPage() {
   const { data: accountants, loading: accountantsLoading } = useAccountants();
   const { data: spvs, loading: spvsLoading } = useSpvs();

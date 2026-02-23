@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";;
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";
 
 const statusLabels: Record<string, string> = { "plaćen": "Placen", "čeka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
 const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
@@ -9,9 +9,9 @@ const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-gre
 export default function OwnerSpvRacuniPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: issued } = useIssuedInvoices(id as string);
   const { data: received } = useReceivedInvoices(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   return (
     <div className="space-y-6">

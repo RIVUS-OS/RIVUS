@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useTokRequests } from "@/lib/data-client";;
+import { useSpvs, useTokRequests } from "@/lib/data-client";
 
 export default function OwnerObavijestPage() {
   const { data: _tokAll } = useTokRequests();

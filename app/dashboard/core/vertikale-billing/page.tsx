@@ -1,5 +1,5 @@
 "use client";
-import { useVerticals, useIssuedInvoices, formatEur } from "@/lib/data-client";;
+import { useVerticals, useIssuedInvoices, formatEur } from "@/lib/data-client";
 export default function CoreVertikaleBillingPage() {
   const { data: verticals, loading: verticalsLoading } = useVerticals();
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();

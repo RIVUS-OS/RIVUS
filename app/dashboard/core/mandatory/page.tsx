@@ -1,5 +1,5 @@
 "use client";
-import { useSpvs, useDocuments } from "@/lib/data-client";;
+import { useSpvs, useDocuments } from "@/lib/data-client";
 export default function CoreMandatoryPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: documents, loading: documentsLoading } = useDocuments();

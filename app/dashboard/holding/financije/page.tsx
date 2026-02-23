@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useIssuedInvoices, useReceivedInvoices, usePnlMonths, formatEur } from "@/lib/data-client";;
+import { useSpvs, useIssuedInvoices, useReceivedInvoices, usePnlMonths, formatEur } from "@/lib/data-client";
 
 export default function HoldingFinancijePage() {
   const { data: _issAll } = useIssuedInvoices();

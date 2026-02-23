@@ -1,6 +1,6 @@
 "use client";
 
-import { useContracts, formatEur } from "@/lib/data-client";;
+import { useContracts, formatEur } from "@/lib/data-client";
 
 export default function CoreUgovoriSpvPage() {
   const { data: contracts, loading: contractsLoading } = useContracts();

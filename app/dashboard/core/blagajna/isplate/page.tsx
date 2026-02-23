@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useTransactions, formatEur } from "@/lib/data-client";;
+import { useTransactions, formatEur } from "@/lib/data-client";
 export default function BlagajnaIsplatePage() {
   const { data: transactions, loading: transactionsLoading } = useTransactions();
 

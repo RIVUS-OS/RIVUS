@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useActiveContracts, formatEur } from "@/lib/data-client";;
+import { useSpvById, useActiveContracts, formatEur } from "@/lib/data-client";
 
 export default function OwnerSpvUgovoriPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: _raw_contracts } = useActiveContracts();
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const contracts = _raw_contracts.filter(c => c.partyBId === id);
 
   return (

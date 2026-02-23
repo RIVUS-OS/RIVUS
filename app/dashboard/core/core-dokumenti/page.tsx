@@ -1,5 +1,5 @@
 "use client";
-import { useDocuments } from "@/lib/data-client";;
+import { useDocuments } from "@/lib/data-client";
 export default function CoreCoreDokumentiPage() {
   const { data: documents, loading: documentsLoading } = useDocuments();
 

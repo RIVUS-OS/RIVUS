@@ -1,6 +1,6 @@
 "use client";
 
-import { useContracts } from "@/lib/data-client";;
+import { useContracts } from "@/lib/data-client";
 
 export default function CoreUgovoriIstjecuPage() {
   const { data: contracts, loading: contractsLoading } = useContracts();

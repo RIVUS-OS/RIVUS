@@ -1,6 +1,6 @@
 "use client";
 
-import { useBanks, useSpvs, useSpvById } from "@/lib/data-client";;
+import { useBanks, useSpvs, useSpvById } from "@/lib/data-client";
 
 export default function BankeNadzorPage() {
   const { data: _allSpvs } = useSpvs();

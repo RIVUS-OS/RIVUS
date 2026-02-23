@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, formatEur } from "@/lib/data-client";;
+import { useSpvById, formatEur } from "@/lib/data-client";
 
 export default function OwnerSpvPostavkePage() {
   const { id } = useParams();

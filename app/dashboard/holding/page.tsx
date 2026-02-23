@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useVerticals, useBanks, useAccountants, formatEur } from "@/lib/data-client";;
+import { useSpvs, useVerticals, useBanks, useAccountants, formatEur } from "@/lib/data-client";
 
 export default function HoldingDashboardPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();

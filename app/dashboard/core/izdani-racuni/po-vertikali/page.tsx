@@ -1,6 +1,6 @@
 "use client";
 
-import { useIssuedInvoices, useVerticals, formatEur } from "@/lib/data-client";;
+import { useIssuedInvoices, useVerticals, formatEur } from "@/lib/data-client";
 
 export default function IzdaniPoVertikaliPage() {
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();

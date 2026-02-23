@@ -1,17 +1,17 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useVerticalsBySpv, useTasks, useTokRequests, useActivityLog } from "@/lib/data-client";;
+import { useSpvById, useVerticalsBySpv, useTasks, useTokRequests, useActivityLog } from "@/lib/data-client";
 
 export default function VerticalSpvPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: verticals } = useVerticalsBySpv(id as string);
   const { data: tasks } = useTasks(id as string);
-  const openTasks = tasks.filter(t => (t.status as string) !== "završen");
   const { data: tok } = useTokRequests(id as string);
   const { data: _raw2_activity } = useActivityLog(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
+  const openTasks = tasks.filter(t => (t.status as string) !== "završen");
   const activity = _raw2_activity.slice(0, 5);
 
   return (

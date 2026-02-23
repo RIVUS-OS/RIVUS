@@ -1,5 +1,5 @@
 ﻿"use client";
-import { usePdvQuarters, formatEur } from "@/lib/data-client";;
+import { usePdvQuarters, formatEur } from "@/lib/data-client";
 export default function PdvPrijavaPage() {
   const { data: pdvQuarters, loading: pdvQuartersLoading } = usePdvQuarters();
 

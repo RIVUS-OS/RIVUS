@@ -1,5 +1,5 @@
 "use client";
-import { useIssuedInvoices, useVerticals, formatEur } from "@/lib/data-client";;
+import { useIssuedInvoices, useVerticals, formatEur } from "@/lib/data-client";
 export default function PrihodiVertikalePage() {
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
   const { data: verticals, loading: verticalsLoading } = useVerticals();

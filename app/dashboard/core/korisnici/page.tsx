@@ -1,5 +1,5 @@
 "use client";
-import { useVerticals, useAccountants, useBanks } from "@/lib/data-client";;
+import { useVerticals, useAccountants, useBanks } from "@/lib/data-client";
 export default function CoreKorisniciPage() {
   const { data: verticals, loading: verticalsLoading } = useVerticals();
   const { data: accountants, loading: accountantsLoading } = useAccountants();

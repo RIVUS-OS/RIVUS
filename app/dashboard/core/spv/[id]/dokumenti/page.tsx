@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useDocuments, useMissingDocs } from "@/lib/data-client";;
+import { useSpvById, useDocuments, useMissingDocs } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "aktivan": "bg-green-100 text-green-700", "arhiviran": "bg-gray-100 text-gray-600",
@@ -11,10 +11,10 @@ const statusColors: Record<string, string> = {
 export default function SpvDokumentiPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
   const { data: docs } = useDocuments(id as string);
   const { data: _raw_missing } = useMissingDocs();
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
+
   const missing = _raw_missing.filter(d => d.spvId === id);
 
   return (

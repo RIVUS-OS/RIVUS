@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useVerticalsBySpv } from "@/lib/data-client";;
+import { useSpvById, useVerticalsBySpv } from "@/lib/data-client";
 
 export default function OwnerSpvVertikalePage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: verticals } = useVerticalsBySpv(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   return (
     <div className="space-y-6">

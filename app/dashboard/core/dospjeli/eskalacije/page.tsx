@@ -1,5 +1,5 @@
 "use client";
-import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 export default function DospjeliEskalacijePage() {
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
 

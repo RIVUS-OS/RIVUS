@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSpvs, formatEur } from "@/lib/data-client";;
+import { useSpvs, formatEur } from "@/lib/data-client";
 
 export default function OwnerProjektiPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
 
+  const router = useRouter();
   if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const router = useRouter();
   const statusColors: Record<string, string> = {
     aktivan: "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700",
     u_izradi: "bg-blue-100 text-blue-700", na_cekanju: "bg-gray-100 text-gray-600",

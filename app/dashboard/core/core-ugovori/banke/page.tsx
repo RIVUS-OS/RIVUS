@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useBanks } from "@/lib/data-client";;
+import { useBanks } from "@/lib/data-client";
 export default function CoreUgovoriBankePage() {
   const { data: banks, loading: banksLoading } = useBanks();
 

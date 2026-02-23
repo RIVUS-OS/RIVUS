@@ -1,6 +1,6 @@
 "use client";
 
-import { useOverdueInvoices, formatEur } from "@/lib/data-client";;
+import { useOverdueInvoices, formatEur } from "@/lib/data-client";
 
 export default function DospjeliPage() {
   const { data: overdue } = useOverdueInvoices();

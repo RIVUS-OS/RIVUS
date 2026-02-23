@@ -1,6 +1,6 @@
 "use client";
 
-import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
 export default function IzdaniPoStatusuPage() {
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useUnpaidInvoices, formatEur } from "@/lib/data-client";;
+import { useUnpaidInvoices, formatEur } from "@/lib/data-client";
 
 export default function NenaPlacenoPage() {
   const { data: unpaid } = useUnpaidInvoices();

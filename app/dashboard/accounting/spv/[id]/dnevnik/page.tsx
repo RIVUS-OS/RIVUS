@@ -1,15 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSpvById, useActivityLog } from "@/lib/data-client";;
+import { useSpvById, useActivityLog } from "@/lib/data-client";
 
 const catColors: Record<string, string> = { lifecycle: "bg-blue-500", billing: "bg-green-500", document: "bg-purple-500", approval: "bg-amber-500", assignment: "bg-teal-500", block: "bg-red-500", task: "bg-indigo-500", tok: "bg-orange-500" };
 
 export default function AccSpvDnevnikPage() {
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const { data: activity } = useActivityLog(id as string);
+  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   return (
     <div className="space-y-6">

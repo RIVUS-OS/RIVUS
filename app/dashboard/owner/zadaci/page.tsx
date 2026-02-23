@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpvs, useTasks } from "@/lib/data-client";;
+import { useSpvs, useTasks } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700",

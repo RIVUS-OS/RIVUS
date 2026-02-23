@@ -1,6 +1,6 @@
 "use client";
 
-import { useActivityLog } from "@/lib/data-client";;
+import { useActivityLog } from "@/lib/data-client";
 
 const catColors: Record<string, string> = {
   lifecycle: "bg-blue-500", billing: "bg-green-500", document: "bg-purple-500",

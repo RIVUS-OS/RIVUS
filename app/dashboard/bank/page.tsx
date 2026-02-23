@@ -1,15 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSpvs, useBanks } from "@/lib/data-client";;
+import { useSpvs, useBanks } from "@/lib/data-client";
 
 export default function BankDashboardPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: banks, loading: banksLoading } = useBanks();
 
+  const router = useRouter();
   if (spvsLoading || banksLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const router = useRouter();
   const evalPending = spvs.filter(p => banks.some(b => b.evaluationPending === p.id));
 
   return (

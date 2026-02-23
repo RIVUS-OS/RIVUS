@@ -1,5 +1,5 @@
 "use client";
-import { usePnlMonths, formatEur } from "@/lib/data-client";;
+import { usePnlMonths, formatEur } from "@/lib/data-client";
 export default function RashodiKvartalnoPage() {
   const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();
 

@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useActivityLog } from "@/lib/data-client";;
+import { useActivityLog } from "@/lib/data-client";
 export default function CoreAktivnostiPage() {
   const { data: activityLog, loading: activityLogLoading } = useActivityLog();
 

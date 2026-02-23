@@ -1,5 +1,5 @@
 "use client";
-import { useSpvs, usePnlMonths, useIssuedInvoices, useReceivedInvoices, useTokRequests, formatEur } from "@/lib/data-client";;
+import { useSpvs, usePnlMonths, useIssuedInvoices, useReceivedInvoices, useTokRequests, formatEur } from "@/lib/data-client";
 export default function CoreCoreDashboardPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();
