@@ -1,10 +1,15 @@
 "use client";
 
-import { SPVS, BANKS, formatEur } from "@/lib/mock-data";
+import { useSpvs, useBanks, formatEur } from "@/lib/data-client";;
 
 export default function BankEvaluacijePage() {
-  const evalPending = SPVS.filter(p => BANKS.some(b => b.evaluationPending === p.id));
-  const completed = SPVS.filter(p => !BANKS.some(b => b.evaluationPending === p.id));
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: banks, loading: banksLoading } = useBanks();
+
+  if (spvsLoading || banksLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const evalPending = spvs.filter(p => banks.some(b => b.evaluationPending === p.id));
+  const completed = spvs.filter(p => !banks.some(b => b.evaluationPending === p.id));
 
   return (
     <div className="space-y-6">

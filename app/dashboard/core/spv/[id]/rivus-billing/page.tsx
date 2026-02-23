@@ -1,15 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getIssuedBySpv, getActiveContracts, formatEur } from "@/lib/mock-data";
+import { useSpvById, useIssuedInvoices, useActiveContracts, formatEur } from "@/lib/data-client";;
 
 export default function SpvRivusBillingPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
-  const issued = getIssuedBySpv(id as string);
-  const contracts = getActiveContracts().filter(c => c.partyBId === id);
+  const { data: issued } = useIssuedInvoices(id as string);
+  const { data: _raw_contracts } = useActiveContracts();
+  const contracts = _raw_contracts.filter(c => c.partyBId === id);
   const totalBilled = issued.reduce((s, i) => s + i.totalAmount, 0);
   const totalPaid = issued.filter(i => (i.status as string) === "plaćen").reduce((s, i) => s + i.totalAmount, 0);
 

@@ -1,9 +1,13 @@
 "use client";
 
-import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function NenaPlOpomenePage() {
-  const overdue = ISSUED_INVOICES.filter(i => (i.status as string) === "kasni");
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+
+  if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const overdue = issuedInvoices.filter(i => (i.status as string) === "kasni");
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Opomene</h1><p className="text-[13px] text-black/50 mt-0.5">{overdue.length} kasni - kandidati za opomenu</p></div>

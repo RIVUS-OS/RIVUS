@@ -1,14 +1,18 @@
 "use client";
 
-import { SPVS, formatEur } from "@/lib/mock-data";
+import { useSpvs, formatEur } from "@/lib/data-client";;
 
 export default function HoldingPortfolioPage() {
-  const bySector: Record<string, typeof SPVS> = {};
-  SPVS.forEach(p => { bySector[p.sectorLabel] = bySector[p.sectorLabel] || []; bySector[p.sectorLabel].push(p); });
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const bySector: Record<string, typeof spvs> = {};
+  spvs.forEach(p => { bySector[p.sectorLabel] = bySector[p.sectorLabel] || []; bySector[p.sectorLabel].push(p); });
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-[22px] font-bold text-black">Portfelj</h1><p className="text-[13px] text-black/50 mt-0.5">{SPVS.length} SPV-ova u {Object.keys(bySector).length} sektora</p></div>
+      <div><h1 className="text-[22px] font-bold text-black">Portfelj</h1><p className="text-[13px] text-black/50 mt-0.5">{spvs.length} SPV-ova u {Object.keys(bySector).length} sektora</p></div>
       {Object.entries(bySector).map(([sector, spvs]) => (
         <div key={sector}>
           <h3 className="text-[14px] font-bold text-black mb-2">{sector} ({spvs.length})</h3>

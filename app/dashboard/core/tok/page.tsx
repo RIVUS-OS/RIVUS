@@ -1,6 +1,6 @@
 "use client";
 
-import { TOK_REQUESTS, getOpenTokRequests, getEscalatedTok, getSlaBreached } from "@/lib/mock-data";
+import { useTokRequests, useOpenTokRequests, useEscalatedTok, useSlaBreached } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = {
   "otvoren": "bg-blue-100 text-blue-700",
@@ -26,16 +26,20 @@ const priorityColors: Record<string, string> = {
 };
 
 export default function TokPage() {
-  const open = getOpenTokRequests();
-  const escalated = getEscalatedTok();
-  const slaBreached = getSlaBreached();
-  const resolved = TOK_REQUESTS.filter(t => t.status === "riješen" || t.status === "zatvoren");
+  const { data: tokRequests, loading: tokRequestsLoading } = useTokRequests();
+
+  if (tokRequestsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const { data: open } = useOpenTokRequests();
+  const { data: escalated } = useEscalatedTok();
+  const { data: slaBreached } = useSlaBreached();
+  const resolved = tokRequests.filter(t => t.status === "riješen" || t.status === "zatvoren");
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">TOK - Zahtjevi</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{TOK_REQUESTS.length} ukupno | {open.length} otvorenih | {escalated.length} eskaliranih | {slaBreached.length} SLA probijenih</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{tokRequests.length} ukupno | {open.length} otvorenih | {escalated.length} eskaliranih | {slaBreached.length} SLA probijenih</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -67,7 +71,7 @@ export default function TokPage() {
             </tr>
           </thead>
           <tbody>
-            {TOK_REQUESTS.map(tok => (
+            {tokRequests.map(tok => (
               <tr key={tok.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${tok.slaBreached ? "bg-red-50/30" : ""}`}>
                 <td className="px-3 py-2.5 font-bold text-black">{tok.id}</td>
                 <td className="px-3 py-2.5 text-black max-w-[200px] truncate">{tok.title}</td>

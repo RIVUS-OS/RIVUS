@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SPVS, SECTORS, formatEur } from "@/lib/mock-data";
+import { useSpvs, formatEur } from "@/lib/data-client";
+import { SECTORS } from "@/lib/mock-data";;;;
 
 const statusColors: Record<string, string> = {
   aktivan: "bg-green-100 text-green-700",
@@ -21,23 +22,27 @@ const phaseColors: Record<string, string> = {
 };
 
 export default function SpvPipelinePage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const router = useRouter();
-  const active = SPVS.filter(s => s.status === "aktivan" || s.status === "blokiran").length;
-  const completed = SPVS.filter(s => s.status === "zavrsen").length;
-  const totalBudget = SPVS.reduce((sum, s) => sum + s.totalBudget, 0);
+  const active = spvs.filter(s => s.status === "aktivan" || s.status === "blokiran").length;
+  const completed = spvs.filter(s => s.status === "zavrsen").length;
+  const totalBudget = spvs.reduce((sum, s) => sum + s.totalBudget, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">SPV Pipeline</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Svi SPV-ovi u sustavu | {SPVS.length} ukupno | {active} aktivnih | {completed} zavrsenih | {formatEur(totalBudget)} budzet</p>
+        <p className="text-[13px] text-black/50 mt-0.5">Svi SPV-ovi u sustavu | {spvs.length} ukupno | {active} aktivnih | {completed} zavrsenih | {formatEur(totalBudget)} budzet</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Aktivni", value: SPVS.filter(s => s.status === "aktivan").length, color: "text-green-600" },
-          { label: "Blokirani", value: SPVS.filter(s => s.status === "blokiran").length, color: "text-red-600" },
-          { label: "U izradi", value: SPVS.filter(s => s.status === "u_izradi").length, color: "text-blue-600" },
+          { label: "Aktivni", value: spvs.filter(s => s.status === "aktivan").length, color: "text-green-600" },
+          { label: "Blokirani", value: spvs.filter(s => s.status === "blokiran").length, color: "text-red-600" },
+          { label: "U izradi", value: spvs.filter(s => s.status === "u_izradi").length, color: "text-blue-600" },
           { label: "Zavrseni", value: completed, color: "text-indigo-600" },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
@@ -62,7 +67,7 @@ export default function SpvPipelinePage() {
             </tr>
           </thead>
           <tbody>
-            {SPVS.map(spv => (
+            {spvs.map(spv => (
               <tr key={spv.id} onClick={() => router.push("/dashboard/core/spv/" + spv.id)}
                 className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors">
                 <td className="px-4 py-3 font-bold text-black">{spv.id}</td>

@@ -1,16 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getTokBySpv } from "@/lib/mock-data";
+import { useSpvById, useTokRequests } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = { "otvoren": "bg-blue-100 text-blue-700", "u_tijeku": "bg-amber-100 text-amber-700", "riješen": "bg-green-100 text-green-700", "eskaliran": "bg-red-100 text-red-700", "zatvoren": "bg-gray-100 text-gray-600" };
 const statusLabels: Record<string, string> = { "otvoren": "Otvoren", "u_tijeku": "U tijeku", "riješen": "Rijesen", "eskaliran": "Eskaliran", "zatvoren": "Zatvoren" };
 
 export default function SpvTokPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const tok = getTokBySpv(id as string);
+  const { data: tok } = useTokRequests(id as string);
 
   return (
     <div className="space-y-6">

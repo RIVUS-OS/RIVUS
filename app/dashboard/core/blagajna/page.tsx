@@ -1,17 +1,21 @@
 ﻿"use client";
 
-import { TRANSACTIONS, getCurrentBalance, formatEur } from "@/lib/mock-data";
+import { useTransactions, useCurrentBalance, formatEur } from "@/lib/data-client";;
 
 export default function BlagajnaPage() {
-  const balance = getCurrentBalance();
-  const totalCredit = TRANSACTIONS.reduce((s, t) => s + t.credit, 0);
-  const totalDebit = TRANSACTIONS.reduce((s, t) => s + t.debit, 0);
+  const { data: transactions, loading: transactionsLoading } = useTransactions();
+
+  if (transactionsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const { data: balance } = useCurrentBalance();
+  const totalCredit = transactions.reduce((s, t) => s + t.credit, 0);
+  const totalDebit = transactions.reduce((s, t) => s + t.debit, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Blagajna</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{TRANSACTIONS.length} transakcija | Saldo: {formatEur(balance)}</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{transactions.length} transakcija | Saldo: {formatEur(balance)}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -43,7 +47,7 @@ export default function BlagajnaPage() {
             </tr>
           </thead>
           <tbody>
-            {TRANSACTIONS.map(tx => (
+            {transactions.map(tx => (
               <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="px-3 py-2.5 text-black/70">{tx.date}</td>
                 <td className="px-3 py-2.5 text-black">{tx.description}</td>

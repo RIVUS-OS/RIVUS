@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getAccountantBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvById, useAccountantBySpv, formatEur } from "@/lib/data-client";;
 
 export default function OwnerSpvKnjigovodstvoPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const acc = getAccountantBySpv(id as string);
+  const { data: acc } = useAccountantBySpv(id as string);
 
   return (
     <div className="space-y-6">

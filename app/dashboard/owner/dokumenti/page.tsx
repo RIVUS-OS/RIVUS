@@ -1,10 +1,15 @@
 "use client";
 
-import { SPVS, getDocsBySpv, getMissingDocs } from "@/lib/mock-data";
+import { useSpvs, useDocuments, useMissingDocs } from "@/lib/data-client";;
 
 export default function OwnerDokumentiPage() {
-  const allDocs = SPVS.flatMap(p => getDocsBySpv(p.id));
-  const missing = getMissingDocs();
+  const { data: _docsAll } = useDocuments();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const allDocs = spvs.flatMap(p => _docsAll.filter(x=>x.spvId===p.id));
+  const { data: missing } = useMissingDocs();
 
   return (
     <div className="space-y-6">

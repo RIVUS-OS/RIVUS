@@ -1,15 +1,20 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getDocsBySpv, getActivityBySpv, BANKS, formatEur } from "@/lib/mock-data";
+import { useSpvById, useDocuments, useActivityLog, useBanks, formatEur } from "@/lib/data-client";;
 
 export default function BankSpvPage() {
+  const { data: banks, loading: banksLoading } = useBanks();
+
+  if (banksLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const bank = BANKS.find(b => b.id === spv.bankId);
-  const docs = getDocsBySpv(id as string);
-  const activity = getActivityBySpv(id as string).slice(0, 5);
+  const bank = banks.find(b => b.id === spv.bankId);
+  const { data: docs } = useDocuments(id as string);
+  const { data: _raw2_activity } = useActivityLog(id as string);
+  const activity = _raw2_activity.slice(0, 5);
 
   return (
     <div className="space-y-6">

@@ -1,7 +1,12 @@
 "use client";
-import { SPVS, getIssuedBySpv, getReceivedBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvs, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";;
 export default function CoreFinancijeNadzorPage() {
-  const data = SPVS.map(p => { const rev = getIssuedBySpv(p.id).reduce((s,i)=>s+i.totalAmount,0); const exp = getReceivedBySpv(p.id).reduce((s,i)=>s+i.totalAmount,0); return {id:p.id,name:p.name,rev,exp,net:rev-exp}; });
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const data = spvs.map(p => { const { data: _raw2_rev } = useIssuedInvoices(p.id);
+  const rev = _raw2_rev.reduce((s,i)=>s+i.totalAmount,0); const { data: _raw2_exp } = useReceivedInvoices(p.id); const exp = _raw2_exp.reduce((s,i)=>s+i.totalAmount,0); return {id:p.id,name:p.name,rev,exp,net:rev-exp}; });
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Financije - Nadzor</h1></div>

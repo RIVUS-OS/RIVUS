@@ -1,7 +1,12 @@
 "use client";
-import { SPVS, ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useSpvs, useIssuedInvoices, formatEur } from "@/lib/data-client";;
 export default function CorePlatformFeesPage() {
-  const fees = ISSUED_INVOICES.filter(i => i.category === "platform_fee");
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+
+  if (spvsLoading || issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const fees = issuedInvoices.filter(i => i.category === "platform_fee");
   const total = fees.reduce((s, i) => s + i.totalAmount, 0);
   return (
     <div className="space-y-6">

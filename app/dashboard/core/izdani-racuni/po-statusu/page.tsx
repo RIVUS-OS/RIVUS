@@ -1,10 +1,14 @@
 "use client";
 
-import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function IzdaniPoStatusuPage() {
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+
+  if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const byStatus: Record<string, { count: number; total: number }> = {};
-  ISSUED_INVOICES.forEach(i => {
+  issuedInvoices.forEach(i => {
     const s = i.status as string;
     byStatus[s] = byStatus[s] || { count: 0, total: 0 };
     byStatus[s].count++; byStatus[s].total += i.totalAmount;
@@ -31,7 +35,7 @@ export default function IzdaniPoStatusuPage() {
             <th className="text-right px-3 py-2.5 font-semibold text-black/70">Iznos</th>
             <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
           </tr></thead>
-          <tbody>{ISSUED_INVOICES.map(i => (
+          <tbody>{issuedInvoices.map(i => (
             <tr key={i.id} className="border-b border-gray-50 hover:bg-gray-50">
               <td className="px-3 py-2.5 font-bold">{i.number}</td>
               <td className="px-3 py-2.5 text-black/70">{i.client}</td>

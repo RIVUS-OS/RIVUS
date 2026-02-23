@@ -1,22 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  SPVS, getOverdueIssued, getMissingDocs, getBlockedTasks, getSlaBreached,
-  type Spv,
-} from "@/lib/mock-data";
+import { useSpvs, useOverdueInvoices, useMissingDocs, useBlockedTasks, useSlaBreached } from "@/lib/data-client";
+import { type Spv } from "@/lib/mock-data";;;;
 
 function computeRisk(spv: Spv) {
   const issues: string[] = [];
   let score = 0;
   if (spv.status === "blokiran") { score += 5; issues.push("SPV blokiran"); }
-  const overdue = getOverdueIssued().filter(i => i.spvId === spv.id);
+  const { data: _raw_overdue } = useOverdueInvoices();
+  const overdue = _raw_overdue.filter(i => i.spvId === spv.id);
   if (overdue.length > 0) { score += overdue.length * 2; issues.push(overdue.length + " dospjelih racuna"); }
-  const missing = getMissingDocs().filter(d => d.spvId === spv.id);
+  const { data: _raw_missing } = useMissingDocs();
+  const missing = _raw_missing.filter(d => d.spvId === spv.id);
   if (missing.length > 0) { score += missing.length * 3; issues.push(missing.length + " mandatory dok. nedostaje"); }
-  const blockedT = getBlockedTasks().filter(t => t.spvId === spv.id);
+  const { data: _raw_blockedT } = useBlockedTasks();
+  const blockedT = _raw_blockedT.filter(t => t.spvId === spv.id);
   if (blockedT.length > 0) { score += blockedT.length * 2; issues.push(blockedT.length + " blokiranih zadataka"); }
-  const sla = getSlaBreached().filter(t => t.spvId === spv.id);
+  const { data: _raw_sla } = useSlaBreached();
+  const sla = _raw_sla.filter(t => t.spvId === spv.id);
   if (sla.length > 0) { score += sla.length * 2; issues.push(sla.length + " SLA probijenih"); }
   if (!spv.accountantId) { score += 1; issues.push("Nema knjigovodju"); }
   return { score, issues, level: score >= 5 ? "Visok" : score >= 3 ? "Srednji" : score > 0 ? "Nizak" : "Bez rizika" };
@@ -30,8 +32,12 @@ const riskColors: Record<string, string> = {
 };
 
 export default function RizikPage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const router = useRouter();
-  const scored = SPVS.map(spv => ({ ...spv, risk: computeRisk(spv) })).sort((a, b) => b.risk.score - a.risk.score);
+  const scored = spvs.map(spv => ({ ...spv, risk: computeRisk(spv) })).sort((a, b) => b.risk.score - a.risk.score);
   const high = scored.filter(s => s.risk.level === "Visok").length;
   const medium = scored.filter(s => s.risk.level === "Srednji").length;
   const low = scored.filter(s => s.risk.level === "Nizak").length;
@@ -41,7 +47,7 @@ export default function RizikPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Rizik - Nadzor</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Proceduralni/operativni rizik | {SPVS.length} SPV-ova analizirano</p>
+        <p className="text-[13px] text-black/50 mt-0.5">Proceduralni/operativni rizik | {spvs.length} SPV-ova analizirano</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

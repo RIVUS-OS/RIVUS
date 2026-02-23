@@ -1,6 +1,6 @@
 "use client";
 
-import { RECEIVED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useReceivedInvoices, formatEur } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = {
   "plaćen": "bg-green-100 text-green-700",
@@ -13,8 +13,12 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function PrimljeniRacuniSviPage() {
-  const paid = RECEIVED_INVOICES.filter(i => i.status === "plaćen");
-  const waiting = RECEIVED_INVOICES.filter(i => i.status === "čeka");
+  const { data: receivedInvoices, loading: receivedInvoicesLoading } = useReceivedInvoices();
+
+  if (receivedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const paid = receivedInvoices.filter(i => i.status === "plaćen");
+  const waiting = receivedInvoices.filter(i => i.status === "čeka");
   const totalPaid = paid.reduce((s, i) => s + i.totalAmount, 0);
   const totalWaiting = waiting.reduce((s, i) => s + i.totalAmount, 0);
 
@@ -22,7 +26,7 @@ export default function PrimljeniRacuniSviPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Primljeni racuni - Svi</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{RECEIVED_INVOICES.length} racuna | {formatEur(totalPaid)} placeno | {formatEur(totalWaiting)} ceka</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{receivedInvoices.length} racuna | {formatEur(totalPaid)} placeno | {formatEur(totalWaiting)} ceka</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -53,7 +57,7 @@ export default function PrimljeniRacuniSviPage() {
             </tr>
           </thead>
           <tbody>
-            {RECEIVED_INVOICES.map(inv => (
+            {receivedInvoices.map(inv => (
               <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="px-3 py-2.5 font-bold text-black">{inv.number}</td>
                 <td className="px-3 py-2.5 text-black/70">{inv.date}</td>

@@ -1,18 +1,13 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import {
-  getSpvById, getIssuedBySpv, getReceivedBySpv, getTasksBySpv,
-  getDocsBySpv, getDecisionsBySpv, getTokBySpv, getActivityBySpv,
-  getAccountantBySpv, getVerticalsBySpv, getMissingDocs,
-  formatEur,
-} from "@/lib/mock-data";
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";;
 
 export default function SpvCommandPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const spv = getSpvById(id);
+  const { data: spv } = useSpvById(id);
 
   if (!spv) {
     return (
@@ -24,16 +19,17 @@ export default function SpvCommandPage() {
     );
   }
 
-  const issued = getIssuedBySpv(id);
-  const received = getReceivedBySpv(id);
-  const tasks = getTasksBySpv(id);
-  const docs = getDocsBySpv(id);
-  const decisions = getDecisionsBySpv(id);
-  const tokRequests = getTokBySpv(id);
-  const activity = getActivityBySpv(id);
-  const accountant = getAccountantBySpv(id);
-  const verticals = getVerticalsBySpv(id);
-  const missingDocs = getMissingDocs().filter(d => d.spvId === id);
+  const { data: issued } = useIssuedInvoices(id);
+  const { data: received } = useReceivedInvoices(id);
+  const { data: tasks } = useTasks(id);
+  const { data: docs } = useDocuments(id);
+  const { data: decisions } = useDecisions(id);
+  const { data: tokRequests } = useTokRequests(id);
+  const { data: activity } = useActivityLog(id);
+  const { data: accountant } = useAccountantBySpv(id);
+  const { data: verticals } = useVerticalsBySpv(id);
+  const { data: _raw_missingDocs } = useMissingDocs();
+  const missingDocs = _raw_missingDocs.filter(d => d.spvId === id);
 
   const unpaidIssued = issued.filter(i => {
     const s = i.status as string;

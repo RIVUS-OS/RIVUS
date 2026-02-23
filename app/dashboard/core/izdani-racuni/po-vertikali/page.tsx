@@ -1,17 +1,22 @@
 "use client";
 
-import { ISSUED_INVOICES, VERTICALS, formatEur } from "@/lib/mock-data";
+import { useIssuedInvoices, useVerticals, formatEur } from "@/lib/data-client";;
 
 export default function IzdaniPoVertikaliPage() {
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+  const { data: verticals, loading: verticalsLoading } = useVerticals();
+
+  if (issuedInvoicesLoading || verticalsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const byVert: Record<string, { name: string; count: number; total: number; commission: number }> = {};
-  ISSUED_INVOICES.filter(i => i.category === "vertical_commission").forEach(i => {
+  issuedInvoices.filter(i => i.category === "vertical_commission").forEach(i => {
     byVert[i.spvId] = byVert[i.spvId] || { name: i.spvId, count: 0, total: 0, commission: 0 };
     byVert[i.spvId].count++; byVert[i.spvId].total += i.totalAmount;
   });
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-[22px] font-bold text-black">Izdani racuni - Po vertikali</h1><p className="text-[13px] text-black/50 mt-0.5">{VERTICALS.length} vertikala</p></div>
+      <div><h1 className="text-[22px] font-bold text-black">Izdani racuni - Po vertikali</h1><p className="text-[13px] text-black/50 mt-0.5">{verticals.length} vertikala</p></div>
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full text-[12px]">
           <thead><tr className="border-b border-gray-100 bg-gray-50/50">
@@ -20,7 +25,7 @@ export default function IzdaniPoVertikaliPage() {
             <th className="text-center px-3 py-2.5 font-semibold text-black/70">Provizija</th>
             <th className="text-left px-3 py-2.5 font-semibold text-black/70">Sektori</th>
           </tr></thead>
-          <tbody>{VERTICALS.map(v => (
+          <tbody>{verticals.map(v => (
             <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
               <td className="px-3 py-2.5 font-bold text-black">{v.name}</td>
               <td className="px-3 py-2.5 text-black/50">{v.type}</td>

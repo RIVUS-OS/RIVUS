@@ -1,9 +1,9 @@
 "use client";
 
-import { getOverdueIssued, formatEur } from "@/lib/mock-data";
+import { useOverdueInvoices, formatEur } from "@/lib/data-client";;
 
 export default function DospjeliPage() {
-  const overdue = getOverdueIssued();
+  const { data: overdue } = useOverdueInvoices();
   const total = overdue.reduce((s, i) => s + i.totalAmount, 0);
 
   return (

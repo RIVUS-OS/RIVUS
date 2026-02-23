@@ -1,9 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SPVS, formatEur } from "@/lib/mock-data";
+import { useSpvs, formatEur } from "@/lib/data-client";;
 
 export default function OwnerProjektiPage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const router = useRouter();
   const statusColors: Record<string, string> = {
     aktivan: "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700",
@@ -14,7 +18,7 @@ export default function OwnerProjektiPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Projekti</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{SPVS.length} SPV-ova u portfelju</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{spvs.length} SPV-ova u portfelju</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full text-[12px]">
@@ -28,7 +32,7 @@ export default function OwnerProjektiPage() {
             <th className="text-right px-3 py-2.5 font-semibold text-black/70">Budzet</th>
             <th className="text-right px-3 py-2.5 font-semibold text-black/70">Proc. profit</th>
           </tr></thead>
-          <tbody>{SPVS.map(p => (
+          <tbody>{spvs.map(p => (
             <tr key={p.id} onClick={() => router.push("/dashboard/owner/spv/" + p.id)}
               className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer">
               <td className="px-3 py-2.5 font-bold text-black">{p.id}</td>

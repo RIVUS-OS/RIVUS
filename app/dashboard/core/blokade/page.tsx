@@ -1,12 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SPVS, getBlockedSpvs, getMissingDocs, getBlockedTasks, getTokBySpv } from "@/lib/mock-data";
+import { useSpvs, useBlockedSpvs, useMissingDocs, useBlockedTasks, useTokRequests } from "@/lib/data-client";;
 
 export default function BlokadePage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const router = useRouter();
-  const blocked = getBlockedSpvs();
-  const missingDocs = getMissingDocs();
+  const { data: blocked } = useBlockedSpvs();
+  const { data: missingDocs } = useMissingDocs();
 
   return (
     <div className="space-y-6">
@@ -24,8 +28,10 @@ export default function BlokadePage() {
         <div className="space-y-4">
           {blocked.map(spv => {
             const spvMissing = missingDocs.filter(d => d.spvId === spv.id);
-            const spvBlockedTasks = getBlockedTasks().filter(t => t.spvId === spv.id);
-            const spvTok = getTokBySpv(spv.id).filter(t => t.status === "otvoren" || t.status === "eskaliran");
+            const { data: _raw_spvBlockedTasks } = useBlockedTasks();
+  const spvBlockedTasks = _raw_spvBlockedTasks.filter(t => t.spvId === spv.id);
+            const { data: _raw_spvTok } = useTokRequests(spv.id);
+  const spvTok = _raw_spvTok.filter(t => t.status === "otvoren" || t.status === "eskaliran");
 
             return (
               <div key={spv.id} className="bg-white rounded-xl border-2 border-red-200 p-5">

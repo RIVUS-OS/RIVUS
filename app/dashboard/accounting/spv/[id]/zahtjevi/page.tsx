@@ -1,13 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getTokBySpv } from "@/lib/mock-data";
+import { useSpvById, useTokRequests } from "@/lib/data-client";;
 
 export default function AccSpvZahtjeviPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const open = getTokBySpv(id as string).filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
+  const { data: _raw_open } = useTokRequests(id as string);
+  const open = _raw_open.filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
 
   return (
     <div className="space-y-6">

@@ -1,7 +1,11 @@
 "use client";
-import { PNL_MONTHS, formatEur } from "@/lib/mock-data";
+import { usePnlMonths, formatEur } from "@/lib/data-client";;
 export default function ProjekcijaScenariji() {
-  const avg = PNL_MONTHS.reduce((s,m)=>s+m.net,0)/PNL_MONTHS.length;
+  const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();
+
+  if (pnlMonthsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const avg = pnlMonths.reduce((s,m)=>s+m.net,0)/pnlMonths.length;
   const scenarios = [
     { name: "Pesimisticni", factor: 0.7, color: "text-red-600", border: "border-red-200" },
     { name: "Bazni", factor: 1.0, color: "text-blue-600", border: "border-blue-200" },

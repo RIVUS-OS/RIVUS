@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getTasksBySpv } from "@/lib/mock-data";
+import { useSpvById, useTasks } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = {
   otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700",
@@ -14,10 +14,10 @@ const priorityColors: Record<string, string> = {
 
 export default function SpvZadaciPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
-  const tasks = getTasksBySpv(id as string);
+  const { data: tasks } = useTasks(id as string);
   const open = tasks.filter(t => (t.status as string) !== "završen");
 
   return (

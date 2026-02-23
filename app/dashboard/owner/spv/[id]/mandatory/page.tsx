@@ -1,14 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getMandatoryDocs, getMissingDocs } from "@/lib/mock-data";
+import { useSpvById, useMandatoryDocs, useMissingDocs } from "@/lib/data-client";;
 
 export default function OwnerSpvMandatoryPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const mandatory = getMandatoryDocs(id as string);
-  const missing = getMissingDocs().filter(d => d.spvId === id);
+  const { data: mandatory } = useMandatoryDocs(id as string);
+  const { data: _raw_missing } = useMissingDocs();
+  const missing = _raw_missing.filter(d => d.spvId === id);
   const complete = mandatory.filter(d => d.status !== "nedostaje");
 
   return (

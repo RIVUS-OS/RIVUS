@@ -1,16 +1,21 @@
 "use client";
 
-import { ACCOUNTANTS, SPVS, getSpvsWithoutAccountant, formatEur } from "@/lib/mock-data";
+import { useAccountants, useSpvs, useSpvsWithoutAccountant, formatEur } from "@/lib/data-client";;
 
 export default function KnjigovodjeNadzorPage() {
-  const spvsWithout = getSpvsWithoutAccountant();
-  const totalMonthlyCost = ACCOUNTANTS.reduce((sum, a) => sum + a.pricePerMonth, 0);
+  const { data: accountants, loading: accountantsLoading } = useAccountants();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (accountantsLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const { data: spvsWithout } = useSpvsWithoutAccountant();
+  const totalMonthlyCost = accountants.reduce((sum, a) => sum + a.pricePerMonth, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Knjigovodje - Nadzor</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{ACCOUNTANTS.length} knjigovodje | {formatEur(totalMonthlyCost)}/mj ukupni trosak | {spvsWithout.length} SPV bez knjigovodje</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{accountants.length} knjigovodje | {formatEur(totalMonthlyCost)}/mj ukupni trosak | {spvsWithout.length} SPV bez knjigovodje</p>
       </div>
 
       {spvsWithout.length > 0 && (
@@ -27,7 +32,7 @@ export default function KnjigovodjeNadzorPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {ACCOUNTANTS.map(acc => (
+        {accountants.map(acc => (
           <div key={acc.id} className="bg-white rounded-xl border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-[15px] font-bold text-black">{acc.name}</h2>

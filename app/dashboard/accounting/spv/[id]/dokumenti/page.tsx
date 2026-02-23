@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getDocsBySpv } from "@/lib/mock-data";
+import { useSpvById, useDocuments } from "@/lib/data-client";;
 
 export default function AccSpvDokumentiPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const docs = getDocsBySpv(id as string);
+  const { data: docs } = useDocuments(id as string);
 
   return (
     <div className="space-y-6">

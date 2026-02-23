@@ -1,16 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getIssuedBySpv, getReceivedBySpv, getTransactionsBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTransactions, formatEur } from "@/lib/data-client";;
 
 export default function SpvFinancijePage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
-  const issued = getIssuedBySpv(id as string);
-  const received = getReceivedBySpv(id as string);
-  const transactions = getTransactionsBySpv(id as string);
+  const { data: issued } = useIssuedInvoices(id as string);
+  const { data: received } = useReceivedInvoices(id as string);
+  const { data: transactions } = useTransactions(id as string);
   const totalIssued = issued.reduce((s, i) => s + i.totalAmount, 0);
   const totalReceived = received.reduce((s, i) => s + i.totalAmount, 0);
   const unpaid = issued.filter(i => i.status !== "plaćen" && i.status !== "storniran");

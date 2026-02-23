@@ -1,8 +1,13 @@
 "use client";
-import { SPVS, DOCUMENTS } from "@/lib/mock-data";
+import { useSpvs, useDocuments } from "@/lib/data-client";;
 export default function CoreMandatoryPage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: documents, loading: documentsLoading } = useDocuments();
+
+  if (spvsLoading || documentsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const required = ["Izvadak iz sudskog registra", "Rjesenje o osnivanju", "OIB potvrda", "Ugovor o poslovnom racunu", "Polica osiguranja"];
-  const coverage = SPVS.map(p => { const docs = DOCUMENTS.filter(d => d.spvId === p.id); return { id: p.id, name: p.name, has: docs.length, missing: Math.max(0, required.length - docs.length) }; });
+  const coverage = spvs.map(p => { const docs = documents.filter(d => d.spvId === p.id); return { id: p.id, name: p.name, has: docs.length, missing: Math.max(0, required.length - docs.length) }; });
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Obvezna dokumentacija</h1><p className="text-[13px] text-black/50 mt-0.5">{required.length} obveznih dokumenata po SPV</p></div>

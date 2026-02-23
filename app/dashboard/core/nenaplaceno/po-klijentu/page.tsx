@@ -1,9 +1,13 @@
 "use client";
 
-import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function NenaPlPoKlijentuPage() {
-  const unpaid = ISSUED_INVOICES.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+
+  if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const unpaid = issuedInvoices.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
   const byClient: Record<string, { count: number; total: number }> = {};
   unpaid.forEach(i => { byClient[i.client] = byClient[i.client] || { count: 0, total: 0 }; byClient[i.client].count++; byClient[i.client].total += i.totalAmount; });
 

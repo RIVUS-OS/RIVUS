@@ -1,6 +1,6 @@
 "use client";
 
-import { DECISIONS, getPendingDecisions } from "@/lib/mock-data";
+import { useDecisions, usePendingDecisions } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = {
   "odobreno": "bg-green-100 text-green-700",
@@ -15,15 +15,19 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function OdobrenjaPage() {
-  const pending = getPendingDecisions();
-  const approved = DECISIONS.filter(d => d.status === "odobreno");
-  const rejected = DECISIONS.filter(d => d.status === "odbijeno");
+  const { data: decisions, loading: decisionsLoading } = useDecisions();
+
+  if (decisionsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const { data: pending } = usePendingDecisions();
+  const approved = decisions.filter(d => d.status === "odobreno");
+  const rejected = decisions.filter(d => d.status === "odbijeno");
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Odobrenja</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{DECISIONS.length} odluka | {pending.length} ceka | {approved.length} odobreno | {rejected.length} odbijeno</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{decisions.length} odluka | {pending.length} ceka | {approved.length} odobreno | {rejected.length} odbijeno</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -70,7 +74,7 @@ export default function OdobrenjaPage() {
             </tr>
           </thead>
           <tbody>
-            {DECISIONS.map(d => (
+            {decisions.map(d => (
               <tr key={d.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="px-3 py-2.5 font-medium text-black">{d.title}</td>
                 <td className="px-3 py-2.5 text-black/50">{d.spvId}</td>

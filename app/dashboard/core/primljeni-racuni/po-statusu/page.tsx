@@ -1,11 +1,15 @@
 "use client";
 
-import { RECEIVED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useReceivedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function PrimljeniPoStatusuPage() {
+  const { data: receivedInvoices, loading: receivedInvoicesLoading } = useReceivedInvoices();
+
+  if (receivedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700" };
   const byStatus: Record<string, { count: number; total: number }> = {};
-  RECEIVED_INVOICES.forEach(i => { const s = i.status as string; byStatus[s] = byStatus[s] || { count: 0, total: 0 }; byStatus[s].count++; byStatus[s].total += i.totalAmount; });
+  receivedInvoices.forEach(i => { const s = i.status as string; byStatus[s] = byStatus[s] || { count: 0, total: 0 }; byStatus[s].count++; byStatus[s].total += i.totalAmount; });
 
   return (
     <div className="space-y-6">

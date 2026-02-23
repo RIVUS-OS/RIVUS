@@ -1,18 +1,24 @@
 "use client";
 
-import { BANKS, SPVS, getSpvById } from "@/lib/mock-data";
+import { useBanks, useSpvs, useSpvById } from "@/lib/data-client";;
 
 export default function BankeNadzorPage() {
+  const { data: _allSpvs } = useSpvs();
+  const { data: banks, loading: banksLoading } = useBanks();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (banksLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Banke - Nadzor</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{BANKS.length} banke u sustavu | {BANKS.filter(b => b.evaluationPending).length} evaluacija u tijeku</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{banks.length} banke u sustavu | {banks.filter(b => b.evaluationPending).length} evaluacija u tijeku</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {BANKS.map(bank => {
-          const bankSpvs = bank.spvs.map(id => getSpvById(id)).filter(Boolean);
+        {banks.map(bank => {
+          const bankSpvs = bank.spvs.map(id => _allSpvs.find(s=>s.id===id)).filter(Boolean);
           return (
             <div key={bank.id} className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="flex items-center justify-between mb-3">

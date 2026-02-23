@@ -1,8 +1,13 @@
 "use client";
-import { SPVS, PNL_MONTHS, formatEur } from "@/lib/mock-data";
+import { useSpvs, usePnlMonths, formatEur } from "@/lib/data-client";;
 export default function CoreIzvjestajiPage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();
+
+  if (spvsLoading || pnlMonthsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const reports = [
-    { name: "Mjesecni P&L", period: PNL_MONTHS[PNL_MONTHS.length-1]?.month || "-", type: "Financijski" },
+    { name: "Mjesecni P&L", period: pnlMonths[pnlMonths.length-1]?.month || "-", type: "Financijski" },
     { name: "PDV rekapitulacija", period: "Q4 2025", type: "Porezni" },
     { name: "SPV portfolio status", period: "Trenutni", type: "Operativni" },
     { name: "Vertikale performanse", period: "YTD", type: "Poslovni" },

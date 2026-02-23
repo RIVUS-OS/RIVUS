@@ -1,26 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SPVS, ACCOUNTANTS, getIssuedBySpv, getReceivedBySpv, getTokBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvs, useAccountants, useIssuedInvoices, useReceivedInvoices, useTokRequests, formatEur } from "@/lib/data-client";;
 
 export default function AccountingDashboardPage() {
-  const router = useRouter();
-  const mySpvs = SPVS; // In production filtered by accountant auth
+  const { data: _recvAll } = useReceivedInvoices();
+  const { data: _tokAll } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: accountants, loading: accountantsLoading } = useAccountants();
 
-  const allTok = mySpvs.flatMap(p => getTokBySpv(p.id).filter(t => t.status === "otvoren" || t.status === "u_tijeku"));
-  const totalReceived = mySpvs.reduce((s, p) => s + getReceivedBySpv(p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
+  if (spvsLoading || accountantsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const router = useRouter();
+  const mySpvs = spvs; // In production filtered by accountant auth
+
+  const allTok = mySpvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id).filter(t => t.status === "otvoren" || t.status === "u_tijeku"));
+  const totalReceived = mySpvs.reduce((s, p) => s + _recvAll.filter(x=>x.spvId===p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Knjigovodstvo - Nadzorna ploca</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{ACCOUNTANTS.length} knjigovodja | {mySpvs.length} SPV-ova u sustavu</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{accountants.length} knjigovodja | {mySpvs.length} SPV-ova u sustavu</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "SPV-ova", value: mySpvs.length, color: "text-blue-600" },
-          { label: "Knjigovodja", value: ACCOUNTANTS.length, color: "text-blue-600" },
+          { label: "Knjigovodja", value: accountants.length, color: "text-blue-600" },
           { label: "Primljeni racuni", value: formatEur(totalReceived), color: "text-amber-600" },
           { label: "Otvoreni TOK", value: allTok.length, color: allTok.length > 0 ? "text-amber-600" : "text-green-600" },
         ].map(k => (

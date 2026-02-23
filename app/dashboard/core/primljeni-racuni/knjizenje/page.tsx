@@ -1,9 +1,13 @@
 "use client";
 
-import { RECEIVED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useReceivedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function PrimljeniKnjizenjePage() {
-  const unbooked = RECEIVED_INVOICES.filter(i => (i.status as string) === "čeka");
+  const { data: receivedInvoices, loading: receivedInvoicesLoading } = useReceivedInvoices();
+
+  if (receivedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const unbooked = receivedInvoices.filter(i => (i.status as string) === "čeka");
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Knjizenje primljenih racuna</h1><p className="text-[13px] text-black/50 mt-0.5">{unbooked.length} ceka knjizenje</p></div>

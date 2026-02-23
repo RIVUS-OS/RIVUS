@@ -1,14 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getDocsBySpv, getMissingDocs } from "@/lib/mock-data";
+import { useSpvById, useDocuments, useMissingDocs } from "@/lib/data-client";;
 
 export default function OwnerSpvDokumentiPage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const docs = getDocsBySpv(id as string);
-  const missing = getMissingDocs().filter(d => d.spvId === id);
+  const { data: docs } = useDocuments(id as string);
+  const { data: _raw_missing } = useMissingDocs();
+  const missing = _raw_missing.filter(d => d.spvId === id);
 
   return (
     <div className="space-y-6">

@@ -1,9 +1,13 @@
 "use client";
 
-import { CONTRACTS, formatEur } from "@/lib/mock-data";
+import { useContracts, formatEur } from "@/lib/data-client";;
 
 export default function CoreUgovoriSpvPage() {
-  const spvContracts = CONTRACTS.filter(c => c.type === "CORE-SPV");
+  const { data: contracts, loading: contractsLoading } = useContracts();
+
+  if (contractsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const spvContracts = contracts.filter(c => c.type === "CORE-SPV");
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Ugovori - SPV</h1><p className="text-[13px] text-black/50 mt-0.5">{spvContracts.length} CORE-SPV ugovora</p></div>

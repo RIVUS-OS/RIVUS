@@ -1,7 +1,12 @@
 "use client";
-import { SPVS, CONTRACTS, formatEur } from "@/lib/mock-data";
+import { useSpvs, useContracts, formatEur } from "@/lib/data-client";;
 export default function CoreSpvBillingPage() {
-  const billing = SPVS.map(p => { const contract = CONTRACTS.find(c => c.type === "CORE-SPV" && c.partyBId === p.id); return { id: p.id, name: p.name, fee: contract?.monthlyFee || 0, status: contract?.status || "nema" }; });
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: contracts, loading: contractsLoading } = useContracts();
+
+  if (spvsLoading || contractsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const billing = spvs.map(p => { const contract = contracts.find(c => c.type === "CORE-SPV" && c.partyBId === p.id); return { id: p.id, name: p.name, fee: contract?.monthlyFee || 0, status: contract?.status || "nema" }; });
   const totalMonthly = billing.reduce((s, b) => s + b.fee, 0);
   return (
     <div className="space-y-6">

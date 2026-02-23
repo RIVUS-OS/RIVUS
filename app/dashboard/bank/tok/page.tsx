@@ -1,11 +1,16 @@
 "use client";
 
-import { SPVS, getTokBySpv } from "@/lib/mock-data";
+import { useSpvs, useTokRequests } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = { "otvoren": "bg-blue-100 text-blue-700", "u_tijeku": "bg-amber-100 text-amber-700", "riješen": "bg-green-100 text-green-700", "eskaliran": "bg-red-100 text-red-700", "zatvoren": "bg-gray-100 text-gray-600" };
 
 export default function BankTokPage() {
-  const allTok = SPVS.flatMap(p => getTokBySpv(p.id));
+  const { data: _tokAll } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const allTok = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id));
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">TOK zahtjevi</h1><p className="text-[13px] text-black/50 mt-0.5">{allTok.length} ukupno</p></div>

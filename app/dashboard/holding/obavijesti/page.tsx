@@ -1,11 +1,16 @@
 "use client";
 
-import { SPVS, getMissingDocs, getTokBySpv } from "@/lib/mock-data";
+import { useSpvs, useMissingDocs, useTokRequests } from "@/lib/data-client";;
 
 export default function HoldingObavijesti() {
-  const blocked = SPVS.filter(p => p.status === "blokiran");
-  const slaBreached = SPVS.flatMap(p => getTokBySpv(p.id).filter(t => t.slaBreached));
-  const missing = getMissingDocs();
+  const { data: _tokAll } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const blocked = spvs.filter(p => p.status === "blokiran");
+  const slaBreached = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id).filter(t => t.slaBreached));
+  const { data: missing } = useMissingDocs();
   const notifications = [
     ...blocked.map(p => ({ type: "Blokada", text: `${p.id} blokiran: ${p.blockReason}`, severity: "red" as const })),
     ...slaBreached.map(t => ({ type: "SLA", text: `SLA probijen: ${t.title} (${t.spvId})`, severity: "red" as const })),

@@ -1,9 +1,14 @@
 "use client";
 
-import { SPVS, getTokBySpv } from "@/lib/mock-data";
+import { useSpvs, useTokRequests } from "@/lib/data-client";;
 
 export default function AccountingZahtjeviPage() {
-  const allTok = SPVS.flatMap(p => getTokBySpv(p.id)).filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
+  const { data: _tokAll } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const allTok = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id)).filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Otvoreni zahtjevi</h1><p className="text-[13px] text-black/50 mt-0.5">{allTok.length} aktivnih zahtjeva</p></div>

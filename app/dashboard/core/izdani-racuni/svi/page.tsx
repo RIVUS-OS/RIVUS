@@ -1,6 +1,6 @@
 "use client";
 
-import { ISSUED_INVOICES, formatEur } from "@/lib/mock-data";
+import { useIssuedInvoices, formatEur } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = {
   "plaćen": "bg-green-100 text-green-700",
@@ -17,10 +17,14 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function IzdaniRacuniSviPage() {
-  const paid = ISSUED_INVOICES.filter(i => i.status === "plaćen");
-  const waiting = ISSUED_INVOICES.filter(i => i.status === "čeka");
-  const overdue = ISSUED_INVOICES.filter(i => i.status === "kasni");
-  const cancelled = ISSUED_INVOICES.filter(i => i.status === "storniran");
+  const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();
+
+  if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const paid = issuedInvoices.filter(i => i.status === "plaćen");
+  const waiting = issuedInvoices.filter(i => i.status === "čeka");
+  const overdue = issuedInvoices.filter(i => i.status === "kasni");
+  const cancelled = issuedInvoices.filter(i => i.status === "storniran");
 
   const totalPaid = paid.reduce((s, i) => s + i.totalAmount, 0);
   const totalUnpaid = [...waiting, ...overdue].reduce((s, i) => s + i.totalAmount, 0);
@@ -29,7 +33,7 @@ export default function IzdaniRacuniSviPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Izdani racuni - Svi</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{ISSUED_INVOICES.length} racuna | {formatEur(totalPaid)} naplaceno | {formatEur(totalUnpaid)} nenaplaceno</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{issuedInvoices.length} racuna | {formatEur(totalPaid)} naplaceno | {formatEur(totalUnpaid)} nenaplaceno</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -64,7 +68,7 @@ export default function IzdaniRacuniSviPage() {
             </tr>
           </thead>
           <tbody>
-            {ISSUED_INVOICES.map(inv => (
+            {issuedInvoices.map(inv => (
               <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="px-3 py-2.5 font-bold text-black">{inv.number}</td>
                 <td className="px-3 py-2.5 text-black/70">{inv.date}</td>

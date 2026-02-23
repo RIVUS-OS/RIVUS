@@ -1,11 +1,15 @@
 "use client";
 
-import { SPVS, getIssuedBySpv, getReceivedBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvs, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";;
 
 export default function OwnerFinancijePage() {
-  const data = SPVS.map(p => {
-    const issued = getIssuedBySpv(p.id);
-    const received = getReceivedBySpv(p.id);
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const data = spvs.map(p => {
+    const { data: issued } = useIssuedInvoices(p.id);
+    const { data: received } = useReceivedInvoices(p.id);
     const totalIssued = issued.reduce((s, i) => s + i.totalAmount, 0);
     const unpaid = issued.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; }).reduce((s, i) => s + i.totalAmount, 0);
     const totalReceived = received.reduce((s, i) => s + i.totalAmount, 0);

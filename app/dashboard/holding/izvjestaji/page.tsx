@@ -1,8 +1,12 @@
 "use client";
 
-import { SPVS, formatEur } from "@/lib/mock-data";
+import { useSpvs, formatEur } from "@/lib/data-client";;
 
 export default function HoldingIzvjestajiPage() {
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const reports = [
     { name: "Mjesecni portfelj izvjestaj", period: "Veljaca 2026", status: "dostupan" },
     { name: "Kvartalni financijski pregled", period: "Q4 2025", status: "dostupan" },
@@ -24,9 +28,9 @@ export default function HoldingIzvjestajiPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h3 className="text-[14px] font-bold text-black mb-3">Sazetak portfelja</h3>
         <div className="grid grid-cols-3 gap-3 text-[12px]">
-          <div className="text-center"><div className="text-lg font-bold text-blue-600">{SPVS.length}</div><div className="text-black/50">SPV-ova</div></div>
-          <div className="text-center"><div className="text-lg font-bold text-black">{formatEur(SPVS.reduce((s, p) => s + p.totalBudget, 0))}</div><div className="text-black/50">Ukupni budzet</div></div>
-          <div className="text-center"><div className="text-lg font-bold text-green-600">{formatEur(SPVS.reduce((s, p) => s + p.estimatedProfit, 0))}</div><div className="text-black/50">Proc. profit</div></div>
+          <div className="text-center"><div className="text-lg font-bold text-blue-600">{spvs.length}</div><div className="text-black/50">SPV-ova</div></div>
+          <div className="text-center"><div className="text-lg font-bold text-black">{formatEur(spvs.reduce((s, p) => s + p.totalBudget, 0))}</div><div className="text-black/50">Ukupni budzet</div></div>
+          <div className="text-center"><div className="text-lg font-bold text-green-600">{formatEur(spvs.reduce((s, p) => s + p.estimatedProfit, 0))}</div><div className="text-black/50">Proc. profit</div></div>
         </div>
       </div>
     </div>

@@ -1,10 +1,16 @@
 "use client";
-import { VERTICALS, ACCOUNTANTS, BANKS } from "@/lib/mock-data";
+import { useVerticals, useAccountants, useBanks } from "@/lib/data-client";;
 export default function CoreKorisniciPage() {
+  const { data: verticals, loading: verticalsLoading } = useVerticals();
+  const { data: accountants, loading: accountantsLoading } = useAccountants();
+  const { data: banks, loading: banksLoading } = useBanks();
+
+  if (verticalsLoading || accountantsLoading || banksLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
   const users = [
-    ...VERTICALS.map(v => ({ name: v.name, role: "Vertikala", type: v.type })),
-    ...ACCOUNTANTS.map(a => ({ name: a.name, role: "Knjigovodja", type: a.status })),
-    ...BANKS.map(b => ({ name: b.name, role: "Banka", type: b.relationshipType })),
+    ...verticals.map(v => ({ name: v.name, role: "Vertikala", type: v.type })),
+    ...accountants.map(a => ({ name: a.name, role: "Knjigovodja", type: a.status })),
+    ...banks.map(b => ({ name: b.name, role: "Banka", type: b.relationshipType })),
   ];
   return (
     <div className="space-y-6">

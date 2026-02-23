@@ -1,16 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getIssuedBySpv, getReceivedBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvById, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";;
 
 const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
 
 export default function BankSpvFinancijePage() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const issued = getIssuedBySpv(id as string);
-  const received = getReceivedBySpv(id as string);
+  const { data: issued } = useIssuedInvoices(id as string);
+  const { data: received } = useReceivedInvoices(id as string);
   const totalIssued = issued.reduce((s, i) => s + i.totalAmount, 0);
   const totalReceived = received.reduce((s, i) => s + i.totalAmount, 0);
 

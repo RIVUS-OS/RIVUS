@@ -1,12 +1,19 @@
 "use client";
 
-import { SPVS, getIssuedBySpv, getReceivedBySpv, formatEur, PNL_MONTHS } from "@/lib/mock-data";
+import { useSpvs, useIssuedInvoices, useReceivedInvoices, usePnlMonths, formatEur } from "@/lib/data-client";;
 
 export default function HoldingFinancijePage() {
-  const totalBudget = SPVS.reduce((s, p) => s + p.totalBudget, 0);
-  const totalProfit = SPVS.reduce((s, p) => s + p.estimatedProfit, 0);
-  const totalIssued = SPVS.reduce((s, p) => s + getIssuedBySpv(p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
-  const totalReceived = SPVS.reduce((s, p) => s + getReceivedBySpv(p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
+  const { data: _issAll } = useIssuedInvoices();
+  const { data: _recvAll } = useReceivedInvoices();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+  const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();
+
+  if (spvsLoading || pnlMonthsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const totalBudget = spvs.reduce((s, p) => s + p.totalBudget, 0);
+  const totalProfit = spvs.reduce((s, p) => s + p.estimatedProfit, 0);
+  const totalIssued = spvs.reduce((s, p) => s + _issAll.filter(x=>x.spvId===p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
+  const totalReceived = spvs.reduce((s, p) => s + _recvAll.filter(x=>x.spvId===p.id).reduce((ss, i) => ss + i.totalAmount, 0), 0);
 
   return (
     <div className="space-y-6">
@@ -33,7 +40,7 @@ export default function HoldingFinancijePage() {
             <th className="text-right py-2 font-semibold text-red-700">Rashodi</th>
             <th className="text-right py-2 font-semibold text-black/70">Neto</th>
           </tr></thead>
-          <tbody>{PNL_MONTHS.map(m => (
+          <tbody>{pnlMonths.map(m => (
             <tr key={m.month} className="border-b border-gray-50">
               <td className="py-2 text-black">{m.month}</td>
               <td className="py-2 text-right text-green-600">{formatEur(m.revenue)}</td>

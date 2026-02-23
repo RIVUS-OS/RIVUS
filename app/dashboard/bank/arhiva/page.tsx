@@ -1,10 +1,14 @@
 ﻿"use client";
 
-import { SPVS, formatEur } from "@/lib/mock-data";
+import { useSpvs, formatEur } from "@/lib/data-client";;
 
 export default function BankArhivaPage() {
-  const archived = SPVS.filter(p => (p.status as string) === "zatvoren" || (p.status as string) === "zavrsen");
-  const active = SPVS.filter(p => (p.status as string) !== "zatvoren");
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const archived = spvs.filter(p => (p.status as string) === "zatvoren" || (p.status as string) === "zavrsen");
+  const active = spvs.filter(p => (p.status as string) !== "zatvoren");
 
   return (
     <div className="space-y-6">

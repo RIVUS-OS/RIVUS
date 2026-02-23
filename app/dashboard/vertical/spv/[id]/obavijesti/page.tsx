@@ -1,14 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getSpvById, getTokBySpv, getTasksBySpv } from "@/lib/mock-data";
+import { useSpvById, useTokRequests, useTasks } from "@/lib/data-client";;
 
 export default function VertSpvObavijesti() {
   const { id } = useParams();
-  const spv = getSpvById(id as string);
+  const { data: spv } = useSpvById(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const slaBreached = getTokBySpv(id as string).filter(t => t.slaBreached);
-  const blocked = getTasksBySpv(id as string).filter(t => t.status === "blokiran");
+  const { data: _raw_slaBreached } = useTokRequests(id as string);
+  const slaBreached = _raw_slaBreached.filter(t => t.slaBreached);
+  const { data: _raw_blocked } = useTasks(id as string);
+  const blocked = _raw_blocked.filter(t => t.status === "blokiran");
   const notifications = [
     ...slaBreached.map(t => ({ type: "SLA", text: `SLA probijen: ${t.title}`, severity: "red" as const })),
     ...blocked.map(t => ({ type: "Blokada", text: `Blokiran zadatak: ${t.title}`, severity: "amber" as const })),

@@ -1,10 +1,15 @@
 "use client";
 
-import { SPVS, getTokBySpv } from "@/lib/mock-data";
+import { useSpvs, useTokRequests } from "@/lib/data-client";;
 
 export default function OwnerObavijestPage() {
-  const alerts = SPVS.flatMap(p => getTokBySpv(p.id).filter(t => t.slaBreached)).slice(0, 10);
-  const recent = SPVS.flatMap(p => getTokBySpv(p.id)).filter(t => (t.status as string) === "otvoren").slice(0, 5);
+  const { data: _tokAll } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const alerts = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id).filter(t => t.slaBreached)).slice(0, 10);
+  const recent = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id)).filter(t => (t.status as string) === "otvoren").slice(0, 5);
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Obavijesti</h1><p className="text-[13px] text-black/50 mt-0.5">{alerts.length} upozorenja, {recent.length} otvorenih</p></div>

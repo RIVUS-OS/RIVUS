@@ -1,9 +1,13 @@
 "use client";
 
-import { CONTRACTS } from "@/lib/mock-data";
+import { useContracts } from "@/lib/data-client";;
 
 export default function CoreUgovoriIstjecuPage() {
-  const expiring = CONTRACTS.filter(c => c.endDate <= "2026-06-30").sort((a, b) => a.endDate.localeCompare(b.endDate));
+  const { data: contracts, loading: contractsLoading } = useContracts();
+
+  if (contractsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const expiring = contracts.filter(c => c.endDate <= "2026-06-30").sort((a, b) => a.endDate.localeCompare(b.endDate));
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Ugovori koji istjecu</h1><p className="text-[13px] text-black/50 mt-0.5">{expiring.length} u narednih 6 mjeseci</p></div>

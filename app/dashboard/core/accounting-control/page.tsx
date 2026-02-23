@@ -1,7 +1,12 @@
 "use client";
-import { ACCOUNTANTS, SPVS } from "@/lib/mock-data";
+import { useAccountants, useSpvs } from "@/lib/data-client";;
 export default function CoreAccountingControlPage() {
-  const coverage = SPVS.map(p => ({ id: p.id, name: p.name, covered: ACCOUNTANTS.some(a => a.coversSpvs.includes(p.id)) }));
+  const { data: accountants, loading: accountantsLoading } = useAccountants();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (accountantsLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const coverage = spvs.map(p => ({ id: p.id, name: p.name, covered: accountants.some(a => a.coversSpvs.includes(p.id)) }));
   const uncovered = coverage.filter(c => !c.covered);
   return (
     <div className="space-y-6">

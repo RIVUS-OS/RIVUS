@@ -1,9 +1,14 @@
 "use client";
-import { TOK_REQUESTS, SPVS } from "@/lib/mock-data";
+import { useTokRequests, useSpvs } from "@/lib/data-client";;
 export default function CoreObavijestPage() {
-  const slaBreached = TOK_REQUESTS.filter(t => t.slaBreached);
-  const open = TOK_REQUESTS.filter(t => (t.status as string) === "otvoren");
-  const blocked = SPVS.filter(p => (p.status as string) === "blokiran");
+  const { data: tokRequests, loading: tokRequestsLoading } = useTokRequests();
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (tokRequestsLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const slaBreached = tokRequests.filter(t => t.slaBreached);
+  const open = tokRequests.filter(t => (t.status as string) === "otvoren");
+  const blocked = spvs.filter(p => (p.status as string) === "blokiran");
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Obavijesti - CORE</h1></div>

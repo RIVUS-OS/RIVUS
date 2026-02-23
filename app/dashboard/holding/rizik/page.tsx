@@ -1,12 +1,19 @@
 "use client";
 
-import { SPVS, getMissingDocs, getTasksBySpv, getTokBySpv, formatEur } from "@/lib/mock-data";
+import { useSpvs, useMissingDocs, useTasks, useTokRequests, formatEur } from "@/lib/data-client";;
 
 export default function HoldingRizikPage() {
-  const riskData = SPVS.map(p => {
-    const missing = getMissingDocs().filter(d => d.spvId === p.id).length;
-    const blocked = getTasksBySpv(p.id).filter(t => t.status === "blokiran").length;
-    const sla = getTokBySpv(p.id).filter(t => t.slaBreached).length;
+  const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+
+  const riskData = spvs.map(p => {
+    const { data: _raw2_missing } = useMissingDocs();
+  const missing = _raw2_missing.filter(d => d.spvId === p.id).length;
+    const { data: _raw2_blocked } = useTasks(p.id);
+  const blocked = _raw2_blocked.filter(t => t.status === "blokiran").length;
+    const { data: _raw2_sla } = useTokRequests(p.id);
+  const sla = _raw2_sla.filter(t => t.slaBreached).length;
     const score = missing * 3 + blocked * 5 + sla * 4 + (p.status === "blokiran" ? 10 : 0);
     return { ...p, missing, blocked, sla, score };
   }).sort((a, b) => b.score - a.score);
