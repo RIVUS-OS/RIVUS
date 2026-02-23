@@ -45,24 +45,21 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   ];
   const isInsideCoreDoo = coreDooPages.some(p => pathname.startsWith(p));
 
-  // === HEADER NAV ===
+  // === HEADER NAV (Context Switcher) ===
   const headerNav = [
-    { label: "Pentagon", href: "/dashboard/core/pentagon", icon: Shield },
-    { label: "SPV Monitoring", href: "/dashboard/core/spv-pipeline", icon: Building2 },
-    { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: Users },
-    { label: "Financije", href: "/dashboard/core/financije-nadzor", icon: Euro },
-    { label: "Banka", href: "/dashboard/core/banke-nadzor", icon: Landmark },
-    { label: "separator", href: "", icon: null },
-    { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
-    { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
-    { label: "Dijagnostika", href: "/dashboard/core/compliance", icon: Eye },
-    { label: "separator", href: "", icon: null },
-    { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
-    { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
-    { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
+    { label: "RIVUS OS", href: "/dashboard/core", icon: Shield },
+    { label: "RIVUS Operater", href: "/dashboard/core/core-dashboard", icon: Building2 },
+    { label: "SPV", href: "/dashboard/owner", icon: Briefcase },
+    { label: "Banke", href: "/dashboard/bank", icon: Landmark },
+    { label: "Vertikale", href: "/dashboard/vertical", icon: GitBranch },
+    { label: "Holding", href: "/dashboard/holding", icon: Layers },
   ];
 
   // === SIDEBAR: SPV DETAIL ===
+  
+
+  // === SIDEBAR: CORE D.O.O. ===
+    // === SIDEBAR: SPV DETAIL ===
   const spvSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
@@ -168,16 +165,26 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/core", icon: Home },
+        { label: "Pregled", href: "/dashboard/core", icon: Home },
+      ],
+    },
+    {
+      title: "PENTAGON",
+      items: [
+        { label: "Pentagon", href: "/dashboard/core/pentagon", icon: Shield },
+        { label: "Dijagnostika", href: "/dashboard/core/compliance", icon: Eye },
+        { label: "Blokade", href: "/dashboard/core/blokade", icon: Lock },
+        { label: "Mandatory", href: "/dashboard/core/mandatory", icon: AlertCircle },
       ],
     },
     {
       title: "NADZOR",
       items: [
-        { label: "Nadzor vertikala", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
-        { label: "Nadzor knjigovođa", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
-        { label: "Bankarske interakcije", href: "/dashboard/core/banke-nadzor", icon: Landmark },
-        { label: "Financije (management)", href: "/dashboard/core/financije-nadzor", icon: Euro },
+        { label: "SPV Projekti", href: "/dashboard/core/spv-pipeline", icon: Building2 },
+        { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
+        { label: "Knjigovodje", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
+        { label: "Banke", href: "/dashboard/core/banke-nadzor", icon: Landmark },
+        { label: "Financije (nadzor)", href: "/dashboard/core/financije-nadzor", icon: Euro },
       ],
     },
     {
@@ -185,42 +192,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
         { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
-        { label: "Blokade", href: "/dashboard/core/blokade", icon: Lock },
-        { label: "Usklađenost", href: "/dashboard/core/compliance", icon: ShieldCheck },
         { label: "Orkestracija", href: "/dashboard/core/orkestracija", icon: GitBranch },
-      ],
-    },
-    {
-      title: "USLUGE I PROVIZIJE",
-      items: [
-        { label: "Nadzorna ploča usluga", href: "/dashboard/core/service-dashboard", icon: BarChart3 },
-        { label: "SPV naplata", href: "/dashboard/core/spv-billing", icon: Receipt },
-        { label: "Naplata vertikala", href: "/dashboard/core/vertikale-billing", icon: DollarSign },
-        { label: "Naknade platforme", href: "/dashboard/core/platform-fees", icon: Euro },
-        { label: "Nenaplaćeno", href: "/dashboard/core/nenaplaceno", icon: AlertCircle },
-      ],
-    },
-    {
-      title: "",
-      items: [
-        { label: "CORE D.O.O.", href: "/dashboard/core/core-dashboard", icon: Building2 },
-      ],
-    },
-    {
-      title: "EVIDENCIJA",
-      items: [
-        { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
-        { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
-        { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
-      ],
-    },
-    {
-      title: "SUSTAV",
-      items: [
-        { label: "Korisnici", href: "/dashboard/core/korisnici", icon: Users },
-        { label: "Uloge i dozvole", href: "/dashboard/core/uloge", icon: ShieldCheck },
-        { label: "Obavijesti", href: "/dashboard/core/obavijesti", icon: Bell },
-        { label: "Postavke", href: "/dashboard/core/postavke", icon: Settings },
       ],
     },
     {
@@ -229,6 +201,30 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "TOK kontrola", href: "/dashboard/core/tok", icon: MessageCircle },
         { label: "Eskalacije", href: "/dashboard/core/tok/eskalacije", icon: AlertTriangle },
         { label: "SLA", href: "/dashboard/core/tok/sla", icon: ClipboardList },
+      ],
+    },
+    {
+      title: "EVIDENCIJA",
+      items: [
+        { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
+        { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
+        { label: "Izvje\u0161taji", href: "/dashboard/core/izvjestaji", icon: FileStack },
+        { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
+      ],
+    },
+    {
+      title: "SUSTAV",
+      items: [
+        { label: "Korisnici", href: "/dashboard/core/korisnici", icon: Users },
+        { label: "Uloge", href: "/dashboard/core/uloge", icon: ShieldCheck },
+        { label: "Obavijesti", href: "/dashboard/core/obavijesti", icon: Bell },
+        { label: "Postavke", href: "/dashboard/core/postavke", icon: Settings },
+      ],
+    },
+    {
+      title: "",
+      items: [
+        { label: "CORE D.O.O.", href: "/dashboard/core/core-dashboard", icon: Building2 },
       ],
     },
   ];
