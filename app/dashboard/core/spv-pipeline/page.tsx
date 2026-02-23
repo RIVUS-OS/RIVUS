@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useSpvs, formatEur } from "@/lib/data-client";
-import { SECTORS } from "@/lib/mock-data";
 
 const statusColors: Record<string, string> = {
   aktivan: "bg-green-100 text-green-700",
