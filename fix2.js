@@ -1,4 +1,5 @@
-"use client";
+const fs = require('fs');
+const code = `"use client";
 import { useAccountants, useSpvs, useSpvsWithoutAccountant, formatEur } from "@/lib/data-client";
 export default function KnjigovodjeNadzorPage() {
   const { data: accountants, loading: accountantsLoading } = useAccountants();
@@ -29,9 +30,9 @@ export default function KnjigovodjeNadzorPage() {
           <div key={acc.id} className="bg-white rounded-xl border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-[15px] font-bold text-black">{acc.name}</h2>
-              <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+              <span className={\`text-[11px] px-2 py-0.5 rounded-full font-semibold \${
                 acc.status === "aktivan" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-              }`}>{acc.status === "aktivan" ? "Aktivan" : "Ugovor u pripremi"}</span>
+              }\`}>{acc.status === "aktivan" ? "Aktivan" : "Ugovor u pripremi"}</span>
             </div>
             <div className="text-[13px] font-semibold text-blue-600 mb-3">{formatEur(acc.pricePerMonth)} / mjesec</div>
             <div className="text-[12px] text-black/50 mb-1">Kontakt: {acc.contact} | {acc.email}</div>
@@ -63,4 +64,6 @@ export default function KnjigovodjeNadzorPage() {
       </div>
     </div>
   );
-}
+}`;
+fs.writeFileSync('app/dashboard/core/knjigovodje-nadzor/page.tsx', code);
+console.log('FIXED - full file rewritten');
