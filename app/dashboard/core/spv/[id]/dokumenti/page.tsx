@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useDocuments, useMissingDocs } from "@/lib/data-client";
@@ -20,7 +20,7 @@ export default function SpvDokumentiPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Dokumenti</h1>
+        <h1 className="text-[22px] font-bold text-black">Dokumenti</h1>
         <p className="text-[13px] text-black/50 mt-0.5">{docs.length} dokumenata | {missing.length} nedostaje</p>
       </div>
 

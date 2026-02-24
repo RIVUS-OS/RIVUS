@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useMandatoryDocs, useMissingDocs } from "@/lib/data-client";
@@ -15,7 +15,7 @@ export default function SpvMandatoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Mandatory dokumenti</h1>
+        <h1 className="text-[22px] font-bold text-black">Mandatory dokumenti</h1>
         <p className="text-[13px] text-black/50 mt-0.5">{complete.length}/{mandatory.length} kompletno | {missing.length} nedostaje</p>
       </div>
 

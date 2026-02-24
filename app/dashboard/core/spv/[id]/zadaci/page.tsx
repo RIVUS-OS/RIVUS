@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useTasks } from "@/lib/data-client";
@@ -23,7 +23,7 @@ export default function SpvZadaciPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Zadaci</h1>
+        <h1 className="text-[22px] font-bold text-black">Zadaci</h1>
         <p className="text-[13px] text-black/50 mt-0.5">{tasks.length} ukupno | {open.length} otvorenih</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">

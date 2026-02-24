@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, formatEur } from "@/lib/data-client";
@@ -19,7 +19,7 @@ export default function SpvPostavkePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Postavke</h1>
+        <h1 className="text-[22px] font-bold text-black">Postavke</h1>
         <p className="text-[13px] text-black/50 mt-0.5">Konfiguracija SPV-a</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-6">

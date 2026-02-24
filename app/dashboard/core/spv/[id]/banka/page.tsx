@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useBanks } from "@/lib/data-client";
@@ -16,7 +16,7 @@ export default function SpvBankaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Banka</h1>
+        <h1 className="text-[22px] font-bold text-black">Banka</h1>
         <p className="text-[13px] text-black/50 mt-0.5">{spv.name}</p>
       </div>
       {bank ? (

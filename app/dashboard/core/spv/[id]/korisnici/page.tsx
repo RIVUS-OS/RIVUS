@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useAccountantBySpv, useVerticalsBySpv, useBanks } from "@/lib/data-client";
@@ -25,7 +25,7 @@ export default function SpvKorisniciPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">{spv.id} - Korisnici</h1>
+        <h1 className="text-[22px] font-bold text-black">Korisnici</h1>
         <p className="text-[13px] text-black/50 mt-0.5">{users.length} korisnika s pristupom</p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
