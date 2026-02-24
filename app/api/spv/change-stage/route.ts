@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { validateLifecycleStageChange } from "@/lib/spvLifecycle";
 
@@ -12,14 +12,13 @@ export async function POST(req: Request) {
 
   const supabase = await supabaseServer();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // 1) Auth check
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  // 2) Role check — only CORE
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
@@ -33,9 +32,10 @@ export async function POST(req: Request) {
     );
   }
 
+  // 3) Get current SPV
   const { data: spv } = await supabase
     .from("spvs")
-    .select("*")
+    .select("id, lifecycle_stage")
     .eq("id", spvId)
     .single();
 
@@ -43,25 +43,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SPV not found" }, { status: 404 });
   }
 
-  const result = validateLifecycleStageChange(
-    spv.lifecycle_stage,
-    newStage,
-    spv
-  );
-
-  if (!result.ok) {
-    const reason = "error" in result && result.error ? result.error : "Blocked";
-    return NextResponse.json({ error: reason }, { status: 400 });
+  // 4) Client-side validation (fast reject)
+  const clientCheck = validateLifecycleStageChange(spv.lifecycle_stage, newStage);
+  if (!clientCheck.ok) {
+    return NextResponse.json({ error: "error" in clientCheck ? clientCheck.error : "Blocked" }, { status: 400 });
   }
 
-  const { error } = await supabase
+  // 5) DB enforcement check (doc gate + transition rules)
+  const { data: dbCheck, error: rpcErr } = await supabase.rpc("spv_can_advance", {
+    p_spv_id: spvId,
+    p_to_stage: newStage,
+  });
+
+  if (rpcErr) {
+    return NextResponse.json({ error: rpcErr.message }, { status: 500 });
+  }
+
+  if (!dbCheck?.allowed) {
+    return NextResponse.json(
+      { error: dbCheck?.reason ?? "Transition blocked by enforcement" },
+      { status: 400 }
+    );
+  }
+
+  // 6) UPDATE — DB trigger will also enforce + write audit log
+  const { error: updErr } = await supabase
     .from("spvs")
     .update({ lifecycle_stage: newStage })
     .eq("id", spvId);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (updErr) {
+    return NextResponse.json({ error: updErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, from: spv.lifecycle_stage, to: newStage });
 }
