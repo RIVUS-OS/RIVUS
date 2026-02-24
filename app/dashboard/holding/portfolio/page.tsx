@@ -29,7 +29,7 @@ export default function HoldingPortfolioPage() {
               </tr></thead>
               <tbody>{spvs.map(p => (
                 <tr key={p.id} className="border-b border-gray-50">
-                  <td className="px-3 py-2 font-bold">{p.id}</td>
+                  
                   <td className="px-3 py-2">{p.name}</td>
                   <td className="px-3 py-2 text-black/50">{p.city}</td>
                   <td className="px-3 py-2 text-black/50">{p.phase}</td>

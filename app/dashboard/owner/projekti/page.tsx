@@ -35,7 +35,7 @@ export default function OwnerProjektiPage() {
           <tbody>{spvs.map(p => (
             <tr key={p.id} onClick={() => router.push("/dashboard/owner/spv/" + p.id)}
               className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer">
-              <td className="px-3 py-2.5 font-bold text-black">{p.id}</td>
+              
               <td className="px-3 py-2.5 text-black">{p.name}</td>
               <td className="px-3 py-2.5 text-black/50">{p.sectorLabel}</td>
               <td className="px-3 py-2.5 text-black/50">{p.city}</td>

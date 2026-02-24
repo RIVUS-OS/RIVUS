@@ -69,7 +69,7 @@ export default function SpvPipelinePage() {
             {spvs.map(spv => (
               <tr key={spv.id} onClick={() => router.push("/dashboard/core/spv/" + spv.id)}
                 className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors">
-                <td className="px-4 py-3 font-bold text-black">{spv.id}</td>
+                
                 <td className="px-4 py-3 text-black">{spv.name}</td>
                 <td className="px-4 py-3">{spv.sectorLabel}</td>
                 <td className="px-4 py-3">

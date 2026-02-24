@@ -25,7 +25,7 @@ export default function OwnerSpvTokPage() {
           </tr></thead>
           <tbody>{tok.map(t => (
             <tr key={t.id} className={`border-b border-gray-50 hover:bg-gray-50 ${t.slaBreached ? "bg-red-50/30" : ""}`}>
-              <td className="px-3 py-2.5 font-bold">{t.id}</td>
+              
               <td className="px-3 py-2.5 text-black">{t.title}</td>
               <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.priority === "critical" ? "bg-red-100 text-red-700" : t.priority === "high" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{t.priority}</span></td>
               <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[t.status] || "bg-gray-100"}`}>{t.status}</span></td>
