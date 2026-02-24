@@ -32,7 +32,7 @@ export default function CoreDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-black">RIVUS CORE — Nadzorna ploča</h1>
+          <h1 className="text-[22px] font-bold text-black">RIVUS Operater — Pregled</h1>
           <p className="text-[13px] text-black/50 mt-0.5">Pregled svih SPV-ova i operativnog stanja sustava</p>
         </div>
         <div className="text-right text-[12px] text-black/40">

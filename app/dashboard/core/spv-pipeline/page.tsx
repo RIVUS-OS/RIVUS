@@ -33,7 +33,7 @@ export default function SpvPipelinePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">SPV Pipeline</h1>
+        <h1 className="text-[22px] font-bold text-black">SPV Projekti</h1>
         <p className="text-[13px] text-black/50 mt-0.5">Svi SPV-ovi u sustavu | {spvs.length} ukupno | {active} aktivnih | {completed} zavrsenih | {formatEur(totalBudget)} budzet</p>
       </div>
 
@@ -55,7 +55,7 @@ export default function SpvPipelinePage() {
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="text-left px-4 py-3 font-semibold text-black/70">ID</th>
+              
               <th className="text-left px-4 py-3 font-semibold text-black/70">Naziv</th>
               <th className="text-left px-4 py-3 font-semibold text-black/70">Sektor</th>
               <th className="text-left px-4 py-3 font-semibold text-black/70">Faza</th>

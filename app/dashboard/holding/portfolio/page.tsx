@@ -19,7 +19,7 @@ export default function HoldingPortfolioPage() {
           <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead><tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-3 py-2 font-semibold text-black/70">ID</th>
+                
                 <th className="text-left px-3 py-2 font-semibold text-black/70">Naziv</th>
                 <th className="text-left px-3 py-2 font-semibold text-black/70">Grad</th>
                 <th className="text-left px-3 py-2 font-semibold text-black/70">Faza</th>
