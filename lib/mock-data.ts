@@ -21,6 +21,7 @@ export type SpvStatus = "aktivan" | "blokiran" | "u_izradi" | "na_cekanju" | "za
 
 export interface Spv {
   id: string;
+  code?: string;
   name: string;
   address: string;
   city: string;
@@ -241,6 +242,7 @@ export const SECTORS: Record<Sector, { label: string; icon: string; color: strin
 export const SPVS: Spv[] = [
   {
     id: "SAN-01",
+    code: "ŠAN-01",
     name: "Šandora Petefija 4",
     address: "Šandora Petefija 4",
     city: "Subotica",
@@ -264,6 +266,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "SAN-02",
+    code: "VUK-02",
     name: "Vukovarska 12",
     address: "Vukovarska 12",
     city: "Osijek",
@@ -287,6 +290,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "SOL-01",
+    code: "SOL-03",
     name: "Solarna Baranja",
     address: "Industrijska zona bb",
     city: "Beli Manastir",
@@ -310,6 +314,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "TUR-01",
+    code: "VIL-04",
     name: "Vila Maestral",
     address: "Obala 22",
     city: "Makarska",
@@ -333,6 +338,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "AGR-01",
+    code: "SLA-05",
     name: "Slavonska farma",
     address: "Ruralna cesta 5",
     city: "Đakovo",
@@ -355,6 +361,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "SAN-03",
+    code: "STR-06",
     name: "Strossmayerova 15",
     address: "Strossmayerova 15",
     city: "Osijek",
@@ -378,6 +385,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "TUR-02",
+    code: "GLA-07",
     name: "Glamping Plitvice",
     address: "Jezera bb",
     city: "Plitvička Jezera",
@@ -401,6 +409,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "INF-01",
+    code: "LOG-08",
     name: "Logistički centar OS",
     address: "Gospodarska zona 3",
     city: "Osijek",
@@ -423,6 +432,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "SOL-02",
+    code: "EVH-09",
     name: "EV Hub Osijek",
     address: "Tehnološki park 1",
     city: "Osijek",
@@ -444,6 +454,7 @@ export const SPVS: Spv[] = [
   },
   {
     id: "TEC-01",
+    code: "SMA-10",
     name: "Smart Building OS",
     address: "IT Park 7",
     city: "Osijek",

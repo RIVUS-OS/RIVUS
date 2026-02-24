@@ -195,6 +195,7 @@ async function fetchSpvsRaw(): Promise<Spv[]> {
     const status = deriveStatus(r);
     return {
       id: r.id,
+      code: (r as any).spv_code || r.id.slice(0, 8),
       name: r.project_name || "",
       address: r.address || "",
       city: r.city || "",

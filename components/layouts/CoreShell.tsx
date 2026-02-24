@@ -264,7 +264,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           {isInsideSpv && (
             <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
               <div className="text-[11px] font-semibold text-[#007AFF] uppercase">SPV</div>
-              <div className="text-[14px] font-bold text-black mt-0.5">{spvId}</div>
+              
             </div>
           )}
 

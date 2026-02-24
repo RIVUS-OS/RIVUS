@@ -97,7 +97,7 @@ export default function SpvCommandPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-[22px] font-bold text-black">{spv.name || spv.id}</h1>
+            <h1 className="text-[22px] font-bold text-black">{spv.code ? spv.code + " — " + spv.name : spv.name}</h1>
             <span className={`px-3 py-1 rounded-full text-[12px] font-semibold ${st.bg} ${st.text}`}>{st.label}</span>
             <span className="text-[12px] px-2 py-0.5 rounded bg-gray-100 text-gray-600">{spv.phase}</span>
           </div>

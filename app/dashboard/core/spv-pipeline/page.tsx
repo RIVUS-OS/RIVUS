@@ -56,7 +56,7 @@ export default function SpvPipelinePage() {
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
               
-              <th className="text-left px-4 py-3 font-semibold text-black/70">Naziv</th>
+              <th className="text-left px-4 py-3 font-semibold text-black/70 w-20">Oznaka</th><th className="text-left px-4 py-3 font-semibold text-black/70">Naziv</th>
               <th className="text-left px-4 py-3 font-semibold text-black/70">Sektor</th>
               <th className="text-left px-4 py-3 font-semibold text-black/70">Faza</th>
               <th className="text-left px-4 py-3 font-semibold text-black/70">Status</th>
@@ -70,7 +70,7 @@ export default function SpvPipelinePage() {
               <tr key={spv.id} onClick={() => router.push("/dashboard/core/spv/" + spv.id)}
                 className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors">
                 
-                <td className="px-4 py-3 text-black">{spv.name}</td>
+                <td className="px-4 py-3 font-mono text-[12px] text-black/60">{spv.code || "—"}</td><td className="px-4 py-3 font-bold text-black">{spv.name}</td>
                 <td className="px-4 py-3">{spv.sectorLabel}</td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${phaseColors[spv.phase] || "bg-gray-100 text-gray-700"}`}>
