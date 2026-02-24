@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // RIVUS OS — UNIFIED MOCK DATA LAYER
 // lib/mock-data.ts
 // Jedan izvor istine za cijeli sustav. Sve stranice importaju odavde.
@@ -39,6 +39,7 @@ export interface Spv {
   totalBudget: number;
   completionDate: string | null;
   blockReason: string | null;
+  lifecycle_stage?: string;
   units?: number;
   area?: number;
   description: string;
@@ -1134,3 +1135,6 @@ export const formatEur = (amount: number) =>
   amount.toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " EUR";
 
 export const formatDate = (dateStr: string) => dateStr;
+
+
+

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { exportSpvZip } from "@/lib/export-spv";
+import { LifecycleChanger } from "@/components/enforcement/LifecycleChanger";
 import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";
 
 export default function SpvCommandPage() {
@@ -10,7 +11,6 @@ export default function SpvCommandPage() {
   const router = useRouter();
   const id = params.id as string;
   const { data: spv } = useSpvById(id);
-
 
   const { data: issued } = useIssuedInvoices(id);
   const { data: received } = useReceivedInvoices(id);
@@ -58,6 +58,7 @@ export default function SpvCommandPage() {
     } catch (e) { console.error("Export failed", e); }
     setExporting(false);
   };
+
   if (!spv) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -66,24 +67,15 @@ export default function SpvCommandPage() {
     );
   }
 
-  const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-    aktivan: { bg: "bg-green-100", text: "text-green-700", label: "Aktivan" },
-    blokiran: { bg: "bg-red-100", text: "text-red-700", label: "Blokiran" },
-    u_izradi: { bg: "bg-blue-100", text: "text-blue-700", label: "U izradi" },
-    na_cekanju: { bg: "bg-gray-100", text: "text-gray-600", label: "Na cekanju" },
-    zavrsen: { bg: "bg-indigo-100", text: "text-indigo-700", label: "Zavrsen" },
-  };
-  const st = statusConfig[spv.status] || statusConfig.na_cekanju;
-return (
+  return (
     <div className="space-y-6">
-      {/* BLOCK ALERT */}
       {spv.status === "blokiran" && spv.blockReason && (
         <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
           <div className="text-[14px] font-bold text-red-700">SPV BLOKIRAN</div>
           <div className="text-[13px] text-red-600 mt-1">{spv.blockReason}</div>
         </div>
       )}
-      {/* KPI ROW */}
+
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
         {[
           { label: "Izdani racuni", value: issued.length, sub: formatEur(issued.reduce((s, i) => s + i.totalAmount, 0)), alert: false },
@@ -101,9 +93,19 @@ return (
         ))}
       </div>
 
+      {/* LIFECYCLE CONTROL */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[11px] text-black/40 mb-1">Lifecycle faza</div>
+            <div className="text-[14px] font-bold text-black">{spv.lifecycle_stage || "N/A"}</div>
+          </div>
+          <LifecycleChanger spvId={id} currentStage={spv.lifecycle_stage || ""} />
+        </div>
+      </div>
+
       {/* MAIN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT */}
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h3 className="text-[14px] font-bold text-black mb-3">Detalji projekta</h3>
@@ -151,7 +153,6 @@ return (
           </div>
         </div>
 
-        {/* RIGHT */}
         <div className="space-y-4">
           {missingDocs.length > 0 && (
             <div className="bg-white rounded-xl border-2 border-red-200 p-5">
@@ -218,3 +219,5 @@ return (
     </div>
   );
 }
+
+
