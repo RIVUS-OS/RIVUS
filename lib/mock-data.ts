@@ -100,9 +100,6 @@ export interface Invoice {
   status: "plaćen" | "čeka" | "kasni" | "storniran";
   paidDate: string | null;
   category: string;
-  verification_status?: string | null;
-  verification_expected_type?: string | null;
-  verification_rejection_reason?: string | null;
 }
 
 export interface Transaction {
@@ -144,6 +141,9 @@ export interface Document {
   fileSize: string;
   mandatory: boolean;
   category: string;
+  verification_status?: string | null;
+  verification_expected_type?: string | null;
+  verification_rejection_reason?: string | null;
 }
 
 export interface Decision {
