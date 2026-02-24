@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
+import { useSpvById } from "@/lib/data-client";
 import { useState } from "react";
 import {
   Home, Shield, Building2, BarChart3, Landmark, Euro, FileText,
@@ -29,6 +30,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const isInsideSpv = !!spvMatch;
   const spvId = spvMatch ? spvMatch[1] : null;
   const spvBase = spvId ? `/dashboard/core/spv/${spvId}` : "";
+  const { data: spvData } = useSpvById(spvId || "");
 
   const coreDooPages = [
     "/dashboard/core/core-dashboard", "/dashboard/core/prihodi", "/dashboard/core/rashodi",
@@ -264,6 +266,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           {isInsideSpv && (
             <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
               <div className="text-[11px] font-semibold text-[#007AFF] uppercase">SPV</div>
+              <div className="text-[14px] font-bold text-black mt-0.5">{spvData?.code || "..."}</div>
+              <div className="text-[12px] text-black/50 truncate">{spvData?.name || ""}</div>
               
             </div>
           )}
@@ -285,8 +289,9 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               )}
               <div className="space-y-1">
                 {section.items.map((item) => {
+                  const needsExactMatch = item.href === "/dashboard/core" || (isInsideSpv && item.href === spvBase);
                   const isActive = pathname === item.href ||
-                    (item.href !== "/dashboard/core" && pathname.startsWith(item.href + "/"));
+                    (!needsExactMatch && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const isDisabled = item.disabled || false;
 
