@@ -12,13 +12,11 @@ export async function POST(req: Request) {
 
   const supabase = await supabaseServer();
 
-  // 1) Auth check
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // 2) Role check — only CORE
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
@@ -32,7 +30,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3) Get current SPV
   const { data: spv } = await supabase
     .from("spvs")
     .select("id, lifecycle_stage")
@@ -43,13 +40,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SPV not found" }, { status: 404 });
   }
 
-  // 4) Client-side validation (fast reject)
   const clientCheck = validateLifecycleStageChange(spv.lifecycle_stage, newStage);
   if (!clientCheck.ok) {
-    return NextResponse.json({ error: "error" in clientCheck ? clientCheck.error : "Blocked" }, { status: 400 });
+    const reason = ("error" in clientCheck && clientCheck.error) ? clientCheck.error : "Blocked";
+    return NextResponse.json({ error: reason }, { status: 400 });
   }
 
-  // 5) DB enforcement check (doc gate + transition rules)
   const { data: dbCheck, error: rpcErr } = await supabase.rpc("spv_can_advance", {
     p_spv_id: spvId,
     p_to_stage: newStage,
@@ -66,7 +62,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // 6) UPDATE — DB trigger will also enforce + write audit log
   const { error: updErr } = await supabase
     .from("spvs")
     .update({ lifecycle_stage: newStage })
