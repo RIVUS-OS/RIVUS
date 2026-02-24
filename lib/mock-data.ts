@@ -100,6 +100,9 @@ export interface Invoice {
   status: "plaćen" | "čeka" | "kasni" | "storniran";
   paidDate: string | null;
   category: string;
+  verification_status?: string | null;
+  verification_expected_type?: string | null;
+  verification_rejection_reason?: string | null;
 }
 
 export interface Transaction {
@@ -1135,6 +1138,7 @@ export const formatEur = (amount: number) =>
   amount.toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " EUR";
 
 export const formatDate = (dateStr: string) => dateStr;
+
 
 
 

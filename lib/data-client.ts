@@ -282,6 +282,9 @@ async function fetchDocsRaw(spvId?: string): Promise<Document[]> {
       fileSize: fmtFileSize(r.file_size_bytes),
       mandatory: r.document_type === "mandatory",
       category: r.document_type || "ostalo",
+      verification_status: (row as any).verification_status || null,
+      verification_expected_type: (row as any).verification_expected_type || null,
+      verification_rejection_reason: (row as any).verification_rejection_reason || null,
     };
   });
 }
@@ -733,4 +736,5 @@ export function useMandatoryDocs(spvId){return useSupabaseQuery(async()=>{const 
 export function usePentagonSummary(){return useSupabaseQuery(async()=>{const[s,d,t,i,k]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw(),fetchTasksRaw(),fetchInvoicesRaw(),fetchTokRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length,ov=i.filter(x=>x.status==="kasni").length,es=k.filter(x=>x.status==="eskaliran").length,cr=t.filter(x=>x.priority==="critical").length;return{compliance:Math.max(0,100-mi*10-bl*20),finance:Math.max(0,100-ov*15),legal:85,operational:Math.max(0,100-cr*10-es*15),risk:Math.max(0,100-bl*25-ov*10-es*10)}},{compliance:0,finance:0,legal:0,operational:0,risk:0})}
 export function useComplianceSummary(){return useSupabaseQuery(async()=>{const[s,d]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length;return{totalSpvs:s.length,compliant:s.length-bl,warnings:Math.min(bl,1),violations:Math.max(0,bl-1),missingDocs:mi,overdueObligations:0}},{totalSpvs:0,compliant:0,warnings:0,violations:0,missingDocs:0,overdueObligations:0})}
 export function useFinanceSummary(){return useSupabaseQuery(async()=>{const inv=await fetchInvoicesRaw();const iss=inv.filter(i=>!!(i as any).direction||(i as any).direction==="issued");const rev=iss.reduce((s,i)=>s+(i.totalAmount||0),0);const unp=iss.filter(i=>i.status==="čeka"||i.status==="kasni");const od=iss.filter(i=>i.status==="kasni");return{totalRevenue:rev,totalExpenses:0,netIncome:rev,unpaidInvoices:unp.length,overdueAmount:od.reduce((s,i)=>s+(i.totalAmount||0),0)}},{totalRevenue:0,totalExpenses:0,netIncome:0,unpaidInvoices:0,overdueAmount:0})}
+
 
