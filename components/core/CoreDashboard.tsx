@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -67,14 +67,14 @@ export default function CoreDashboard() {
     d.setHours(0, 0, 0, 0);
     const todayISO = d.toISOString();
 
-    const { count: spvsCount } = await supabase.from("spvs").select("*", { count: "exact", head: true });
+    const { count: spvsCount } = await supabase.from("spvs").select("*", { count: "exact", head: true }).is("deleted_at", null);
     setSpvCount(spvsCount || 0);
 
     const { count: overdue } = await supabase
       .from("tasks")
       .select("*", { count: "exact", head: true })
       .is("deleted_at", null)
-      .neq("status", "Završen")
+      .neq("status", "ZavrÅ¡en")
       .lt("due_date", todayISO);
 
     setOverdueTasks(overdue || 0);
@@ -84,7 +84,7 @@ export default function CoreDashboard() {
       .select("*", { count: "exact", head: true })
       .is("deleted_at", null)
       .eq("is_mandatory", true)
-      .neq("status", "Završen");
+      .neq("status", "ZavrÅ¡en");
 
     setMandatoryOpen(mandatory || 0);
 
@@ -92,7 +92,7 @@ export default function CoreDashboard() {
     else if ((overdue || 0) > 0) setRiskLevel("Srednji");
     else setRiskLevel("Nizak");
 
-    const { data: spvData } = await supabase.from("spvs").select("*");
+    const { data: spvData } = await supabase.from("spvs").select("*").is("deleted_at", null);
     const { data: tasks } = await supabase.from("tasks").select("*").is("deleted_at", null);
     const { data: financeEntries } = await supabase.from("spv_finance_entries").select("*");
     const { data: activity } = await supabase.from("activity_log").select("*");
@@ -102,13 +102,13 @@ export default function CoreDashboard() {
 
       const overdueCount = spvTasks.filter(
         (t: any) =>
-          t.status !== "Završen" &&
+          t.status !== "ZavrÅ¡en" &&
           t.due_date &&
           new Date(t.due_date) < new Date()
       ).length;
 
       const mandatoryCount = spvTasks.filter(
-        (t: any) => t.status !== "Završen" && t.is_mandatory
+        (t: any) => t.status !== "ZavrÅ¡en" && t.is_mandatory
       ).length;
 
       const riskScore = calculateRiskScore(overdueCount, mandatoryCount, 0, overdueCount > 0);
@@ -169,7 +169,7 @@ export default function CoreDashboard() {
   return (
     <div className="space-y-5 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-black">Nadzorna ploča</h1>
+        <h1 className="text-[22px] font-bold text-black">Nadzorna ploÄa</h1>
 
         <button
           onClick={() => router.push("/dashboard/core/spvs")}
@@ -212,3 +212,6 @@ export default function CoreDashboard() {
     </div>
   );
 }
+
+
+
