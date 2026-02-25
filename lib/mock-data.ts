@@ -144,6 +144,7 @@ export interface Document {
   verification_status?: string | null;
   verification_expected_type?: string | null;
   verification_rejection_reason?: string | null;
+    filePath?: string | null;
 }
 
 export interface Decision {
@@ -1138,6 +1139,7 @@ export const formatEur = (amount: number) =>
   amount.toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " EUR";
 
 export const formatDate = (dateStr: string) => dateStr;
+
 
 
 
