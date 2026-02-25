@@ -148,8 +148,8 @@ export default async function DiagnosticsPage() {
 
   const overallLabel = {
     ok: 'Sustav spreman',
-    warn: 'Upozorenja â€” provjeri',
-    error: 'KritiÄne greÅ¡ke',
+    warn: 'Upozorenja - provjeri',
+    error: 'Kriticne greske',
   }[overallStatus]
 
   const overallColor = {
@@ -174,7 +174,7 @@ export default async function DiagnosticsPage() {
           <span className="font-semibold">{overallLabel}</span>
         </div>
         <div className="text-sm">
-          {okCount} OK Â· {warnCount} upozorenja Â· {errorCount} greÅ¡aka
+          {okCount} OK / {warnCount} upozorenja / {errorCount} gresaka
         </div>
       </div>
 
