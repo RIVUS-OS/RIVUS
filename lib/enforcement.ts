@@ -17,7 +17,7 @@ export function getNextStages(current: LifecycleStageType): LifecycleStageType[]
 export async function checkMandatoryTasks(spvId: string) {
   const { data, error } = await supabaseBrowser
     .from('tasks').select('id, title, status')
-    .eq('spv_id', spvId).eq('is_mandatory', true).neq('status', 'Završen');
+    .is('deleted_at', null).eq('spv_id', spvId).eq('is_mandatory', true).neq('status', 'Završen');
   if (error) return { canProceed: false, incomplete: -1, tasks: [] as string[] };
   return { canProceed: (data?.length ?? 0) === 0, incomplete: data?.length ?? 0, tasks: data?.map(t => t.title) ?? [] };
 }
