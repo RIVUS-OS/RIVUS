@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { exportSpvZip } from "@/lib/export-spv";
+import { LifecycleStepper } from "@/components/LifecycleStepper";
 import { LifecycleChanger } from "@/components/enforcement/LifecycleChanger";
 import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";
 
@@ -97,6 +98,7 @@ export default function SpvCommandPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div>
+            <LifecycleStepper currentStage={spv.lifecycle_stage || ""} compact className="mb-3" />
             <div className="text-[11px] text-black/40 mb-1">Lifecycle faza</div>
             <div className="text-[14px] font-bold text-black">{spv.lifecycle_stage || "N/A"}</div>
           </div>
