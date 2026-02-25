@@ -18,14 +18,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabaseBrowser } from "./supabaseBrowser";
 import {
-  VERTICALS as MOCK_VERTICALS,
-  ACCOUNTANTS as MOCK_ACCOUNTANTS,
-  BANKS as MOCK_BANKS,
-  PNL_MONTHS as MOCK_PNL,
-  type Vertical,
-  type Accountant,
-  type Bank,
-  type PnlMonth,
   Spv,
   Invoice,
   Transaction,
@@ -722,15 +714,15 @@ export function useDashboardCounts(): UseDataResult<DashboardCounts> {
 
 // ═══ PHASE C EXTENSION — Temporary mock-backed hooks ═══
 
-export function useVerticals(){return useSupabaseQuery(async()=>MOCK_VERTICALS,[])}
-export function useActiveVerticals(){return useSupabaseQuery(async()=>MOCK_VERTICALS.filter(v=>v.active),[])}
-export function useVerticalsBySpv(spvId){return useSupabaseQuery(async()=>MOCK_VERTICALS.filter(v=>v.assignedSpvs.includes(spvId)),[],[spvId])}
-export function useVerticalById(id){return useSupabaseQuery(async()=>MOCK_VERTICALS.find(v=>v.id===id)??null,null,[id])}
-export function useAccountants(){return useSupabaseQuery(async()=>MOCK_ACCOUNTANTS,[])}
-export function useAccountantBySpv(spvId){return useSupabaseQuery(async()=>MOCK_ACCOUNTANTS.find(a=>a.coversSpvs.includes(spvId))??null,null,[spvId])}
+export function useVerticals(){return useSupabaseQuery(async()=>[],[])}
+export function useActiveVerticals(){return useSupabaseQuery(async()=>[],[])}
+export function useVerticalsBySpv(spvId: string){return useSupabaseQuery(async()=>[],[],[spvId])}
+export function useVerticalById(id: string){return useSupabaseQuery(async()=>null,null,[id])}
+export function useAccountants(){return useSupabaseQuery(async()=>[],[])}
+export function useAccountantBySpv(spvId: string){return useSupabaseQuery(async()=>null,null,[spvId])}
 export function useSpvsWithoutAccountant(){return useSupabaseQuery(async()=>{const s=await fetchSpvsRaw();return s.filter(x=>!x.accountantId)},[])}
-export function useBanks(){return useSupabaseQuery(async()=>MOCK_BANKS,[])}
-export function usePnlMonths(){return useSupabaseQuery(async()=>MOCK_PNL,[])}
+export function useBanks(){return useSupabaseQuery(async()=>[],[])}
+export function usePnlMonths(){return useSupabaseQuery(async()=>[],[])}
 export function useCurrentBalance(){return useSupabaseQuery(async()=>{const t=await fetchTransactionsRaw();return t.length>0?t[0].balance??0:0},0)}
 export function useBlockedTasks(){return useSupabaseQuery(async()=>{const t=await fetchTasksRaw();return t.filter(x=>x.status==="blokiran"||x.status==="eskaliran")},[])}
 export function useCriticalTasks(){return useSupabaseQuery(async()=>{const t=await fetchTasksRaw();return t.filter(x=>x.priority==="critical")},[])}
