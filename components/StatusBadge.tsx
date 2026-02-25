@@ -1,4 +1,4 @@
-// RIVUS v1.0 — StatusBadge
+﻿// RIVUS v1.0 — StatusBadge
 'use client';
 import React from 'react';
 
@@ -10,16 +10,16 @@ const COLORS: Record<string, string> = {
   'Completed': 'bg-emerald-100 text-emerald-800',
   // tasks
   'Otvoren': 'bg-blue-100 text-blue-700', 'U tijeku': 'bg-indigo-100 text-indigo-700',
-  'Na čekanju': 'bg-yellow-100 text-yellow-800', 'Završen': 'bg-green-100 text-green-700',
+  'Na cekanju': 'bg-yellow-100 text-yellow-800', 'Zavrsen': 'bg-green-100 text-green-700',
   // documents
   'UPLOADED': 'bg-gray-100 text-gray-700', 'DELIVERED': 'bg-yellow-100 text-yellow-800',
   'ACCEPTED': 'bg-green-100 text-green-700', 'REJECTED': 'bg-red-100 text-red-700',
   // invoices
   'Zaprimljen': 'bg-gray-100 text-gray-700', 'Odobren': 'bg-blue-100 text-blue-700',
-  'Plaćen': 'bg-green-100 text-green-700', 'Djelomično plaćen': 'bg-yellow-100 text-yellow-800',
-  'Kašnjenje': 'bg-red-100 text-red-700', 'Storniran': 'bg-red-100 text-red-700',
+  'Placen': 'bg-green-100 text-green-700', 'Djelomicno placen': 'bg-yellow-100 text-yellow-800',
+  'Kasnjenje': 'bg-red-100 text-red-700', 'Storniran': 'bg-red-100 text-red-700',
   // phases
-  'Nije započeta': 'bg-gray-100 text-gray-600', 'Završena': 'bg-green-100 text-green-700',
+  'Nije zapoceta': 'bg-gray-100 text-gray-600', 'Zavrsena': 'bg-green-100 text-green-700',
   // finance
   'PLANNED': 'bg-gray-100 text-gray-600', 'ISSUED': 'bg-blue-100 text-blue-700',
   'PAID': 'bg-green-100 text-green-700', 'CANCELLED': 'bg-red-100 text-red-700',
@@ -29,7 +29,7 @@ const COLORS: Record<string, string> = {
   'U razmatranju': 'bg-yellow-100 text-yellow-800', 'Odobreno': 'bg-green-100 text-green-700',
   'Odbijeno': 'bg-red-100 text-red-700', 'Potrebne izmjene': 'bg-orange-100 text-orange-700',
   // accounting
-  'Riješen': 'bg-green-100 text-green-700',
+  'Rijesen': 'bg-green-100 text-green-700',
   // roles
   'Core': 'bg-purple-100 text-purple-700', 'SPV_Owner': 'bg-blue-100 text-blue-700',
   'Vertical': 'bg-teal-100 text-teal-700', 'Bank': 'bg-amber-100 text-amber-700',

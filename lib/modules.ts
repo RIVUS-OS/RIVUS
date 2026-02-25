@@ -1,4 +1,4 @@
-import { supabaseBrowser } from "./supabaseBrowser";
+﻿import { supabaseBrowser } from "./supabaseBrowser";
 
 export async function hasModule(spvId: string, moduleKey: string): Promise<boolean> {
   const { data, error } = await supabaseBrowser

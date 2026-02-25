@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useSpvs, useVerticals, useTasks, useTokRequests } from "@/lib/data-client";
@@ -12,7 +12,7 @@ export default function VerticalDashboardPage() {
   const router = useRouter();
   if (spvsLoading || verticalsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const allOpenTasks = spvs.flatMap(p => _tasksAll.filter(x=>x.spvId===p.id).filter(t => (t.status as string) !== "završen"));
+  const allOpenTasks = spvs.flatMap(p => _tasksAll.filter(x=>x.spvId===p.id).filter(t => (t.status as string) !== "zavrsen"));
   const allOpenTok = spvs.flatMap(p => _tokAll.filter(t=>t.spvId===p.id).filter(t => t.status === "otvoren" || t.status === "u_tijeku"));
 
   return (

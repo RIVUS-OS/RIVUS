@@ -13,10 +13,10 @@ export default function SpvFinancijePage() {
 
   const totalIssued = issued.reduce((s, i) => s + i.totalAmount, 0);
   const totalReceived = received.reduce((s, i) => s + i.totalAmount, 0);
-  const unpaid = issued.filter(i => i.status !== "plaćen" && i.status !== "storniran");
+  const unpaid = issued.filter(i => i.status !== "placen" && i.status !== "storniran");
 
-  const statusLabels: Record<string, string> = { "plaćen": "Placen", "čeka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
-  const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
+  const statusLabels: Record<string, string> = { "placen": "Placen", "ceka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
+  const statusColors: Record<string, string> = { "placen": "bg-green-100 text-green-700", "ceka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
 
   return (
     <div className="space-y-6">

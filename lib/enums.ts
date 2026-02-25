@@ -1,4 +1,4 @@
-// RIVUS v1.0 — Enumi (matchaju DB CHECK constraints TOČNO)
+﻿// RIVUS v1.0 — Enumi (matchaju DB CHECK constraints TOcNO)
 
 // spvs.lifecycle_stage (lifecycle_stage_check)
 export const LifecycleStage = {
@@ -26,8 +26,8 @@ export const ALLOWED_TRANSITIONS: Record<LifecycleStageType, LifecycleStageType[
 export const TaskStatus = {
   OPEN: 'Otvoren',
   IN_PROGRESS: 'U tijeku',
-  ON_HOLD: 'Na čekanju',
-  DONE: 'Završen',
+  ON_HOLD: 'Na cekanju',
+  DONE: 'Zavrsen',
 } as const;
 export type TaskStatusType = (typeof TaskStatus)[keyof typeof TaskStatus];
 
@@ -54,9 +54,9 @@ export const DocumentType = {
 export const InvoiceStatus = {
   RECEIVED: 'Zaprimljen',
   APPROVED: 'Odobren',
-  PAID: 'Plaćen',
-  PARTIAL: 'Djelomično plaćen',
-  OVERDUE: 'Kašnjenje',
+  PAID: 'Placen',
+  PARTIAL: 'Djelomicno placen',
+  OVERDUE: 'Kasnjenje',
   CANCELLED: 'Storniran',
 } as const;
 
@@ -68,7 +68,7 @@ export const InvoiceDirection = {
 
 // invoices.category (invoices_category_check)
 export const InvoiceCategory = {
-  ZEMLJISTE: 'Zemljište',
+  ZEMLJISTE: 'Zemljiste',
   PROJEKTIRANJE: 'Projektiranje',
   GRADNJA: 'Gradnja',
   NADZOR: 'Nadzor',
@@ -100,15 +100,15 @@ export const Language = { HR: 'HR', EN: 'EN', DE: 'DE' } as const;
 
 // phases.status (phases_status_check)
 export const PhaseStatus = {
-  NOT_STARTED: 'Nije započeta',
+  NOT_STARTED: 'Nije zapoceta',
   IN_PROGRESS: 'U tijeku',
-  COMPLETED: 'Završena',
+  COMPLETED: 'Zavrsena',
 } as const;
 
 // vertical_assignments.status (vertical_assignments_status_check)
 export const VerticalStatus = {
   ACTIVE: 'Aktivan',
-  COMPLETED: 'Završen',
+  COMPLETED: 'Zavrsen',
   CANCELLED: 'Otkazan',
 } as const;
 
@@ -121,7 +121,7 @@ export const BankEvalStatus = {
 } as const;
 
 // accounting_requests.status (accounting_requests_status_check)
-export const AccReqStatus = { OPEN: 'Otvoren', RESOLVED: 'Riješen' } as const;
+export const AccReqStatus = { OPEN: 'Otvoren', RESOLVED: 'Rijesen' } as const;
 
 // accounting_requests.priority (accounting_requests_priority_check)
 export const AccReqPriority = { NORMAL: 'Normal', URGENT: 'Hitno' } as const;
@@ -156,5 +156,5 @@ export const UserRoleTable = {
 
 // Priority labels
 export const PriorityLabel: Record<number, string> = {
-  0: 'Nizak', 1: 'Normalan', 2: 'Visok', 3: 'Kritičan',
+  0: 'Nizak', 1: 'Normalan', 2: 'Visok', 3: 'Kritican',
 };

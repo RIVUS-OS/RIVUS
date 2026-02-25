@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useSpvs, usePnlMonths, formatEur } from "@/lib/data-client";
 export default function CoreIzvjestajiPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();

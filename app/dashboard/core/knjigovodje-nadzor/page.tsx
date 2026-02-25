@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useAccountants, useSpvs, useSpvsWithoutAccountant, formatEur } from "@/lib/data-client";
 export default function KnjigovodjeNadzorPage() {
   const { data: accountants, loading: accountantsLoading } = useAccountants();

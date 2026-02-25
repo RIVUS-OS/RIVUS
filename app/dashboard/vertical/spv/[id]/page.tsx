@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useVerticalsBySpv, useTasks, useTokRequests, useActivityLog } from "@/lib/data-client";
@@ -11,7 +11,7 @@ export default function VerticalSpvPage() {
   const { data: tok } = useTokRequests(id as string);
   const { data: _raw2_activity } = useActivityLog(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const openTasks = tasks.filter(t => (t.status as string) !== "završen");
+  const openTasks = tasks.filter(t => (t.status as string) !== "zavrsen");
   const activity = _raw2_activity.slice(0, 5);
 
   return (
@@ -21,7 +21,7 @@ export default function VerticalSpvPage() {
         {[
           { label: "Vertikale", value: verticals.length, color: "text-blue-600" },
           { label: "Zadaci", value: openTasks.length, color: openTasks.length > 0 ? "text-amber-600" : "text-green-600" },
-          { label: "TOK", value: tok.filter(t => t.status !== "zatvoren" && (t.status as string) !== "riješen").length, color: "text-blue-600" },
+          { label: "TOK", value: tok.filter(t => t.status !== "zatvoren" && (t.status as string) !== "rijesen").length, color: "text-blue-600" },
           { label: "Faza", value: spv.phase, color: "text-black" },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-3 text-center">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,7 @@ export default function RegisterPage() {
     if (error) {
       setMsg(error.message);
     } else {
-      setMsg("Registracija uspješna. Provjeri email za potvrdu računa.");
+      setMsg("Registracija uspjesna. Provjeri email za potvrdu racuna.");
     }
 
     setLoading(false);

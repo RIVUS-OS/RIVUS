@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useUnpaidInvoices, formatEur } from "@/lib/data-client";
 
 export default function NenaPlacenoPage() {
   const { data: unpaid } = useUnpaidInvoices();
   const total = unpaid.reduce((s, i) => s + i.totalAmount, 0);
-  const waiting = unpaid.filter(i => i.status === "čeka");
+  const waiting = unpaid.filter(i => i.status === "ceka");
   const overdue = unpaid.filter(i => i.status === "kasni");
 
   // Group by client

@@ -46,7 +46,7 @@ export default function OwnerSpvPage() {
 
   const missingDocs = allMissing.filter((d: any) => d.spvId === id);
   const unpaidIssued = issued.filter(
-    (i: any) => i.status !== "plaÄ‡en" && i.status !== "storniran"
+    (i: any) => i.status !== "placen" && i.status !== "storniran"
   );
   const openTasks = tasks.filter((t: any) => t.status !== "zavrÅ¡en");
   const pendingDecisions = decisions.filter(

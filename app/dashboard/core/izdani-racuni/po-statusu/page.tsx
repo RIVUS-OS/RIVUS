@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
@@ -13,7 +13,7 @@ export default function IzdaniPoStatusuPage() {
     byStatus[s] = byStatus[s] || { count: 0, total: 0 };
     byStatus[s].count++; byStatus[s].total += i.totalAmount;
   });
-  const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
+  const statusColors: Record<string, string> = { "placen": "bg-green-100 text-green-700", "ceka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
 
   return (
     <div className="space-y-6">

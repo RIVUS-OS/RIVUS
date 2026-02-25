@@ -1,17 +1,17 @@
-"use client";
+﻿"use client";
 
 import { useDecisions, usePendingDecisions } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "odobreno": "bg-green-100 text-green-700",
   "odbijeno": "bg-red-100 text-red-700",
-  "na_čekanju": "bg-amber-100 text-amber-700",
+  "na_cekanju": "bg-amber-100 text-amber-700",
 };
 
 const statusLabels: Record<string, string> = {
   "odobreno": "Odobreno",
   "odbijeno": "Odbijeno",
-  "na_čekanju": "Na cekanju",
+  "na_cekanju": "Na cekanju",
 };
 
 export default function OdobrenjaPage() {

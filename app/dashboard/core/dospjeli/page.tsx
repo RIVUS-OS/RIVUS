@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useOverdueInvoices, formatEur } from "@/lib/data-client";
 
@@ -59,3 +59,4 @@ export default function DospjeliPage() {
     </div>
   );
 }
+

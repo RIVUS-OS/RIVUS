@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams, useRouter } from "next/navigation";
 import { useSpvById, useIssuedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useMissingDocs, formatEur } from "@/lib/data-client";
@@ -24,9 +24,9 @@ export default function OwnerSpvPage() {
   }
 
   const missingDocs = allMissing.filter(d => d.spvId === id);
-  const unpaidIssued = issued.filter(i => i.status !== "pla\u0107en" && i.status !== "storniran");
-  const openTasks = tasks.filter(t => t.status !== "zavr\u0161en");
-  const pendingDecisions = decisions.filter(d => d.status === "na_\u010dekanju");
+  const unpaidIssued = issued.filter(i => i.status !== "placen" && i.status !== "storniran");
+  const openTasks = tasks.filter(t => t.status !== "zavrsen");
+  const pendingDecisions = decisions.filter(d => d.status === "na_cekanju");
   const openTok = tokRequests.filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
   const st: Record<string, { bg: string; text: string; label: string }> = {
     aktivan: { bg: "bg-green-100", text: "text-green-700", label: "Aktivan" },

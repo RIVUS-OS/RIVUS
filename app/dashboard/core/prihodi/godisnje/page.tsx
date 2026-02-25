@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { usePnlMonths, formatEur } from "@/lib/data-client";
 export default function PrihodiGodisnjePage() {
   const { data: pnlMonths, loading: pnlMonthsLoading } = usePnlMonths();

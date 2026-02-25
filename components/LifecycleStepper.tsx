@@ -1,4 +1,4 @@
-// RIVUS v1.0 — LifecycleStepper
+﻿// RIVUS v1.0 — LifecycleStepper
 'use client';
 import React from 'react';
 import { LifecycleStage, type LifecycleStageType } from '@/lib/enums';
@@ -10,7 +10,7 @@ const STAGES: { key: LifecycleStageType; label: string; short: string }[] = [
   { key: LifecycleStage.STRUCTURED, label: 'Strukturiran', short: 'Struktura' },
   { key: LifecycleStage.FINANCING, label: 'Financiranje', short: 'Financije' },
   { key: LifecycleStage.ACTIVE_CONSTRUCTION, label: 'Aktivna gradnja', short: 'Gradnja' },
-  { key: LifecycleStage.COMPLETED, label: 'Završen', short: 'Završen' },
+  { key: LifecycleStage.COMPLETED, label: 'Zavrsen', short: 'Zavrsen' },
 ];
 
 export function LifecycleStepper({ currentStage, compact = false, className = '' }: {

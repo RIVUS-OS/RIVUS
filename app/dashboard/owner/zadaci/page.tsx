@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useSpvs, useTasks } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700",
-  "završen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700",
+  "zavrsen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700",
 };
 const priorityColors: Record<string, string> = {
   critical: "bg-red-100 text-red-700", high: "bg-amber-100 text-amber-700",
@@ -18,7 +18,7 @@ export default function OwnerZadaciPage() {
   if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
   const allTasks = spvs.flatMap(p => _tasksAll.filter(x=>x.spvId===p.id));
-  const open = allTasks.filter(t => (t.status as string) !== "završen");
+  const open = allTasks.filter(t => (t.status as string) !== "zavrsen");
 
   return (
     <div className="space-y-6">

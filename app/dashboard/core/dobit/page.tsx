@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 import FinancePage from "@/components/core/FinancePage";
 export default function Page() {
   return <FinancePage
     title="Porez na dobit"
-    subtitle="Godišnji obračun, predujmovi, prijava"
+    subtitle="Godisnji obracun, predujmovi, prijava"
     summary={[
       { label: "Dobit 2025.", value: "16.600 EUR" },
       { label: "Porez 10%", value: "1.660 EUR", color: "text-red-600" },
-      { label: "Predujam uplaćen", value: "0 EUR" },
+      { label: "Predujam uplacen", value: "0 EUR" },
       { label: "Prijava rok", value: "30.04.2026." },
     ]}
     columns={[

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 export default function Staranje90PlusPage() {
   const { data: issuedInvoices, loading: issuedInvoicesLoading } = useIssuedInvoices();

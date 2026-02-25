@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useDocuments, useActivityLog, useBanks, formatEur } from "@/lib/data-client";

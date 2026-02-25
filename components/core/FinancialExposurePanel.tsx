@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 

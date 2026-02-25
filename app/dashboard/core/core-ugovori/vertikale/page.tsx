@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useContracts, useVerticals } from "@/lib/data-client";
 

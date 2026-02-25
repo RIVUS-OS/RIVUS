@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import FinancePage from "@/components/core/FinancePage";
 export default function Page() {
   const tabs = [
@@ -10,8 +10,8 @@ export default function Page() {
     { label: "Opomene", href: "/dashboard/core/staranje/opomene" },
   ];
   return <FinancePage
-    title="Staranje potraživanja"
-    subtitle="Analiza potraživanja po starosti"
+    title="Staranje potrazivanja"
+    subtitle="Analiza potrazivanja po starosti"
     tabs={tabs}
     summary={[
       { label: "0-30 dana", value: "1.200 EUR", color: "text-green-600" },
@@ -21,7 +21,7 @@ export default function Page() {
     ]}
     columns={[
       { key: "klijent", label: "Klijent" },
-      { key: "racun", label: "Br. računa" },
+      { key: "racun", label: "Br. racuna" },
       { key: "iznos", label: "Iznos (EUR)", align: "right" },
       { key: "dani", label: "Starost (dana)", align: "right" },
       { key: "kategorija", label: "Kategorija" },

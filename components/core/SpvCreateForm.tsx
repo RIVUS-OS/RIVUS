@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -47,7 +47,7 @@ export default function SpvCreateForm({ onSuccess }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? 'Greška pri kreiranju SPV-a')
+        setError(data.error ?? 'Greska pri kreiranju SPV-a')
         return
       }
 
@@ -55,7 +55,7 @@ export default function SpvCreateForm({ onSuccess }: Props) {
       router.refresh()
       onSuccess?.()
     } catch {
-      setError('Mrežna greška. Pokušaj ponovo.')
+      setError('Mrezna greska. Pokusaj ponovo.')
     } finally {
       setLoading(false)
     }
@@ -71,7 +71,7 @@ export default function SpvCreateForm({ onSuccess }: Props) {
           name="project_name"
           value={form.project_name}
           onChange={handleChange}
-          placeholder="npr. Šandora Petefija d.o.o."
+          placeholder="npr. sandora Petefija d.o.o."
           required
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -150,7 +150,7 @@ export default function SpvCreateForm({ onSuccess }: Props) {
 
       <p className="text-xs text-gray-500">
         RIVUS kreira SPV entitet u sustavu. Pravnu osobnost SPV-a osniva vlasnik zasebno.
-        Odgovornost za vođenje poslovanja ostaje na vlasniku (ZTD čl. 240).
+        Odgovornost za vodenje poslovanja ostaje na vlasniku (ZTD cl. 240).
       </p>
     </form>
   )

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useTasks } from "@/lib/data-client";
 
-const statusColors: Record<string, string> = { otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700", "završen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700" };
+const statusColors: Record<string, string> = { otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700", "zavrsen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700" };
 const priorityColors: Record<string, string> = { critical: "bg-red-100 text-red-700", high: "bg-amber-100 text-amber-700", medium: "bg-blue-100 text-blue-700", low: "bg-gray-100 text-gray-600" };
 
 export default function OwnerSpvZadaciPage() {
@@ -11,7 +11,7 @@ export default function OwnerSpvZadaciPage() {
   const { data: spv } = useSpvById(id as string);
   const { data: tasks } = useTasks(id as string);
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-  const open = tasks.filter(t => (t.status as string) !== "završen");
+  const open = tasks.filter(t => (t.status as string) !== "zavrsen");
 
   return (
     <div className="space-y-6">

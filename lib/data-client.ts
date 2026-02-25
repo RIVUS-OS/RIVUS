@@ -9,7 +9,7 @@
 //   PRIJE:  import { SPVS, getTasksBySpv } from "@/lib/mock-data"
 //   POSLIJE: import { useSpvs, useTasks } from "@/lib/data-client"
 //
-// Svaki hook vraća { data, loading, error }
+// Svaki hook vraca { data, loading, error }
 // formatEur i formatDate ostaju synchronous helperi.
 // ============================================================================
 
@@ -59,7 +59,7 @@ function useSupabaseQuery<T>(
       setData(result);
     } catch (err) {
       console.error("Supabase query error:", err);
-      setError(err instanceof Error ? err.message : "Greška pri dohvaćanju podataka");
+      setError(err instanceof Error ? err.message : "Greska pri dohvacanju podataka");
     } finally {
       setLoading(false);
     }
@@ -84,21 +84,21 @@ function mapPhase(stage: string | null): SpvPhase {
     "Structured": "Strukturirano",
     "Financing": "Financiranje",
     "Active Construction": "Aktivna gradnja",
-    "Completed": "Završeno",
+    "Completed": "Zavrseno",
     "Kreirano": "Kreirano",
     "CORE pregled": "CORE pregled",
     "Vertikale aktivne": "Vertikale aktivne",
     "Strukturirano": "Strukturirano",
     "Financiranje": "Financiranje",
     "Aktivna gradnja": "Aktivna gradnja",
-    "Završeno": "Završeno",
+    "Zavrseno": "Zavrseno",
   };
   return map[stage || ""] || "Kreirano";
 }
 
 function deriveStatus(row: { is_blocked: boolean; core_approved: boolean; lifecycle_stage: string }): SpvStatus {
   if (row.is_blocked) return "blokiran";
-  if (row.lifecycle_stage === "Completed" || row.lifecycle_stage === "Završeno") return "zavrsen";
+  if (row.lifecycle_stage === "Completed" || row.lifecycle_stage === "Zavrseno") return "zavrsen";
   if (!row.core_approved) return "u_izradi";
   return "aktivan";
 }
@@ -106,14 +106,14 @@ function deriveStatus(row: { is_blocked: boolean; core_approved: boolean; lifecy
 function statusLabel(status: SpvStatus): string {
   const labels: Record<SpvStatus, string> = {
     aktivan: "Aktivan", blokiran: "Blokiran", u_izradi: "U izradi",
-    na_cekanju: "Na čekanju", zavrsen: "Završen",
+    na_cekanju: "Na cekanju", zavrsen: "Zavrsen",
   };
   return labels[status] || status;
 }
 
 function sectorLabelFn(sector: string): string {
   const labels: Record<string, string> = {
-    residential: "Nekretnine", commercial: "Komercijalno", mixed: "Mješovito",
+    residential: "Nekretnine", commercial: "Komercijalno", mixed: "Mjesovito",
     hospitality: "Turizam", nekretnine: "Nekretnine", energetika: "Energetika",
     turizam: "Turizam", agro: "Agro", infrastruktura: "Infrastruktura", tech: "Tech",
   };
@@ -141,10 +141,10 @@ function mapPriority(p: number | string | null): string {
 
 function mapInvoiceStatus(s: string | null): Invoice["status"] {
   const map: Record<string, Invoice["status"]> = {
-    paid: "plaćen", pending: "čeka", overdue: "kasni", cancelled: "storniran",
-    "plaćen": "plaćen", "čeka": "čeka", kasni: "kasni", storniran: "storniran",
+    paid: "placen", pending: "ceka", overdue: "kasni", cancelled: "storniran",
+    "placen": "placen", "ceka": "ceka", kasni: "kasni", storniran: "storniran",
   };
-  return map[s || ""] || "čeka";
+  return map[s || ""] || "ceka";
 }
 
 // ─── EXPORTED FORMATTERS (sync, backward-compatible) ─────────────────────────
@@ -269,7 +269,7 @@ async function fetchDocsRaw(spvId?: string): Promise<Document[]> {
       spvId: r.spv_id || "",
       uploadedBy: r.uploader?.full_name || "—",
       uploadDate: fmtDate(r.created_at),
-      status: (r.status || "čeka_pregled") as Document["status"],
+      status: (r.status || "ceka_pregled") as Document["status"],
       version: r.version || 1,
       fileSize: fmtFileSize(r.file_size_bytes),
       mandatory: r.document_type === "mandatory",
@@ -296,7 +296,7 @@ export function useMissingDocs(): UseDataResult<Document[]> {
 export function usePendingDocs(): UseDataResult<Document[]> {
   return useSupabaseQuery(async () => {
     const docs = await fetchDocsRaw();
-    return docs.filter((d) => d.status === "čeka_pregled");
+    return docs.filter((d) => d.status === "ceka_pregled");
   }, []);
 }
 
@@ -358,7 +358,7 @@ export function useReceivedInvoices(spvId?: string): UseDataResult<Invoice[]> {
 export function useUnpaidInvoices(): UseDataResult<Invoice[]> {
   return useSupabaseQuery(async () => {
     const inv = await fetchInvoicesRaw(undefined, "issued");
-    return inv.filter((i) => i.status === "čeka" || i.status === "kasni");
+    return inv.filter((i) => i.status === "ceka" || i.status === "kasni");
   }, []);
 }
 
@@ -478,7 +478,7 @@ async function fetchDecisionsRaw(spvId?: string): Promise<Decision[]> {
       id: r.id, title: r.title || "", spvId: r.spv_id || "",
       requestedBy: r.requester?.full_name || "—",
       decidedBy: r.decider?.full_name || null,
-      status: (r.status || "na_čekanju") as Decision["status"],
+      status: (r.status || "na_cekanju") as Decision["status"],
       date: fmtDate(r.requested_date),
       decidedDate: fmtDate(r.decided_date),
       description: r.description || "", category: r.category || "",
@@ -493,7 +493,7 @@ export function useDecisions(spvId?: string): UseDataResult<Decision[]> {
 export function usePendingDecisions(): UseDataResult<Decision[]> {
   return useSupabaseQuery(async () => {
     const d = await fetchDecisionsRaw();
-    return d.filter((x) => x.status === "na_čekanju");
+    return d.filter((x) => x.status === "na_cekanju");
   }, []);
 }
 
@@ -699,10 +699,10 @@ export function useDashboardCounts(): UseDataResult<DashboardCounts> {
       totalSpvs: spvs.length,
       activeSpvs: spvs.filter((s) => s.status === "aktivan").length,
       blockedSpvs: spvs.filter((s) => s.status === "blokiran").length,
-      pendingDocuments: docs.filter((d) => d.status === "čeka_pregled").length,
+      pendingDocuments: docs.filter((d) => d.status === "ceka_pregled").length,
       openTasks: tasks.filter((t) => t.status === "otvoren" || t.status === "u_tijeku").length,
       openTokRequests: tok.filter((t) => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran").length,
-      pendingDecisions: dec.filter((d) => d.status === "na_čekanju").length,
+      pendingDecisions: dec.filter((d) => d.status === "na_cekanju").length,
       overdueInvoices: inv.filter((i) => i.status === "kasni").length,
     };
   }, {
@@ -729,7 +729,7 @@ export function useCriticalTasks(){return useSupabaseQuery(async()=>{const t=awa
 export function useMandatoryDocs(spvId){return useSupabaseQuery(async()=>{const d=await fetchDocsRaw();return d.filter(x=>x.mandatory&&(!spvId||x.spvId===spvId))},[],[spvId])}
 export function usePentagonSummary(){return useSupabaseQuery(async()=>{const[s,d,t,i,k]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw(),fetchTasksRaw(),fetchInvoicesRaw(),fetchTokRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length,ov=i.filter(x=>x.status==="kasni").length,es=k.filter(x=>x.status==="eskaliran").length,cr=t.filter(x=>x.priority==="critical").length;return{compliance:Math.max(0,100-mi*10-bl*20),finance:Math.max(0,100-ov*15),legal:85,operational:Math.max(0,100-cr*10-es*15),risk:Math.max(0,100-bl*25-ov*10-es*10)}},{compliance:0,finance:0,legal:0,operational:0,risk:0})}
 export function useComplianceSummary(){return useSupabaseQuery(async()=>{const[s,d]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length;return{totalSpvs:s.length,compliant:s.length-bl,warnings:Math.min(bl,1),violations:Math.max(0,bl-1),missingDocs:mi,overdueObligations:0}},{totalSpvs:0,compliant:0,warnings:0,violations:0,missingDocs:0,overdueObligations:0})}
-export function useFinanceSummary(){return useSupabaseQuery(async()=>{const inv=await fetchInvoicesRaw();const iss=inv.filter(i=>!!(i as any).direction||(i as any).direction==="issued");const rev=iss.reduce((s,i)=>s+(i.totalAmount||0),0);const unp=iss.filter(i=>i.status==="čeka"||i.status==="kasni");const od=iss.filter(i=>i.status==="kasni");return{totalRevenue:rev,totalExpenses:0,netIncome:rev,unpaidInvoices:unp.length,overdueAmount:od.reduce((s,i)=>s+(i.totalAmount||0),0)}},{totalRevenue:0,totalExpenses:0,netIncome:0,unpaidInvoices:0,overdueAmount:0})}
+export function useFinanceSummary(){return useSupabaseQuery(async()=>{const inv=await fetchInvoicesRaw();const iss=inv.filter(i=>!!(i as any).direction||(i as any).direction==="issued");const rev=iss.reduce((s,i)=>s+(i.totalAmount||0),0);const unp=iss.filter(i=>i.status==="ceka"||i.status==="kasni");const od=iss.filter(i=>i.status==="kasni");return{totalRevenue:rev,totalExpenses:0,netIncome:rev,unpaidInvoices:unp.length,overdueAmount:od.reduce((s,i)=>s+(i.totalAmount||0),0)}},{totalRevenue:0,totalExpenses:0,netIncome:0,unpaidInvoices:0,overdueAmount:0})}
 
 
 

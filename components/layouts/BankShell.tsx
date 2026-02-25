@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -31,7 +31,7 @@ export default function BankShell({ children }: { children: React.ReactNode }) {
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/bank", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/bank", icon: Home },
       ],
     },
     {
@@ -182,7 +182,7 @@ export default function BankShell({ children }: { children: React.ReactNode }) {
             <div className="h-6 w-px bg-[#d1d1d6]" />
             <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/50 hover:bg-black/[0.04] transition-all">
               <Search size={14} />
-              <span>Pretraži...</span>
+              <span>Pretrazi...</span>
             </button>
           </div>
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TrendingUp, ArrowRight, AlertTriangle } from "lucide-react";
 
@@ -141,7 +141,7 @@ export function generateLifecycleData(spvList: any[]): LifecycleStage[] {
     "Strukturirano": 0,
     "Financiranje": 0,
     "Aktivna gradnja": 0,
-    "Završeno": 0,
+    "Zavrseno": 0,
   };
 
   spvList.forEach((spv) => {
@@ -159,7 +159,7 @@ export function generateLifecycleData(spvList: any[]): LifecycleStage[] {
     { stage: "Vertikale aktivne", count: stageCounts["Vertikale aktivne"], color: "#AF52DE", description: "Vertikale dodijeljene i aktivne" },
     { stage: "Strukturirano", count: stageCounts["Strukturirano"], color: "#007AFF", description: "Pravna struktura, ugovori" },
     { stage: "Financiranje", count: stageCounts["Financiranje"], color: "#FF9500", description: "Financiranje, capital raising" },
-    { stage: "Aktivna gradnja", count: stageCounts["Aktivna gradnja"], color: "#34C759", description: "Izvođenje radova, gradnja" },
-    { stage: "Završeno", count: stageCounts["Završeno"], color: "#5856D6", description: "Projekt završen, zatvaranje SPV-a" },
+    { stage: "Aktivna gradnja", count: stageCounts["Aktivna gradnja"], color: "#34C759", description: "Izvodenje radova, gradnja" },
+    { stage: "Zavrseno", count: stageCounts["Zavrseno"], color: "#5856D6", description: "Projekt zavrsen, zatvaranje SPV-a" },
   ];
 }

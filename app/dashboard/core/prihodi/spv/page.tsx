@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useSpvs, useIssuedInvoices, formatEur } from "@/lib/data-client";
 export default function PrihodiSpvPage() {
   const { data: _issAll } = useIssuedInvoices();

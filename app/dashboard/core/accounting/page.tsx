@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useAccountants, useSpvs, formatEur } from "@/lib/data-client";
 export default function CoreAccountingPage() {
   const { data: accountants, loading: accountantsLoading } = useAccountants();

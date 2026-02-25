@@ -94,7 +94,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/core/core-dashboard", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/core/core-dashboard", icon: Home },
       ],
     },
     {
@@ -109,19 +109,19 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "FAKTURIRANJE",
       items: [
-        { label: "Izdani računi", href: "/dashboard/core/izdani-racuni", icon: FileText },
-        { label: "Primljeni računi", href: "/dashboard/core/primljeni-racuni", icon: FileText },
-        { label: "Nenaplaćeno", href: "/dashboard/core/nenaplaceno", icon: Clock },
+        { label: "Izdani racuni", href: "/dashboard/core/izdani-racuni", icon: FileText },
+        { label: "Primljeni racuni", href: "/dashboard/core/primljeni-racuni", icon: FileText },
+        { label: "Nenaplaceno", href: "/dashboard/core/nenaplaceno", icon: Clock },
         { label: "Dospjeli", href: "/dashboard/core/dospjeli", icon: AlertTriangle },
         { label: "Storna", href: "/dashboard/core/storna", icon: RefreshCw },
-        { label: "eRačuni", href: "/dashboard/core/eracuni", icon: FileText },
+        { label: "eRacuni", href: "/dashboard/core/eracuni", icon: FileText },
       ],
     },
     {
-      title: "NOVČANI TOK",
+      title: "NOVcANI TOK",
       items: [
-        { label: "Žiro račun", href: "/dashboard/core/blagajna", icon: Landmark },
-        { label: "Devizni račun", href: "/dashboard/core/devizni", icon: Globe },
+        { label: "ziro racun", href: "/dashboard/core/blagajna", icon: Landmark },
+        { label: "Devizni racun", href: "/dashboard/core/devizni", icon: Globe },
         { label: "Cash flow", href: "/dashboard/core/projekcija", icon: TrendingUp },
       ],
     },
@@ -134,12 +134,12 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      title: "IZVJEŠTAJI",
+      title: "IZVJEsTAJI",
       items: [
         { label: "Bilanca (informativna)", href: "/dashboard/core/bilanca", icon: BarChart3 },
         { label: "Bruto bilanca (informativna)", href: "/dashboard/core/bruto", icon: BarChart3 },
-        { label: "Staranje potraživanja", href: "/dashboard/core/staranje", icon: AlertTriangle },
-        { label: "Analitičke kartice", href: "/dashboard/core/analitika", icon: Search },
+        { label: "Staranje potrazivanja", href: "/dashboard/core/staranje", icon: AlertTriangle },
+        { label: "Analiticke kartice", href: "/dashboard/core/analitika", icon: Search },
       ],
     },
     {
@@ -155,7 +155,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       title: "POSTAVKE",
       items: [
         { label: "Postavke firme", href: "/dashboard/core/core-postavke", icon: Settings },
-        { label: "Bankovni računi", href: "/dashboard/core/bankovni-racuni", icon: Landmark },
+        { label: "Bankovni racuni", href: "/dashboard/core/bankovni-racuni", icon: Landmark },
         { label: "Porezne stope", href: "/dashboard/core/porezne-stope", icon: FileText },
         { label: "Knjigovodstvo", href: "/dashboard/core/knjigovodstvo", icon: BookOpen },
       ],
@@ -210,7 +210,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
         { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
-        { label: "Izvje\u0161taji", href: "/dashboard/core/izvjestaji", icon: FileStack },
+        { label: "Izvjestaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
         { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
       ],
     },
@@ -380,7 +380,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                 className="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-black/[0.04] transition-all"
               >
                 <div className="text-right">
-                  <div className="text-[13px] font-semibold text-black">Jurke Maričić</div>
+                  <div className="text-[13px] font-semibold text-black">Jurke Maricic</div>
                   <div className="text-[11px] font-medium text-black/50">jurke@rivus.hr</div>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-[14px] font-bold">
@@ -391,7 +391,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl border border-[#d1d1d6] shadow-lg overflow-hidden z-50">
                   <div className="p-3 border-b border-[#d1d1d6]">
-                    <div className="text-[13px] font-bold text-black">Jurke Maričić</div>
+                    <div className="text-[13px] font-bold text-black">Jurke Maricic</div>
                     <div className="text-[12px] font-medium text-black/50 mt-0.5">CORE Administrator</div>
                   </div>
                   <div className="p-1.5">

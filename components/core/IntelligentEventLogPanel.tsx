@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { AlertCircle, AlertTriangle, Info, Filter, ArrowRight, Calendar } from "lucide-react";
@@ -345,7 +345,7 @@ export function generateIntelligentEvents(
 
   // Generate warning events from mandatory tasks
   tasks.forEach((task) => {
-    if (task.is_mandatory && task.status !== "Završen") {
+    if (task.is_mandatory && task.status !== "Zavrsen") {
       events.push({
         id: `warning-task-${task.id}`,
         severity: "warning",

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useSpvs, useTasks, useTokRequests, formatEur } from "@/lib/data-client";
 export default function HoldingRizikPage() {
   const { data: spvs, loading } = useSpvs();

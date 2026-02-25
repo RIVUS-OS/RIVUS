@@ -1,4 +1,4 @@
-import AccountingShell from "@/components/layouts/AccountingShell";
+﻿import AccountingShell from "@/components/layouts/AccountingShell";
 
 export default function AccountingLayout({ children }: { children: React.ReactNode }) {
   return <AccountingShell>{children}</AccountingShell>;

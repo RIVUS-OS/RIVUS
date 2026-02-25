@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useReceivedInvoices, formatEur } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
-  "plaćen": "bg-green-100 text-green-700",
-  "čeka": "bg-amber-100 text-amber-700",
+  "placen": "bg-green-100 text-green-700",
+  "ceka": "bg-amber-100 text-amber-700",
 };
 
 const statusLabels: Record<string, string> = {
-  "plaćen": "Placen",
-  "čeka": "Ceka",
+  "placen": "Placen",
+  "ceka": "Ceka",
 };
 
 export default function PrimljeniRacuniSviPage() {
@@ -17,8 +17,8 @@ export default function PrimljeniRacuniSviPage() {
 
   if (receivedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const paid = receivedInvoices.filter(i => i.status === "plaćen");
-  const waiting = receivedInvoices.filter(i => i.status === "čeka");
+  const paid = receivedInvoices.filter(i => i.status === "placen");
+  const waiting = receivedInvoices.filter(i => i.status === "ceka");
   const totalPaid = paid.reduce((s, i) => s + i.totalAmount, 0);
   const totalWaiting = waiting.reduce((s, i) => s + i.totalAmount, 0);
 
@@ -81,3 +81,4 @@ export default function PrimljeniRacuniSviPage() {
     </div>
   );
 }
+

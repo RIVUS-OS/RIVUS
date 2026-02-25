@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 export default function CjenikPlatformaPage() {
   const items = [
     { name: "Osnovni pristup", desc: "Dashboard, dokumenti, dnevnik", price: "200 EUR/mj" },

@@ -1,4 +1,4 @@
-// RIVUS v1.0 — Auth Helpers (Server Components)
+﻿// RIVUS v1.0 — Auth Helpers (Server Components)
 
 import { redirect } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabaseServer';

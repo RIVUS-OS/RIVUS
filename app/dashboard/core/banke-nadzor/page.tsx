@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useBanks, useSpvs, useSpvById } from "@/lib/data-client";
 

@@ -1,17 +1,17 @@
-"use client";
+﻿"use client";
 
 import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
-  "plaćen": "bg-green-100 text-green-700",
-  "čeka": "bg-amber-100 text-amber-700",
+  "placen": "bg-green-100 text-green-700",
+  "ceka": "bg-amber-100 text-amber-700",
   "kasni": "bg-red-100 text-red-700",
   "storniran": "bg-gray-100 text-gray-500",
 };
 
 const statusLabels: Record<string, string> = {
-  "plaćen": "Placen",
-  "čeka": "Ceka",
+  "placen": "Placen",
+  "ceka": "Ceka",
   "kasni": "Kasni",
   "storniran": "Storniran",
 };
@@ -21,8 +21,8 @@ export default function IzdaniRacuniSviPage() {
 
   if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const paid = issuedInvoices.filter(i => i.status === "plaćen");
-  const waiting = issuedInvoices.filter(i => i.status === "čeka");
+  const paid = issuedInvoices.filter(i => i.status === "placen");
+  const waiting = issuedInvoices.filter(i => i.status === "ceka");
   const overdue = issuedInvoices.filter(i => i.status === "kasni");
   const cancelled = issuedInvoices.filter(i => i.status === "storniran");
 
@@ -92,3 +92,4 @@ export default function IzdaniRacuniSviPage() {
     </div>
   );
 }
+

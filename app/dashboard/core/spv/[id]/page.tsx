@@ -27,15 +27,15 @@ export default function SpvCommandPage() {
 
   const unpaidIssued = issued.filter(i => {
     const s = i.status as string;
-    return s !== "plaćen" && s !== "placen" && s !== "storniran";
+    return s !== "placen" && s !== "placen" && s !== "storniran";
   });
   const openTasks = tasks.filter(t => {
     const s = t.status as string;
-    return s !== "zavrsen" && s !== "završen";
+    return s !== "zavrsen" && s !== "zavrsen";
   });
   const pendingDecisions = decisions.filter(d => {
     const s = d.status as string;
-    return s === "na_čekanju" || s === "na_cekanju";
+    return s === "na_cekanju" || s === "na_cekanju";
   });
   const openTok = tokRequests.filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 export default function CorePostavkePage() {
   const settings = [
     { group: "Platforma", items: ["Naziv platforme", "Logo", "Domena", "Jezik", "Valuta"] },

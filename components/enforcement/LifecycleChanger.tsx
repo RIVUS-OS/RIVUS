@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { ALLOWED_TRANSITIONS, type LifecycleStageType } from "@/lib/enums";

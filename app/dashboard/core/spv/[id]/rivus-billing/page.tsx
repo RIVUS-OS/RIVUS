@@ -12,7 +12,7 @@ export default function SpvRivusBillingPage() {
 
   const contracts = _raw_contracts.filter(c => c.partyBId === id);
   const totalBilled = issued.reduce((s, i) => s + i.totalAmount, 0);
-  const totalPaid = issued.filter(i => (i.status as string) === "plaćen").reduce((s, i) => s + i.totalAmount, 0);
+  const totalPaid = issued.filter(i => (i.status as string) === "placen").reduce((s, i) => s + i.totalAmount, 0);
 
   const categoryLabels: Record<string, string> = {
     platform_fee: "Platform fee", brand_licence: "Brand licenca",

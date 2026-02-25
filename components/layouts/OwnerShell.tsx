@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -33,7 +33,7 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/owner", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/owner", icon: Home },
         { label: "Moji projekti", href: "/dashboard/owner/projekti", icon: Building2 },
       ],
     },
@@ -69,7 +69,7 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
         { label: "Zadaci", href: `${spvBase}/zadaci`, icon: CheckSquare },
         { label: "Dokumenti", href: `${spvBase}/dokumenti`, icon: FolderOpen },
         { label: "Financije", href: `${spvBase}/financije`, icon: Euro },
-        { label: "Računi", href: `${spvBase}/racuni`, icon: Receipt },
+        { label: "Racuni", href: `${spvBase}/racuni`, icon: Receipt },
         { label: "Ugovori", href: `${spvBase}/ugovori`, icon: FileText },
       ],
     },
@@ -197,12 +197,12 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-black/80 hover:bg-black/[0.04] transition-all"
             >
               <Home size={16} />
-              <span>Početna</span>
+              <span>Pocetna</span>
             </button>
             <div className="h-6 w-px bg-[#d1d1d6]" />
             <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/50 hover:bg-black/[0.04] transition-all">
               <Search size={14} />
-              <span>Pretraži...</span>
+              <span>Pretrazi...</span>
             </button>
           </div>
 

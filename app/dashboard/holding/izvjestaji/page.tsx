@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSpvs, formatEur } from "@/lib/data-client";
 

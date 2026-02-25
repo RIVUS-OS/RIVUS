@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTransactions, formatEur } from "@/lib/data-client";
@@ -12,9 +12,9 @@ export default function OwnerSpvFinancijePage() {
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   const totalIssued = issued.reduce((s, i) => s + i.totalAmount, 0);
-  const unpaid = issued.filter(i => { const st = i.status as string; return st !== "plaćen" && st !== "storniran"; });
-  const statusLabels: Record<string, string> = { "plaćen": "Placen", "čeka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
-  const statusColors: Record<string, string> = { "plaćen": "bg-green-100 text-green-700", "čeka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
+  const unpaid = issued.filter(i => { const st = i.status as string; return st !== "placen" && st !== "storniran"; });
+  const statusLabels: Record<string, string> = { "placen": "Placen", "ceka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
+  const statusColors: Record<string, string> = { "placen": "bg-green-100 text-green-700", "ceka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
 
   return (
     <div className="space-y-6">

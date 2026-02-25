@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -32,7 +32,7 @@ export default function AccountingShell({ children }: { children: React.ReactNod
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/accounting", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/accounting", icon: Home },
         { label: "Svi SPV-ovi", href: "/dashboard/accounting/projekti", icon: Building2 },
       ],
     },
@@ -63,7 +63,7 @@ export default function AccountingShell({ children }: { children: React.ReactNod
       title: "",
       items: [
         { label: "Financije", href: `${spvBase}/financije`, icon: Euro },
-        { label: "Računi", href: `${spvBase}/racuni`, icon: Receipt },
+        { label: "Racuni", href: `${spvBase}/racuni`, icon: Receipt },
         { label: "Dokumenti", href: `${spvBase}/dokumenti`, icon: FolderOpen },
         { label: "Zahtjevi", href: `${spvBase}/zahtjevi`, icon: ClipboardList },
       ],
@@ -183,7 +183,7 @@ export default function AccountingShell({ children }: { children: React.ReactNod
             <div className="h-6 w-px bg-[#d1d1d6]" />
             <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/50 hover:bg-black/[0.04] transition-all">
               <Search size={14} />
-              <span>Pretraži...</span>
+              <span>Pretrazi...</span>
             </button>
           </div>
 
@@ -198,8 +198,8 @@ export default function AccountingShell({ children }: { children: React.ReactNod
                 className="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-black/[0.04] transition-all"
               >
                 <div className="text-right">
-                  <div className="text-[13px] font-semibold text-black">Knjigovođa</div>
-                  <div className="text-[11px] font-medium text-black/50">Računovodstvo</div>
+                  <div className="text-[13px] font-semibold text-black">Knjigovoda</div>
+                  <div className="text-[11px] font-medium text-black/50">Racunovodstvo</div>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-[#AF52DE] flex items-center justify-center text-white text-[14px] font-bold">
                   K
@@ -209,8 +209,8 @@ export default function AccountingShell({ children }: { children: React.ReactNod
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl border border-[#d1d1d6] shadow-lg overflow-hidden z-50">
                   <div className="p-3 border-b border-[#d1d1d6]">
-                    <div className="text-[13px] font-bold text-black">Knjigovođa</div>
-                    <div className="text-[12px] font-medium text-black/50 mt-0.5">Računovodstvo</div>
+                    <div className="text-[13px] font-bold text-black">Knjigovoda</div>
+                    <div className="text-[12px] font-medium text-black/50 mt-0.5">Racunovodstvo</div>
                   </div>
                   <div className="p-1.5">
                     <button

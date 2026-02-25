@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useRouter } from "next/navigation";
 import { useSpvs, usePnlMonths, useIssuedInvoices, useReceivedInvoices, useTokRequests, useDecisions, usePendingDecisions, useOverdueInvoices, useMissingDocs, useBlockedSpvs, useActivityLog, useUnpaidInvoices, formatEur } from "@/lib/data-client";
 
@@ -44,11 +44,11 @@ export default function CoreDashboardPage() {
       {/* ALERT BANNER */}
       {(blocked.length > 0 || escalated > 0 || overdue.length > 0) && (
         <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-          <div className="text-[13px] font-bold text-red-700 mb-1">Potrebna pažnja</div>
+          <div className="text-[13px] font-bold text-red-700 mb-1">Potrebna paznja</div>
           <div className="flex flex-wrap gap-4 text-[12px] text-red-600">
             {blocked.length > 0 && <span className="font-semibold">{blocked.length} blokiran SPV</span>}
             {escalated > 0 && <span className="font-semibold">{escalated} eskaliranih TOK</span>}
-            {overdue.length > 0 && <span className="font-semibold">{overdue.length} dospjelih računa ({formatEur(overdueTotal)})</span>}
+            {overdue.length > 0 && <span className="font-semibold">{overdue.length} dospjelih racuna ({formatEur(overdueTotal)})</span>}
             {missing.length > 0 && <span className="font-semibold">{missing.length} mandatory dok. nedostaje</span>}
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function CoreDashboardPage() {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push("/dashboard/core/odobrenja")}>
           <div className={`text-2xl font-bold ${pending.length > 0 ? "text-amber-600" : "text-black/30"}`}>{pending.length}</div>
-          <div className="text-[11px] text-black/50">Čeka odobrenje</div>
+          <div className="text-[11px] text-black/50">ceka odobrenje</div>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push("/dashboard/core/tok")}>
           <div className={`text-2xl font-bold ${openTok > 0 ? "text-amber-600" : "text-black/30"}`}>{openTok}</div>
@@ -94,7 +94,7 @@ export default function CoreDashboardPage() {
         </div>
         <div className={`rounded-xl border p-4 text-center cursor-pointer hover:shadow-md transition-shadow ${unpaid.length > 0 ? "bg-amber-50 border-amber-200" : "bg-white border-gray-200"}`} onClick={() => router.push("/dashboard/core/nenaplaceno")}>
           <div className={`text-xl font-bold ${unpaidTotal > 0 ? "text-amber-600" : "text-black/30"}`}>{formatEur(unpaidTotal)}</div>
-          <div className="text-[11px] text-black/50">Nenaplaćeno</div>
+          <div className="text-[11px] text-black/50">Nenaplaceno</div>
         </div>
       </div>
 
@@ -156,8 +156,8 @@ export default function CoreDashboardPage() {
       {/* COMPLIANCE FOOTER */}
       <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between text-[11px] text-black/40">
-          <span>RIVUS OS v1.0 | {spvs.length} SPV | {decisions.length} odluka | {issued.length + received.length} računa | {activity.length} audit zapisa</span>
-          <span>Svi podaci su informativnog karaktera. Mjerodavno je službeno knjigovodstvo.</span>
+          <span>RIVUS OS v1.0 | {spvs.length} SPV | {decisions.length} odluka | {issued.length + received.length} racuna | {activity.length} audit zapisa</span>
+          <span>Svi podaci su informativnog karaktera. Mjerodavno je sluzbeno knjigovodstvo.</span>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useSpvs, useIssuedInvoices, formatEur } from "@/lib/data-client";
 export default function CorePlatformFeesPage() {
   const { data: spvs, loading: spvsLoading } = useSpvs();

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useSpvs, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";
 export default function FinancijeNadzorPage() {
   const { data: spvs, loading } = useSpvs();

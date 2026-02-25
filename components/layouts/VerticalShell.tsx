@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -31,7 +31,7 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
     {
       title: "",
       items: [
-        { label: "Nadzorna ploča", href: "/dashboard/vertical", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/vertical", icon: Home },
         { label: "Dodijeljeni projekti", href: "/dashboard/vertical/projekti", icon: Building2 },
       ],
     },
@@ -178,12 +178,12 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-black/80 hover:bg-black/[0.04] transition-all"
             >
               <Home size={16} />
-              <span>Početna</span>
+              <span>Pocetna</span>
             </button>
             <div className="h-6 w-px bg-[#d1d1d6]" />
             <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/50 hover:bg-black/[0.04] transition-all">
               <Search size={14} />
-              <span>Pretraži...</span>
+              <span>Pretrazi...</span>
             </button>
           </div>
 
@@ -199,7 +199,7 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
               >
                 <div className="text-right">
                   <div className="text-[13px] font-semibold text-black">Vertikala</div>
-                  <div className="text-[11px] font-medium text-black/50">Izvršitelj</div>
+                  <div className="text-[11px] font-medium text-black/50">Izvrsitelj</div>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-[#FF9500] flex items-center justify-center text-white text-[14px] font-bold">
                   V
@@ -210,7 +210,7 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl border border-[#d1d1d6] shadow-lg overflow-hidden z-50">
                   <div className="p-3 border-b border-[#d1d1d6]">
                     <div className="text-[13px] font-bold text-black">Vertikala</div>
-                    <div className="text-[12px] font-medium text-black/50 mt-0.5">Izvršitelj</div>
+                    <div className="text-[12px] font-medium text-black/50 mt-0.5">Izvrsitelj</div>
                   </div>
                   <div className="p-1.5">
                     <button

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
@@ -7,7 +7,7 @@ export default function NenaPlPoStarostiPage() {
 
   if (issuedInvoicesLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const unpaid = issuedInvoices.filter(i => { const s = i.status as string; return s !== "plaćen" && s !== "storniran"; });
+  const unpaid = issuedInvoices.filter(i => { const s = i.status as string; return s !== "placen" && s !== "storniran"; });
   const aging = [
     { label: "0-30 dana", items: unpaid.slice(0, 3), color: "text-amber-600" },
     { label: "31-60 dana", items: unpaid.slice(3, 5), color: "text-orange-600" },

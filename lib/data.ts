@@ -1,9 +1,9 @@
-// ============================================================================
+﻿// ============================================================================
 // RIVUS OS — DATA LAYER (Phase C)
 // lib/data.ts
 //
-// Zamjena za mock-data.ts. Svaka funkcija dohvaća iz Supabase i vraća
-// format kompatibilan s postojećim stranicama (mock interface shape).
+// Zamjena za mock-data.ts. Svaka funkcija dohvaca iz Supabase i vraca
+// format kompatibilan s postojecim stranicama (mock interface shape).
 // Stranice migriraju postupno: import { SPVS } from "@/lib/mock-data"
 // → import { fetchSpvs } from "@/lib/data"
 // ============================================================================
@@ -36,15 +36,15 @@ function mapPhase(stage: string | null): Spv["phase"] {
     "Structured": "Strukturirano",
     "Financing": "Financiranje",
     "Active Construction": "Aktivna gradnja",
-    "Completed": "Završeno",
-    // Croatian DB values (ako koristiš HR u bazi)
+    "Completed": "Zavrseno",
+    // Croatian DB values (ako koristis HR u bazi)
     "Kreirano": "Kreirano",
     "CORE pregled": "CORE pregled",
     "Vertikale aktivne": "Vertikale aktivne",
     "Strukturirano": "Strukturirano",
     "Financiranje": "Financiranje",
     "Aktivna gradnja": "Aktivna gradnja",
-    "Završeno": "Završeno",
+    "Zavrseno": "Zavrseno",
   };
   return map[stage || ""] || "Kreirano";
 }
@@ -56,7 +56,7 @@ function deriveStatus(row: {
   lifecycle_stage: string;
 }): Spv["status"] {
   if (row.is_blocked) return "blokiran";
-  if (row.lifecycle_stage === "Completed" || row.lifecycle_stage === "Završeno") return "zavrsen";
+  if (row.lifecycle_stage === "Completed" || row.lifecycle_stage === "Zavrseno") return "zavrsen";
   if (!row.core_approved) return "u_izradi";
   return "aktivan";
 }
@@ -67,8 +67,8 @@ function statusLabel(status: Spv["status"]): string {
     aktivan: "Aktivan",
     blokiran: "Blokiran",
     u_izradi: "U izradi",
-    na_cekanju: "Na čekanju",
-    zavrsen: "Završen",
+    na_cekanju: "Na cekanju",
+    zavrsen: "Zavrsen",
   };
   return labels[status] || status;
 }
@@ -78,7 +78,7 @@ function sectorLabel(sector: string): string {
   const labels: Record<string, string> = {
     residential: "Nekretnine",
     commercial: "Komercijalno",
-    mixed: "Mješovito",
+    mixed: "Mjesovito",
     hospitality: "Turizam",
     nekretnine: "Nekretnine",
     energetika: "Energetika",
@@ -197,7 +197,7 @@ export async function fetchDocuments(spvId?: string): Promise<Document[]> {
     spvId: row.spv_id || "",
     uploadedBy: row.uploader?.full_name || "—",
     uploadDate: formatDate(row.created_at),
-    status: (row.status || "čeka_pregled") as Document["status"],
+    status: (row.status || "ceka_pregled") as Document["status"],
     version: row.version || 1,
     fileSize: formatFileSize(row.file_size_bytes),
     mandatory: row.document_type === "mandatory",
@@ -244,16 +244,16 @@ export async function fetchInvoices(spvId?: string): Promise<Invoice[]> {
 
 function mapInvoiceStatus(s: string | null): Invoice["status"] {
   const map: Record<string, Invoice["status"]> = {
-    paid: "plaćen",
-    pending: "čeka",
+    paid: "placen",
+    pending: "ceka",
     overdue: "kasni",
     cancelled: "storniran",
-    plaćen: "plaćen",
-    čeka: "čeka",
+    placen: "placen",
+    ceka: "ceka",
     kasni: "kasni",
     storniran: "storniran",
   };
-  return map[s || ""] || "čeka";
+  return map[s || ""] || "ceka";
 }
 
 // ─── TRANSACTIONS (spv_finance_entries) ───────────────────────────────────────
@@ -365,7 +365,7 @@ export async function fetchDecisions(spvId?: string): Promise<Decision[]> {
     spvId: row.spv_id || "",
     requestedBy: row.requester?.full_name || "—",
     decidedBy: row.decider?.full_name || null,
-    status: (row.status || "na_čekanju") as Decision["status"],
+    status: (row.status || "na_cekanju") as Decision["status"],
     date: formatDate(row.requested_date),
     decidedDate: formatDate(row.decided_date),
     description: row.description || "",
@@ -527,7 +527,7 @@ export async function fetchDashboardCounts(): Promise<DashboardCounts> {
 
   const [spvRes, docRes, taskRes, tokRes, decRes, invRes] = await Promise.all([
     sb.from("spvs").select("is_blocked", { count: "exact" }),
-    sb.from("documents").select("id", { count: "exact" }).eq("status", "čeka_pregled"),
+    sb.from("documents").select("id", { count: "exact" }).eq("status", "ceka_pregled"),
     sb.from("tasks").select("id", { count: "exact" }).is("deleted_at", null).in("status", ["otvoren", "u_tijeku"]),
     sb.from("tok_requests").select("id", { count: "exact" }).is("deleted_at", null).in("status", ["otvoren", "u_tijeku", "eskaliran"]),
     sb.from("decisions").select("id", { count: "exact" }).eq("status", "na_cekanju"),

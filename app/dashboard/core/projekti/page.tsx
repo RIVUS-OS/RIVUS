@@ -54,7 +54,7 @@ export default async function CoreProjektiPage() {
   const list: SPV[] = spvs ?? []
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -133,6 +133,7 @@ export default async function CoreProjektiPage() {
     </div>
   )
 }
+
 
 
 

@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useTokRequests, useOpenTokRequests, useEscalatedTok, useSlaBreached } from "@/lib/data-client";
 
 const statusColors: Record<string, string> = {
   "otvoren": "bg-blue-100 text-blue-700",
   "u_tijeku": "bg-amber-100 text-amber-700",
-  "riješen": "bg-green-100 text-green-700",
+  "rijesen": "bg-green-100 text-green-700",
   "eskaliran": "bg-red-100 text-red-700",
   "zatvoren": "bg-gray-100 text-gray-600",
 };
@@ -13,7 +13,7 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   "otvoren": "Otvoren",
   "u_tijeku": "U tijeku",
-  "riješen": "Rijesen",
+  "rijesen": "Rijesen",
   "eskaliran": "Eskaliran",
   "zatvoren": "Zatvoren",
 };
@@ -33,7 +33,7 @@ export default function TokPage() {
   const { data: slaBreached } = useSlaBreached();
   if (tokRequestsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 
-  const resolved = tokRequests.filter(t => t.status === "riješen" || t.status === "zatvoren");
+  const resolved = tokRequests.filter(t => t.status === "rijesen" || t.status === "zatvoren");
 
   return (
     <div className="space-y-6">
@@ -102,3 +102,4 @@ export default function TokPage() {
     </div>
   );
 }
+

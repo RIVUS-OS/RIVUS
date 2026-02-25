@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useSpvs, useTokRequests } from "@/lib/data-client";
 
-const statusColors: Record<string, string> = { "otvoren": "bg-blue-100 text-blue-700", "u_tijeku": "bg-amber-100 text-amber-700", "riješen": "bg-green-100 text-green-700", "eskaliran": "bg-red-100 text-red-700", "zatvoren": "bg-gray-100 text-gray-600" };
+const statusColors: Record<string, string> = { "otvoren": "bg-blue-100 text-blue-700", "u_tijeku": "bg-amber-100 text-amber-700", "rijesen": "bg-green-100 text-green-700", "eskaliran": "bg-red-100 text-red-700", "zatvoren": "bg-gray-100 text-gray-600" };
 
 export default function AccountingTokPage() {
   const { data: _tokAll } = useTokRequests();

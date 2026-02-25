@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import FinancePage from "@/components/core/FinancePage";
 export default function Page() {
   const tabs = [
@@ -20,9 +20,9 @@ export default function Page() {
       { key: "opis", label: "Opis" },
     ]}
     data={[
-      { usluga: "Brand licenca", model: "Fiksno mjesečno", cijena: "200 EUR/mj", opis: "Korištenje RIVUS branda na projektu" },
-      { usluga: "Platform fee", model: "Fiksno mjesečno", cijena: "300 EUR/mj", opis: "Pristup RIVUS OS platformi" },
-      { usluga: "PM usluga", model: "Fiksno mjesečno", cijena: "2.500 EUR/mj", opis: "Project management — vodi projekt" },
+      { usluga: "Brand licenca", model: "Fiksno mjesecno", cijena: "200 EUR/mj", opis: "Koristenje RIVUS branda na projektu" },
+      { usluga: "Platform fee", model: "Fiksno mjesecno", cijena: "300 EUR/mj", opis: "Pristup RIVUS OS platformi" },
+      { usluga: "PM usluga", model: "Fiksno mjesecno", cijena: "2.500 EUR/mj", opis: "Project management — vodi projekt" },
       { usluga: "Success fee", model: "% profita", cijena: "10% neto profita", opis: "Postotak od realiziranog profita SPV-a" },
       { usluga: "Hybrid", model: "Fiksno + %", cijena: "300 EUR + 3-5%", opis: "Platform fee + postotak od gradnje" },
       { usluga: "Provizija vertikala", model: "% od usluge", cijena: "8-12%", opis: "Provizija na svaku vertikalu" },

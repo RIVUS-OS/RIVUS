@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AlertCircle, Clock, CheckCircle, ArrowRight, User, FileText } from "lucide-react";
 
@@ -59,7 +59,7 @@ export function NextActionPanel({ actions }: NextActionPanelProps) {
         {topActions.length === 0 ? (
           <div className="text-center py-8">
             <CheckCircle size={32} className="mx-auto text-emerald-500 mb-2" />
-            <div className="text-[13px] text-black/40">Nema kritičnih akcija</div>
+            <div className="text-[13px] text-black/40">Nema kriticnih akcija</div>
           </div>
         ) : (
           <div className="space-y-2">

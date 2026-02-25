@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 export default function CoreCorePostavkePage() {
   const configs = [
     { name: "RIVUS CORE d.o.o.", oib: "XXXXXXXX", nkd: "62.10.9, 70.22.0", status: "aktivan" },

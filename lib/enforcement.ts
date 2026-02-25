@@ -1,4 +1,4 @@
-// RIVUS v1.0 — Enforcement Engine
+﻿// RIVUS v1.0 — Enforcement Engine
 
 import { LifecycleStage, ALLOWED_TRANSITIONS, type LifecycleStageType } from '@/lib/enums';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
@@ -17,7 +17,7 @@ export function getNextStages(current: LifecycleStageType): LifecycleStageType[]
 export async function checkMandatoryTasks(spvId: string) {
   const { data, error } = await supabaseBrowser
     .from('tasks').select('id, title, status')
-    .is('deleted_at', null).eq('spv_id', spvId).eq('is_mandatory', true).neq('status', 'Završen');
+    .is('deleted_at', null).eq('spv_id', spvId).eq('is_mandatory', true).neq('status', 'Zavrsen');
   if (error) return { canProceed: false, incomplete: -1, tasks: [] as string[] };
   return { canProceed: (data?.length ?? 0) === 0, incomplete: data?.length ?? 0, tasks: data?.map(t => t.title) ?? [] };
 }
@@ -35,7 +35,7 @@ export async function validateTransition(spvId: string, from: LifecycleStageType
   if (b.blocked) errors.push(`SPV je blokiran: ${b.reason ?? 'bez razloga'}`);
   if (to === LifecycleStage.STRUCTURED) {
     const m = await checkMandatoryTasks(spvId);
-    if (!m.canProceed) errors.push(`${m.incomplete} mandatory taskova nezavršeno: ${m.tasks.join(', ')}`);
+    if (!m.canProceed) errors.push(`${m.incomplete} mandatory taskova nezavrseno: ${m.tasks.join(', ')}`);
   }
   return { valid: errors.length === 0, errors };
 }

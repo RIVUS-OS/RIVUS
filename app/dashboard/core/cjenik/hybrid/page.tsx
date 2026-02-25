@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 export default function CjenikHybridPage() {
   return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Cjenik - Hybrid modeli</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6"><div className="space-y-4"><div className="p-4 bg-blue-50 rounded-lg"><div className="text-[14px] font-bold text-blue-700">Platform + PM</div><div className="text-[12px] text-black/50">Kombinacija platforme i PM usluge s popustom</div><div className="text-xl font-bold text-blue-600 mt-1">1.100 EUR/mj <span className="text-[11px] text-green-500 font-normal">usteda 15%</span></div></div><div className="p-4 bg-green-50 rounded-lg"><div className="text-[14px] font-bold text-green-700">All-in + Success</div><div className="text-[12px] text-black/50">Sve usluge + success fee s nizim postotkom</div><div className="text-xl font-bold text-green-600 mt-1">800 EUR/mj + 2% success</div></div></div></div></div>);
 }

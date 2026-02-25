@@ -1,4 +1,4 @@
-export default function ComingSoon({ title, subtitle }: { title: string; subtitle?: string }) {
+﻿export default function ComingSoon({ title, subtitle }: { title: string; subtitle?: string }) {
     return (
       <div className="max-w-5xl">
         <div className="mb-4">

@@ -71,7 +71,7 @@ export default function FinancePage({ title, subtitle, tabs, columns, data, summ
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-black/30" />
-          <input type="text" placeholder="Pretraži..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+          <input type="text" placeholder="Pretrazi..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF]" />
         </div>
         <button onClick={() => alert("Export u izradi")}

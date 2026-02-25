@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useBanks, useSpvs } from "@/lib/data-client";
 export default function CoreBankovniRacuniPage() {
   const { data: banks, loading: banksLoading } = useBanks();

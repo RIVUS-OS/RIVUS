@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useIssuedInvoices, formatEur } from "@/lib/data-client";
 
