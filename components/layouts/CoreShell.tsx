@@ -182,7 +182,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "NADZOR",
       items: [
-        { label: "SPV Projekti", href: "/dashboard/core/spv-pipeline", icon: Building2 },
+        { label: "SPV Projekti", href: "/dashboard/core/projekti", icon: Building2 },
         { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
         { label: "Knjigovodje", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
         { label: "Banke", href: "/dashboard/core/banke-nadzor", icon: Landmark },
@@ -419,3 +419,4 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
