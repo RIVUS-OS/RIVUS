@@ -23,7 +23,7 @@ function CheckRow({ check }: { check: Check }) {
       <div className="flex items-center gap-3">
         <StatusDot status={check.status} />
         <span className="text-sm text-gray-700">{check.label}</span>
-        {check.note && <span className="text-xs text-gray-400">â€” {check.note}</span>}
+        {check.note && <span className="text-xs text-gray-400">- {check.note}</span>}
       </div>
       <span className="text-sm font-mono text-gray-500">{check.value}</span>
     </div>
