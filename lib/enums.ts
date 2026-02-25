@@ -158,3 +158,12 @@ export const UserRoleTable = {
 export const PriorityLabel: Record<number, string> = {
   0: 'Nizak', 1: 'Normalan', 2: 'Visok', 3: 'Kritican',
 };
+
+// obligations.status
+export const ObligationStatus = {
+  OPEN: 'OPEN',
+  DONE: 'DONE',
+  WAIVED: 'WAIVED',
+} as const;
+export type ObligationStatusType = (typeof ObligationStatus)[keyof typeof ObligationStatus];
+
