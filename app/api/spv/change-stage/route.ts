@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { validateLifecycleStageChange } from "@/lib/spvLifecycle";
 
@@ -40,9 +40,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SPV not found" }, { status: 404 });
   }
 
+  // Client-level fast check (UX feedback without DB round-trip)
   const clientCheck = validateLifecycleStageChange(spv.lifecycle_stage, newStage);
   if (!clientCheck.ok) {
-    const reason = ("error" in clientCheck && clientCheck.error) ? clientCheck.error : "Blocked";
+    const reason =
+      ("error" in clientCheck && clientCheck.error) ? clientCheck.error : "Blocked";
+
     await supabase.from("activity_log").insert({
       action: "LIFECYCLE_CHANGE_BLOCKED",
       entity_type: "SPV",
@@ -56,7 +59,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: reason }, { status: 400 });
   }
 
-  const { data: dbCheck, error: rpcErr } = await supabase.rpc("spv_can_advance", {
+  // DB enforcement: auth + validation + update + audit in one RPC
+  const { data: result, error: rpcErr } = await supabase.rpc("spv_change_stage", {
     p_spv_id: spvId,
     p_to_stage: newStage,
   });
@@ -65,41 +69,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: rpcErr.message }, { status: 500 });
   }
 
-  if (!dbCheck?.allowed) {
-    await supabase.from("activity_log").insert({
-      action: "LIFECYCLE_CHANGE_BLOCKED",
-      entity_type: "SPV",
-      entity_id: spvId,
-      user_id: user.id,
-      spv_id: spvId,
-      severity: "warning",
-      metadata: { from: spv.lifecycle_stage, to: newStage, reason: dbCheck?.reason ?? "Transition blocked by enforcement", layer: "db" },
-    });
-
-    return NextResponse.json(
-      { error: dbCheck?.reason ?? "Transition blocked by enforcement" },
-      { status: 400 }
-    );
+  if (!result?.ok) {
+    return NextResponse.json({ error: result?.error ?? "Blocked" }, { status: 400 });
   }
 
-  const { error: updErr } = await supabase
-    .from("spvs")
-    .update({ lifecycle_stage: newStage })
-    .eq("id", spvId);
-
-  if (updErr) {
-    return NextResponse.json({ error: updErr.message }, { status: 500 });
-  }
-
-  await supabase.from("activity_log").insert({
-    action: "LIFECYCLE_STAGE_CHANGED",
-    entity_type: "SPV",
-    entity_id: spvId,
-    user_id: user.id,
-    spv_id: spvId,
-    severity: "info",
-    metadata: { from: spv.lifecycle_stage, to: newStage },
-  });
-
-  return NextResponse.json({ success: true, from: spv.lifecycle_stage, to: newStage });
+  return NextResponse.json({ success: true, from: result.from, to: result.to });
 }
