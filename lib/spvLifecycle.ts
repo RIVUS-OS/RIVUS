@@ -1,7 +1,6 @@
 ﻿import { ALLOWED_TRANSITIONS, type LifecycleStageType } from "./enums";
 
 export const LIFECYCLE_STAGES = [
-  "Draft",
   "Created",
   "CORE Review",
   "Verticals Active",
@@ -9,7 +8,6 @@ export const LIFECYCLE_STAGES = [
   "Financing",
   "Active Construction",
   "Completed",
-  "Closed",
 ] as const;
 export type SPVStatus = (typeof LIFECYCLE_STAGES)[number];
 

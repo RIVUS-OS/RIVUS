@@ -19,7 +19,7 @@ export const ALLOWED_TRANSITIONS: Record<LifecycleStageType, LifecycleStageType[
   [LifecycleStage.STRUCTURED]:           [LifecycleStage.FINANCING, LifecycleStage.VERTICALS_ACTIVE],
   [LifecycleStage.FINANCING]:            [LifecycleStage.ACTIVE_CONSTRUCTION, LifecycleStage.STRUCTURED],
   [LifecycleStage.ACTIVE_CONSTRUCTION]:  [LifecycleStage.COMPLETED, LifecycleStage.FINANCING],
-  [LifecycleStage.COMPLETED]:            [LifecycleStage.ACTIVE_CONSTRUCTION],
+  [LifecycleStage.COMPLETED]:            [],
 };
 
 // tasks.status (task_status_check)
