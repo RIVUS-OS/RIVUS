@@ -73,6 +73,7 @@ export default function CoreDashboard() {
     const { count: overdue } = await supabase
       .from("tasks")
       .select("*", { count: "exact", head: true })
+      .is("deleted_at", null)
       .neq("status", "Završen")
       .lt("due_date", todayISO);
 
@@ -81,6 +82,7 @@ export default function CoreDashboard() {
     const { count: mandatory } = await supabase
       .from("tasks")
       .select("*", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("is_mandatory", true)
       .neq("status", "Završen");
 
@@ -91,7 +93,7 @@ export default function CoreDashboard() {
     else setRiskLevel("Nizak");
 
     const { data: spvData } = await supabase.from("spvs").select("*");
-    const { data: tasks } = await supabase.from("tasks").select("*");
+    const { data: tasks } = await supabase.from("tasks").select("*").is("deleted_at", null);
     const { data: financeEntries } = await supabase.from("spv_finance_entries").select("*");
     const { data: activity } = await supabase.from("activity_log").select("*");
 

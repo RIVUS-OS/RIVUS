@@ -307,6 +307,7 @@ export async function fetchTasks(spvId?: string): Promise<Task[]> {
     `)
     .order("created_at", { ascending: false });
 
+  query = query.is("deleted_at", null);
   if (spvId) query = query.eq("spv_id", spvId);
 
   const { data, error } = await query;
@@ -385,6 +386,7 @@ export async function fetchTokRequests(spvId?: string): Promise<TokRequest[]> {
     `)
     .order("created_at", { ascending: false });
 
+  query = query.is("deleted_at", null);
   if (spvId) query = query.eq("spv_id", spvId);
 
   const { data, error } = await query;
@@ -526,8 +528,8 @@ export async function fetchDashboardCounts(): Promise<DashboardCounts> {
   const [spvRes, docRes, taskRes, tokRes, decRes, invRes] = await Promise.all([
     sb.from("spvs").select("is_blocked", { count: "exact" }),
     sb.from("documents").select("id", { count: "exact" }).eq("status", "čeka_pregled"),
-    sb.from("tasks").select("id", { count: "exact" }).in("status", ["otvoren", "u_tijeku"]),
-    sb.from("tok_requests").select("id", { count: "exact" }).in("status", ["otvoren", "u_tijeku", "eskaliran"]),
+    sb.from("tasks").select("id", { count: "exact" }).is("deleted_at", null).in("status", ["otvoren", "u_tijeku"]),
+    sb.from("tok_requests").select("id", { count: "exact" }).is("deleted_at", null).in("status", ["otvoren", "u_tijeku", "eskaliran"]),
     sb.from("decisions").select("id", { count: "exact" }).eq("status", "na_cekanju"),
     sb.from("invoices").select("id", { count: "exact" }).eq("status", "overdue"),
   ]);
