@@ -1,4 +1,4 @@
-import { supabaseServer } from '@/lib/supabaseServer'
+﻿import { supabaseServer } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 
 interface Check {
@@ -23,7 +23,7 @@ function CheckRow({ check }: { check: Check }) {
       <div className="flex items-center gap-3">
         <StatusDot status={check.status} />
         <span className="text-sm text-gray-700">{check.label}</span>
-        {check.note && <span className="text-xs text-gray-400">— {check.note}</span>}
+        {check.note && <span className="text-xs text-gray-400">â€” {check.note}</span>}
       </div>
       <span className="text-sm font-mono text-gray-500">{check.value}</span>
     </div>
@@ -131,7 +131,7 @@ export default async function DiagnosticsPage() {
     },
     {
       label: 'Zadnja DB verzija',
-      value: lastVersion?.version ?? '—',
+      value: lastVersion?.version ?? 'â€”',
       status: lastVersion ? 'ok' : 'error',
       note: lastVersion
         ? new Date(lastVersion.applied_at).toLocaleDateString('hr-HR')
@@ -148,8 +148,8 @@ export default async function DiagnosticsPage() {
 
   const overallLabel = {
     ok: 'Sustav spreman',
-    warn: 'Upozorenja — provjeri',
-    error: 'Kritične greške',
+    warn: 'Upozorenja â€” provjeri',
+    error: 'KritiÄne greÅ¡ke',
   }[overallStatus]
 
   const overallColor = {
@@ -159,8 +159,8 @@ export default async function DiagnosticsPage() {
   }[overallStatus]
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="mb-6">
+    <div className="space-y-6">
+      <div>
         <h1 className="text-2xl font-bold text-gray-900">Dijagnostika sustava</h1>
         <p className="text-sm text-gray-500 mt-1">
           Preflight provjera stanja RIVUS OS platforme
@@ -174,7 +174,7 @@ export default async function DiagnosticsPage() {
           <span className="font-semibold">{overallLabel}</span>
         </div>
         <div className="text-sm">
-          {okCount} OK · {warnCount} upozorenja · {errorCount} grešaka
+          {okCount} OK Â· {warnCount} upozorenja Â· {errorCount} greÅ¡aka
         </div>
       </div>
 
@@ -188,8 +188,9 @@ export default async function DiagnosticsPage() {
       {/* Disclaimer */}
       <p className="text-xs text-gray-400 text-center">
         RIVUS prikazuje stanje sustava kao informativni alat. Odgovornost za
-        izvršenje obveza ostaje na odgovornoj strani. ZTD čl. 240.
+        izvrÅ¡enje obveza ostaje na odgovornoj strani. ZTD Äl. 240.
       </p>
     </div>
   )
 }
+
