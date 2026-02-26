@@ -75,6 +75,10 @@ export default function IzdaniRacuniPage() {
 
   const filtered = filter === "SVE" ? invoices : invoices.filter(i => i.status === filter);
 
+  // v1.1.4c — HF-4: Derived storno status.
+  // Original invoice se ne mutira; storno status derivira se iz storno_of relacije.
+  const stornoedIds = new Set(invoices.filter(i => i.storno_of).map(i => i.storno_of!));
+
   async function changeStatus(invoice: Invoice, newStatus: string) {
     setUpdating(true);
     const { error } = await supabaseBrowser
@@ -158,6 +162,9 @@ export default function IzdaniRacuniPage() {
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_COLORS[inv.status] || "bg-gray-100"}`}>
                       {STATUS_LABELS[inv.status] || inv.status}
                     </span>
+                    {stornoedIds.has(inv.id) && inv.status !== "STORNO" && (
+                      <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800">Storniran</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -173,9 +180,14 @@ export default function IzdaniRacuniPage() {
             </div>
             <div className="space-y-2 text-[12px]">
               <div className="flex justify-between"><span className="text-black/50">Status</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_COLORS[selected.status]}`}>
-                  {STATUS_LABELS[selected.status]}
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_COLORS[selected.status]}`}>
+                    {STATUS_LABELS[selected.status]}
+                  </span>
+                  {stornoedIds.has(selected.id) && selected.status !== "STORNO" && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800">Storniran</span>
+                  )}
+                </div>
               </div>
               <div className="flex justify-between"><span className="text-black/50">Primatelj</span><span className="font-medium">{selected.receiver_name}</span></div>
               <div className="flex justify-between"><span className="text-black/50">Datum</span><span>{selected.invoice_date}</span></div>
@@ -185,7 +197,7 @@ export default function IzdaniRacuniPage() {
               <div className="flex justify-between border-t border-gray-100 pt-2 font-bold"><span>Ukupno</span><span>{selected.gross_amount.toFixed(2)} EUR</span></div>
             </div>
             <div className="space-y-2">
-              {NEXT_STATUS[selected.status] && (
+              {NEXT_STATUS[selected.status] && !stornoedIds.has(selected.id) && (
                 <button
                   onClick={() => changeStatus(selected, NEXT_STATUS[selected.status]!)}
                   disabled={updating}
@@ -193,7 +205,7 @@ export default function IzdaniRacuniPage() {
                   {STATUS_LABELS[NEXT_STATUS[selected.status]!]}
                 </button>
               )}
-              {!["STORNO","CANCELLED"].includes(selected.status) && (
+              {!["STORNO","CANCELLED"].includes(selected.status) && !stornoedIds.has(selected.id) && (
                 stornoId === selected.id ? (
                   <div className="space-y-1">
                     <p className="text-[11px] text-red-600 font-medium">Potvrdi storno?</p>

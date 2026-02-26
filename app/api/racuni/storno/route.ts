@@ -36,11 +36,18 @@ export async function POST(req: NextRequest) {
 
   if (fetchError || !original) return NextResponse.json({ error: 'Račun nije pronađen' }, { status: 404 })
 
-  if (['STORNO', 'CANCELLED'].includes(original.status)) {
+  // v1.1.4c — HF-4: Duplikat check preko storno_of relacije, ne preko statusa originala.
+  // Original se NIKAD ne mutira (MP 3.1 — immutable append-only).
+  const { data: existingStorno } = await supabase
+    .from('invoices')
+    .select('id')
+    .eq('storno_of', original_id)
+    .maybeSingle()
+
+  if (existingStorno) {
     return NextResponse.json({ error: 'Račun je već storniran' }, { status: 400 })
   }
 
-  const year = new Date().getFullYear()
   const storno_number = `STORNO-${original.invoice_number}-${Date.now().toString().slice(-4)}`
 
   const { data: storno, error: stornoError } = await supabase
@@ -71,12 +78,9 @@ export async function POST(req: NextRequest) {
 
   if (stornoError) return NextResponse.json({ error: stornoError.message }, { status: 500 })
 
-  // NOTE: Original invoice status update ostaje u v1.1.4b.
-  // HF-4 (immutability fix — uklanjanje ove mutacije) rjesava se u v1.1.4c.
-  await supabase
-    .from('invoices')
-    .update({ status: 'STORNO', updated_at: new Date().toISOString() })
-    .eq('id', original_id)
+  // v1.1.4c — HF-4: Original invoice se NE mijenja.
+  // Status originala ostaje kakav je bio (DRAFT, ISSUED, PAID...).
+  // Stornirani status derivira se iz postojanja storno dokumenta (storno_of relacija).
 
   await supabase.from('activity_log').insert({
     spv_id: original.spv_id,
