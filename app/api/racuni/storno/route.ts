@@ -1,9 +1,27 @@
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { NextRequest, NextResponse } from 'next/server'
+
+// v1.1.7a — P15a: Rate limit 5 req/min (MP §6.3)
+
 export async function POST(req: NextRequest) {
   const supabase = await supabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // --- Rate limit (MP §6.3: 5 req/min) ---
+  const rl = checkRateLimit(`storno:${user.id}`, RATE_LIMITS.RACUNI_STORNO.maxRequests, RATE_LIMITS.RACUNI_STORNO.windowMs)
+  if (!rl.allowed) {
+    await supabase.from('activity_log').insert({
+      action: 'RATE_LIMIT_HIT',
+      entity_type: 'invoice',
+      user_id: user.id,
+      severity: 'warning',
+      metadata: { endpoint: 'racuni/storno' },
+    })
+    return NextResponse.json({ error: 'Prekoracen limit zahtjeva (5/min)' }, { status: 429 })
+  }
+
   // P08 scope: samo CORE smije stornirati racune (v1.1.4b — HF-3)
   const { data: profile } = await supabase
     .from('user_profiles')
@@ -29,9 +47,8 @@ export async function POST(req: NextRequest) {
     .eq('id', original_id)
     .single()
   if (fetchError || !original) return NextResponse.json({ error: 'Racun nije pronaden' }, { status: 404 })
+
   // v1.1.6 — P14: Period lock enforcement (MP §10.2)
-  // "Storno u zakljucanom periodu nije dozvoljen."
-  // Storno kreira novi dokument u tekucem periodu, ali provjeravamo period ORIGINALA.
   const originalPeriod = String(original.invoice_date).slice(0, 7)
   const { data: lockCheck } = await supabase
     .from('period_locks')
@@ -53,8 +70,8 @@ export async function POST(req: NextRequest) {
       { status: 423 }
     )
   }
-  // v1.1.4c — HF-4: Duplikat check preko storno_of relacije, ne preko statusa originala.
-  // Original se NIKAD ne mutira (MP 3.1 — immutable append-only).
+
+  // v1.1.4c — HF-4: Duplikat check preko storno_of relacije
   const { data: existingStorno } = await supabase
     .from('invoices')
     .select('id')
@@ -90,9 +107,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
   if (stornoError) return NextResponse.json({ error: stornoError.message }, { status: 500 })
-  // v1.1.4c — HF-4: Original invoice se NE mijenja.
-  // Status originala ostaje kakav je bio (DRAFT, ISSUED, PAID...).
-  // Stornirani status derivira se iz postojanja storno dokumenta (storno_of relacija).
   await supabase.from('activity_log').insert({
     spv_id: original.spv_id,
     action: 'INVOICE_STORNO',

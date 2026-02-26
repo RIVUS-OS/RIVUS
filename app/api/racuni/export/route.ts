@@ -1,9 +1,9 @@
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { NextRequest, NextResponse } from 'next/server'
 
 // v1.1.5 — P13: CSV Export za eRacun posrednika
-// MP §5.3: /api/racuni/export
-// MP §9.2: OIB HARD GATE (ZPDV cl. 79) + audit = uvjet valjanosti
+// v1.1.7a — P15a: Rate limit 10 req/min (MP §6.3)
 
 const ALLOWED_ROLES = ['Core', 'SPV_Owner', 'Knjigovodja']
 
@@ -63,6 +63,19 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // --- Rate limit (MP §6.3: 10 req/min) ---
+  const rl = checkRateLimit(`export:${user.id}`, RATE_LIMITS.RACUNI_EXPORT.maxRequests, RATE_LIMITS.RACUNI_EXPORT.windowMs)
+  if (!rl.allowed) {
+    await supabase.from('activity_log').insert({
+      action: 'RATE_LIMIT_HIT',
+      entity_type: 'invoice',
+      user_id: user.id,
+      severity: 'warning',
+      metadata: { endpoint: 'racuni/export' },
+    })
+    return NextResponse.json({ error: 'Prekoracen limit zahtjeva (10/min)' }, { status: 429 })
   }
 
   // --- Role check (v1.1.4b pattern) ---

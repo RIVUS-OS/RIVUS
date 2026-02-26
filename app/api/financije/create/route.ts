@@ -1,5 +1,9 @@
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { NextRequest, NextResponse } from 'next/server'
+
+// v1.1.7a — P15a: Rate limit 60 req/min (MP §6.3)
+
 function roundHalfUp(value: number, decimals: number): number {
   const factor = Math.pow(10, decimals)
   return Math.round(value * factor) / factor
@@ -8,6 +12,20 @@ export async function POST(req: NextRequest) {
   const supabase = await supabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // --- Rate limit (MP §6.3: 60 req/min) ---
+  const rl = checkRateLimit(`financije:${user.id}`, RATE_LIMITS.FINANCIJE.maxRequests, RATE_LIMITS.FINANCIJE.windowMs)
+  if (!rl.allowed) {
+    await supabase.from('activity_log').insert({
+      action: 'RATE_LIMIT_HIT',
+      entity_type: 'FINANCE_ENTRY',
+      user_id: user.id,
+      severity: 'warning',
+      metadata: { endpoint: 'financije/create' },
+    })
+    return NextResponse.json({ error: 'Prekoracen limit zahtjeva (60/min)' }, { status: 429 })
+  }
+
   // P08 scope: samo CORE smije kreirati finance entries (v1.1.4b — HF-2)
   const { data: profile } = await supabase
     .from('user_profiles')
@@ -37,7 +55,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Neispravna PDV stopa' }, { status: 400 })
   }
   // v1.1.6 — P14: Period lock enforcement (MP §10.3)
-  // "Nijedan finance_entry ne moze biti kreiran ili storniran u zakljucanom periodu."
   const entryPeriod = String(datum).slice(0, 7)
   const { data: lockCheck } = await supabase
     .from('period_locks')
@@ -80,9 +97,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  // v1.1.4b — HF-1: Audit metadata minimization (MP 3.2)
-  // Dozvoljeno: entity_id, action, entry_type, field_count
-  // Zabranjeno: iznosi, OIB, imena
   await supabase.from('activity_log').insert({
     spv_id,
     action: 'FINANCE_ENTRY_CREATED',
