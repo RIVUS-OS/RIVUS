@@ -1,0 +1,68 @@
+import { supabaseServer } from '@/lib/supabaseServer'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(req: NextRequest) {
+  const supabase = await supabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { original_id } = await req.json()
+  if (!original_id) return NextResponse.json({ error: 'original_id obavezan' }, { status: 400 })
+
+  const { data: original, error: fetchError } = await supabase
+    .from('invoices')
+    .select('*')
+    .eq('id', original_id)
+    .single()
+
+  if (fetchError || !original) return NextResponse.json({ error: 'Račun nije pronađen' }, { status: 404 })
+
+  if (['STORNO', 'CANCELLED'].includes(original.status)) {
+    return NextResponse.json({ error: 'Račun je već storniran' }, { status: 400 })
+  }
+
+  const year = new Date().getFullYear()
+  const storno_number = `STORNO-${original.invoice_number}-${Date.now().toString().slice(-4)}`
+
+  const { data: storno, error: stornoError } = await supabase
+    .from('invoices')
+    .insert({
+      spv_id: original.spv_id,
+      invoice_number: storno_number,
+      direction: original.direction,
+      issuer_name: original.issuer_name,
+      issuer_oib: original.issuer_oib,
+      receiver_name: original.receiver_name,
+      receiver_oib: original.receiver_oib,
+      net_amount: -Math.abs(original.net_amount),
+      pdv_rate: original.pdv_rate,
+      pdv_amount: -Math.abs(original.pdv_amount),
+      gross_amount: -Math.abs(original.gross_amount),
+      invoice_date: new Date().toISOString().split('T')[0],
+      category: original.category,
+      notes: `Storno računa ${original.invoice_number}`,
+      items: original.items || [],
+      issuer_entity: 'CORE',
+      status: 'STORNO',
+      storno_of: original.id,
+      created_by: user.id
+    })
+    .select()
+    .single()
+
+  if (stornoError) return NextResponse.json({ error: stornoError.message }, { status: 500 })
+
+  await supabase
+    .from('invoices')
+    .update({ status: 'STORNO', updated_at: new Date().toISOString() })
+    .eq('id', original_id)
+
+  await supabase.from('activity_log').insert({
+    spv_id: original.spv_id,
+    action: 'INVOICE_STORNO',
+    actor_id: user.id,
+    metadata: { original_id, storno_id: storno.id, storno_number }
+  })
+
+  return NextResponse.json({ data: storno })
+}
