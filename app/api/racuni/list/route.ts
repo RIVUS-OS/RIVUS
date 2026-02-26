@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     .from('invoices')
     .select('*')
     .eq('spv_id', spv_id)
+    .is('deleted_at', null)
     .order('invoice_date', { ascending: false })
 
   if (direction) query = query.eq('direction', direction)
