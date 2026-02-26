@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -74,7 +74,7 @@ export default function CoreDashboard() {
       .from("tasks")
       .select("*", { count: "exact", head: true })
       .is("deleted_at", null)
-      .neq("status", "ZavrÅ¡en")
+      .neq("status", "Zavrsen")
       .lt("due_date", todayISO);
 
     setOverdueTasks(overdue || 0);
@@ -84,7 +84,7 @@ export default function CoreDashboard() {
       .select("*", { count: "exact", head: true })
       .is("deleted_at", null)
       .eq("is_mandatory", true)
-      .neq("status", "ZavrÅ¡en");
+      .neq("status", "Zavrsen");
 
     setMandatoryOpen(mandatory || 0);
 
@@ -94,21 +94,21 @@ export default function CoreDashboard() {
 
     const { data: spvData } = await supabase.from("spvs").select("*").is("deleted_at", null);
     const { data: tasks } = await supabase.from("tasks").select("*").is("deleted_at", null);
-    const { data: financeEntries } = await supabase.from("spv_finance_entries").select("*");
-    const { data: activity } = await supabase.from("activity_log").select("*");
+    const { data: financeEntries } = await supabase.from("spv_finance_entries").select("*").is("deleted_at", null);
+    const { data: activity } = await supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(100);
 
     const enriched = (spvData || []).map((spv: any) => {
       const spvTasks = (tasks || []).filter((t: any) => t.spv_id === spv.id);
 
       const overdueCount = spvTasks.filter(
         (t: any) =>
-          t.status !== "ZavrÅ¡en" &&
+          t.status !== "Zavrsen" &&
           t.due_date &&
           new Date(t.due_date) < new Date()
       ).length;
 
       const mandatoryCount = spvTasks.filter(
-        (t: any) => t.status !== "ZavrÅ¡en" && t.is_mandatory
+        (t: any) => t.status !== "Zavrsen" && t.is_mandatory
       ).length;
 
       const riskScore = calculateRiskScore(overdueCount, mandatoryCount, 0, overdueCount > 0);
@@ -137,31 +137,31 @@ export default function CoreDashboard() {
   function navigateToPill(filter: string) {
     switch (filter) {
       case "active":
-        router.push("/dashboard/core/spvs");
+        router.push("/dashboard/core/projekti");
         break;
 
       case "blocked":
-        router.push("/dashboard/core/spvs");
+        router.push("/dashboard/core/blokade");
         break;
 
       case "overdue":
-        router.push("/dashboard/core/tasks?filter=overdue");
+        router.push("/dashboard/core/blokade");
         break;
 
       case "mandatory":
-        router.push("/dashboard/core/tasks?filter=mandatory");
+        router.push("/dashboard/core/mandatory");
         break;
 
       case "risk":
         if (riskLevel === "Visok" || riskLevel === "Srednji") {
-          router.push("/dashboard/core/tasks?filter=overdue");
+          router.push("/dashboard/core/blokade");
         } else {
-          router.push("/dashboard/core/spvs");
+          router.push("/dashboard/core/projekti");
         }
         break;
 
       default:
-        router.push("/dashboard/core/spvs");
+        router.push("/dashboard/core/projekti");
         break;
     }
   }
@@ -169,10 +169,10 @@ export default function CoreDashboard() {
   return (
     <div className="space-y-5 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-black">Nadzorna ploÄa</h1>
+        <h1 className="text-[22px] font-bold text-black">Nadzorna ploca</h1>
 
         <button
-          onClick={() => router.push("/dashboard/core/spvs")}
+          onClick={() => router.push("/dashboard/core/projekti")}
           className="apple-blue-btn px-4 py-2 rounded-lg text-[13px] flex items-center gap-2"
         >
           <Plus size={16} />
@@ -212,6 +212,3 @@ export default function CoreDashboard() {
     </div>
   );
 }
-
-
-

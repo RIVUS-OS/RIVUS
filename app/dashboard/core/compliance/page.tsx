@@ -131,7 +131,7 @@ export default async function DiagnosticsPage() {
     },
     {
       label: 'Zadnja DB verzija',
-      value: lastVersion?.version ?? 'â€”',
+      value: lastVersion?.version ?? '--',
       status: lastVersion ? 'ok' : 'error',
       note: lastVersion
         ? new Date(lastVersion.applied_at).toLocaleDateString('hr-HR')
