@@ -26,12 +26,20 @@ export async function POST(req: NextRequest) {
   const pdv = Math.round(neto * (stopa / 100) * 100) / 100
   const bruto = Math.round((neto + pdv) * 100) / 100
 
-  // Auto invoice number
+  // Auto invoice number iz DB sequence
   const year = new Date(invoice_date).getFullYear()
-  const { data: seqData } = await supabase.rpc('nextval', { seq: 'invoice_seq' }).single()
-  const seq = seqData || Date.now()
-  const prefix = direction === 'IZDANI' ? 'R' : 'URA'
-  const invoice_number = `${prefix}-${year}-${String(seq).padStart(3, '0')}`
+  const seqName = `invoice_seq_${year}`
+  const { data: seqData, error: seqError } = await supabase
+    .rpc('get_next_invoice_number', { seq_name: seqName, year_val: year, direction_val: direction })
+
+  if (seqError || !seqData) {
+    // Fallback: timestamp-based
+    const fallback = Date.now().toString().slice(-6)
+    const prefix = direction === 'IZDANI' ? 'R' : 'URA'
+    var invoice_number = `${prefix}-${year}-${fallback}`
+  } else {
+    var invoice_number = seqData as string
+  }
 
   const { data, error } = await supabase
     .from('invoices')
