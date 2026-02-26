@@ -112,11 +112,11 @@ export async function POST(request: NextRequest) {
     entity_type: 'SPV',
     entity_id: spv.id,
     user_id: user.id,
+    // v1.1.4b — HF-1: Audit metadata minimization (MP 3.2)
+    // Dozvoljeno: entity_id, action, status flags
+    // Zabranjeno: OIB, imena, adrese
     metadata: {
-      project_name: spv.project_name,
-      oib: spv.oib,
-      city: spv.city,
-      owner_name: spv.owner_name,
+      entity_id: spv.id,
       platform_status: 'ACTIVE',
       lifecycle_stage: 'Created',
     },

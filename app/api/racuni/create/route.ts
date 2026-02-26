@@ -6,6 +6,25 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // P08 scope: samo CORE smije kreirati racune (v1.1.4b — HF-3)
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'Core') {
+    await supabase.from('activity_log').insert({
+      action: 'INVOICE_CREATE_BLOCKED',
+      entity_type: 'INVOICE',
+      user_id: user.id,
+      spv_id: null,
+      severity: 'warning',
+      metadata: { reason: 'Insufficient role' },
+    })
+    return NextResponse.json({ error: 'Samo CORE rola smije kreirati racune (P08)' }, { status: 403 })
+  }
+
   const body = await req.json()
   const {
     spv_id, direction, issuer_name, issuer_oib,
@@ -70,11 +89,14 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  // v1.1.4b — HF-1: Audit metadata minimization (MP 3.2)
+  // Dozvoljeno: entity_id, action, direction
+  // Zabranjeno: iznosi, OIB, imena
   await supabase.from('activity_log').insert({
     spv_id,
     action: 'INVOICE_CREATED',
     actor_id: user.id,
-    metadata: { invoice_number, direction, neto, pdv, bruto }
+    metadata: { entity_id: data.id, invoice_number, direction }
   })
 
   return NextResponse.json({ data })

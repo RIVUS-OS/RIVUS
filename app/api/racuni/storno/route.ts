@@ -6,6 +6,25 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // P08 scope: samo CORE smije stornirati racune (v1.1.4b — HF-3)
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'Core') {
+    await supabase.from('activity_log').insert({
+      action: 'INVOICE_STORNO_BLOCKED',
+      entity_type: 'INVOICE',
+      user_id: user.id,
+      spv_id: null,
+      severity: 'warning',
+      metadata: { reason: 'Insufficient role' },
+    })
+    return NextResponse.json({ error: 'Samo CORE rola smije stornirati racune (P08)' }, { status: 403 })
+  }
+
   const { original_id } = await req.json()
   if (!original_id) return NextResponse.json({ error: 'original_id obavezan' }, { status: 400 })
 
@@ -52,6 +71,8 @@ export async function POST(req: NextRequest) {
 
   if (stornoError) return NextResponse.json({ error: stornoError.message }, { status: 500 })
 
+  // NOTE: Original invoice status update ostaje u v1.1.4b.
+  // HF-4 (immutability fix — uklanjanje ove mutacije) rjesava se u v1.1.4c.
   await supabase
     .from('invoices')
     .update({ status: 'STORNO', updated_at: new Date().toISOString() })
