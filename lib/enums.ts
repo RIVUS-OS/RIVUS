@@ -61,9 +61,10 @@ export const InvoiceStatus = {
 } as const;
 
 // invoices.direction (invoices_direction_check)
+// v1.1.4d — M-1: Uskladjeno s DB CHECK invoices_direction_check
 export const InvoiceDirection = {
-  INCOMING: 'ulazni',
-  OUTGOING: 'izlazni',
+  IZDANI: 'IZDANI',
+  PRIMLJENI: 'PRIMLJENI',
 } as const;
 
 // invoices.category (invoices_category_check)
@@ -137,7 +138,8 @@ export const Severity = {
 } as const;
 
 // spv_finance_entries.entry_type (spv_finance_entries_entry_type_check)
-export const FinanceEntryType = { INCOME: 'INCOME', EXPENSE: 'EXPENSE' } as const;
+// v1.1.4d — M-2: Uskladjeno s DB CHECK entry_type_check
+export const FinanceEntryType = { PRIHOD: 'PRIHOD', RASHOD: 'RASHOD' } as const;
 
 // spv_finance_entries.status (spv_finance_entries_status_check)
 export const FinanceEntryStatus = {
