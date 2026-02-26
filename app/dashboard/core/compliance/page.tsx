@@ -1,4 +1,4 @@
-﻿import { supabaseServer } from '@/lib/supabaseServer'
+import { supabaseServer } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 
 interface Check {
@@ -188,7 +188,7 @@ export default async function DiagnosticsPage() {
       {/* Disclaimer */}
       <p className="text-xs text-gray-400 text-center">
         RIVUS prikazuje stanje sustava kao informativni alat. Odgovornost za
-        izvrÅ¡enje obveza ostaje na odgovornoj strani. ZTD Äl. 240.
+        izvrsenje obveza ostaje na odgovornoj strani. ZTD cl. 240.
       </p>
     </div>
   )

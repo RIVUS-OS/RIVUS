@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useParams, useRouter } from "next/navigation";
 import {
   useSpvById,
@@ -48,9 +48,9 @@ export default function OwnerSpvPage() {
   const unpaidIssued = issued.filter(
     (i: any) => i.status !== "placen" && i.status !== "storniran"
   );
-  const openTasks = tasks.filter((t: any) => t.status !== "zavrÅ¡en");
+  const openTasks = tasks.filter((t: any) => t.status !== "zavrsen");
   const pendingDecisions = decisions.filter(
-    (d: any) => d.status === "na_Äekanju"
+    (d: any) => d.status === "na_cekanju"
   );
   const openTok = tokRequests.filter(
     (t: any) =>
