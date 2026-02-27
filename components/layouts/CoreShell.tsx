@@ -337,7 +337,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           >
             <span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.1</div>
+          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.2</div>
         </div>
       </aside>
 

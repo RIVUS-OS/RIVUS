@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
   await supabase.from('activity_log').insert({
     spv_id,
     action: 'INVOICE_CREATED',
-    actor_id: user.id,
+    user_id: user.id,
     metadata: { entity_id: data.id, invoice_number, direction }
   })
   return NextResponse.json({ data })

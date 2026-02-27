@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     .from('invoices')
     .select('*')
     .eq('id', original_id)
+    .is('deleted_at', null)
     .single()
   if (fetchError || !original) return NextResponse.json({ error: 'Racun nije pronaden' }, { status: 404 })
 
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
     .from('invoices')
     .select('id')
     .eq('storno_of', original_id)
+    .is('deleted_at', null)
     .maybeSingle()
   if (existingStorno) {
     return NextResponse.json({ error: 'Racun je vec storniran' }, { status: 400 })
@@ -110,7 +112,7 @@ export async function POST(req: NextRequest) {
   await supabase.from('activity_log').insert({
     spv_id: original.spv_id,
     action: 'INVOICE_STORNO',
-    actor_id: user.id,
+    user_id: user.id,
     metadata: { original_id, storno_id: storno.id, storno_number }
   })
   return NextResponse.json({ data: storno })
