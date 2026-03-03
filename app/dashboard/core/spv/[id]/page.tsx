@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -7,12 +7,25 @@ import { LifecycleStepper } from "@/components/LifecycleStepper";
 import { LifecycleChanger } from "@/components/enforcement/LifecycleChanger";
 import { useSpvById, useIssuedInvoices, useReceivedInvoices, useTasks, useDocuments, useDecisions, useTokRequests, useActivityLog, useAccountantBySpv, useVerticalsBySpv, useMissingDocs, formatEur } from "@/lib/data-client";
 
+// P19 Hooks
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+
 export default function SpvCommandPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const { data: spv } = useSpvById(id);
 
+  // P19: Platform mode + permission check
+  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
+  const { allowed: canRead, loading: permLoading, role } = usePermission('spv_detail_read');
+
+  const writeDisabled = isSafe || isLockdown || isForensic;
+
+  const { data: spv } = useSpvById(id);
   const { data: issued } = useIssuedInvoices(id);
   const { data: received } = useReceivedInvoices(id);
   const { data: tasks } = useTasks(id);
@@ -24,6 +37,19 @@ export default function SpvCommandPage() {
   const { data: verticals } = useVerticalsBySpv(id);
   const { data: _raw_missingDocs } = useMissingDocs();
   const missingDocs = _raw_missingDocs.filter(d => d.spvId === id);
+
+  // P19: Audit log SPV detail access
+  useEffect(() => {
+    if (!permLoading && canRead && id) {
+      logAudit({
+        action: 'SPV_DETAIL_VIEW',
+        entity_type: 'spv',
+        entity_id: id,
+        spv_id: id,
+        details: { context: 'control_room' },
+      });
+    }
+  }, [permLoading, canRead, id]);
 
   const unpaidIssued = issued.filter(i => {
     const s = i.status as string;
@@ -43,6 +69,16 @@ export default function SpvCommandPage() {
   const handleExport = async () => {
     setExporting(true);
     try {
+      // P19: Audit export action
+      await logAudit({
+        action: 'SPV_EXPORT',
+        entity_type: 'spv',
+        entity_id: id,
+        spv_id: id,
+        details: { context: 'control_room', export_type: 'zip' },
+        severity: 'info',
+      });
+
       await exportSpvZip({
         spv: spv as unknown as Record<string, unknown>,
         issued: issued as unknown as Record<string, unknown>[],
@@ -60,6 +96,27 @@ export default function SpvCommandPage() {
     setExporting(false);
   };
 
+  // P19: Permission denied
+  if (!permLoading && !canRead) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
+          <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za pregled ovog SPV-a.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (modeLoading || permLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   if (!spv) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -74,6 +131,13 @@ export default function SpvCommandPage() {
         <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
           <div className="text-[14px] font-bold text-red-700">SPV BLOKIRAN</div>
           <div className="text-[13px] text-red-600 mt-1">{spv.blockReason}</div>
+        </div>
+      )}
+
+      {/* P19: CORE role separation notice */}
+      {role === 'Core' && (
+        <div className="px-3 py-2 rounded-lg bg-blue-50 border border-blue-100 text-[12px] text-blue-700">
+          CORE pogled — samo citanje. Financije, dokumenti i zadaci upravljaju se kroz Owner Cockpit.
         </div>
       )}
 
@@ -102,7 +166,14 @@ export default function SpvCommandPage() {
             <div className="text-[11px] text-black/40 mb-1">Lifecycle faza</div>
             <div className="text-[14px] font-bold text-black">{spv.lifecycle_stage || "N/A"}</div>
           </div>
-          <LifecycleChanger spvId={id} currentStage={spv.lifecycle_stage || ""} />
+          {/* P19: Lifecycle change disabled in SAFE/LOCKDOWN */}
+          {!writeDisabled ? (
+            <LifecycleChanger spvId={id} currentStage={spv.lifecycle_stage || ""} />
+          ) : (
+            <div className="px-3 py-1.5 rounded-lg bg-gray-100 text-[12px] text-gray-400 cursor-not-allowed">
+              Promjena onemogucena
+            </div>
+          )}
         </div>
       </div>
 
@@ -218,8 +289,13 @@ export default function SpvCommandPage() {
           </div>
         </div>
       </div>
+
+      {/* P19: Disclaimer (PAGE-SPEC v3.0 obavezan) */}
+      <p className="text-xs text-gray-400 mt-8 text-center">
+        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
+        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
+        RIVUS ne pruza pravne, porezne niti financijske savjete.
+      </p>
     </div>
   );
 }
-
-
