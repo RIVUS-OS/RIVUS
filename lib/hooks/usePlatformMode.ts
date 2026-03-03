@@ -1,5 +1,5 @@
 // RIVUS v1.2.7 — P19: usePlatformMode Hook
-// Cita platform_status iz platform_config tablice.
+// Cita platform_mode iz platform_config tablice.
 // Svaka stranica u Bloku B MORA koristiti ovaj hook (A13-K9).
 'use client';
 
@@ -58,7 +58,7 @@ export function usePlatformMode(): PlatformModeState {
       const { data, error: dbError } = await supabaseBrowser
         .from('platform_config')
         .select('value')
-        .eq('key', 'platform_status')
+        .eq('key', 'platform_mode')
         .single();
 
       if (dbError) {
@@ -100,7 +100,7 @@ export function usePlatformMode(): PlatformModeState {
           event: 'UPDATE',
           schema: 'public',
           table: 'platform_config',
-          filter: 'key=eq.platform_status',
+          filter: 'key=eq.platform_mode',
         },
         (payload) => {
           const newVal = payload.new?.value as string;

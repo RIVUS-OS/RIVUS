@@ -122,12 +122,12 @@ export async function logAudit({
     const { error: dbError } = await supabaseBrowser
       .from('activity_log')
       .insert({
-        actor_id: user.id,
+        user_id: user.id,
         action,
         entity_type: entity_type ?? null,
         entity_id: entity_id ?? null,
         spv_id: spv_id ?? null,
-        details: finalDetails,
+        metadata: finalDetails,
         severity,
       });
 
@@ -166,7 +166,7 @@ export async function auditAndExecute<T>(
       ...auditParams,
       action: auditParams.action + '_FAILED',
       severity: 'warning',
-      details: { ...auditParams.details, error: String(e) },
+      metadata: { ...auditParams.details, error: String(e) },
     });
     throw e;
   }
