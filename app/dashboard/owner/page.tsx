@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import {
   useSpvs,
   useOpenTasks,
@@ -13,8 +15,16 @@ import {
   formatEur,
 } from "@/lib/data-client";
 
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
+
 export default function OwnerDashboardPage() {
   const router = useRouter();
+
+  const { isSafe, isLockdown, loading: modeLoading } = usePlatformMode();
+  const { allowed, loading: permLoading } = usePermission('owner_dashboard');
+
   const { data: spvs, loading } = useSpvs();
   const { data: openTasks } = useOpenTasks();
   const { data: unpaid } = useUnpaidInvoices();
@@ -24,12 +34,29 @@ export default function OwnerDashboardPage() {
   const { data: activity } = useActivityLog(undefined, 8);
   const { data: missingDocs } = useMissingDocs();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-[14px] text-black/40">Ucitavanje...</div>
-      </div>
-    );
+  useEffect(() => {
+    if (!permLoading && allowed) {
+      logAudit({ action: 'OWNER_DASHBOARD_VIEW', entity_type: 'owner_dashboard', details: { context: 'owner_cockpit' } });
+    }
+  }, [permLoading, allowed]);
+
+  if (!permLoading && !allowed) {
+    return (<div className="flex items-center justify-center h-64"><div className="text-center">
+      <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
+      <p className="text-sm text-gray-500 mt-1">Nemate Owner pristup.</p>
+    </div></div>);
+  }
+
+  if (modeLoading || permLoading || loading) {
+    return (<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>);
+  }
+
+  // P19: Lockdown redirect notice
+  if (isLockdown) {
+    return (<div className="flex items-center justify-center h-64"><div className="text-center">
+      <p className="text-lg font-semibold text-red-700">Sustav u Lockdown modu</p>
+      <p className="text-sm text-gray-500 mt-1">Kontaktirajte CORE administratora.</p>
+    </div></div>);
   }
 
   const totalBudget = spvs.reduce((s, p) => s + (p.totalBudget || 0), 0);
@@ -60,6 +87,13 @@ export default function OwnerDashboardPage() {
         <p className="text-[13px] text-black/50 mt-0.5">Pregled svih projekata i operativnog stanja</p>
       </div>
 
+      {/* P19: Safe Mode banner */}
+      {isSafe && (
+        <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-[12px] text-amber-700">
+          Sustav u Safe Mode — samo citanje aktivno. Kontaktirajte CORE.
+        </div>
+      )}
+
       {/* KPI */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
@@ -76,11 +110,7 @@ export default function OwnerDashboardPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
           <div className="text-[13px] font-semibold text-amber-800">Zahtijeva paznju</div>
           {alerts.map((a) => (
-            <div
-              key={a.label}
-              onClick={() => router.push(a.path)}
-              className="flex items-center justify-between text-[12px] cursor-pointer hover:bg-amber-100/50 rounded px-2 py-1"
-            >
+            <div key={a.label} onClick={() => router.push(a.path)} className="flex items-center justify-between text-[12px] cursor-pointer hover:bg-amber-100/50 rounded px-2 py-1">
               <span className={`font-medium ${a.color}`}>{a.label}</span>
               <span className="font-bold text-black/70">{a.count}</span>
             </div>
@@ -92,49 +122,28 @@ export default function OwnerDashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[16px] font-bold text-black">Projekti</h2>
-          <button
-            onClick={() => router.push("/dashboard/owner/projekti")}
-            className="text-[12px] text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Svi projekti &rarr;
-          </button>
+          <button onClick={() => router.push("/dashboard/owner/projekti")} className="text-[12px] text-blue-600 hover:text-blue-700 font-medium">Svi projekti &rarr;</button>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
           <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-3 py-2.5 font-semibold text-black/70">Naziv</th>
-                <th className="text-left px-3 py-2.5 font-semibold text-black/70">Grad</th>
-                <th className="text-left px-3 py-2.5 font-semibold text-black/70">Faza</th>
-                <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
-                <th className="text-right px-3 py-2.5 font-semibold text-black/70">Budzet</th>
-              </tr>
-            </thead>
+            <thead><tr className="border-b border-gray-100 bg-gray-50/50">
+              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Naziv</th>
+              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Grad</th>
+              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Faza</th>
+              <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
+              <th className="text-right px-3 py-2.5 font-semibold text-black/70">Budzet</th>
+            </tr></thead>
             <tbody>
               {spvs.map((p) => (
-                <tr
-                  key={p.id}
-                  onClick={() => router.push("/dashboard/owner/spv/" + p.id)}
-                  className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer"
-                >
+                <tr key={p.id} onClick={() => router.push("/dashboard/owner/spv/" + p.id)} className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer">
                   <td className="px-3 py-2.5 font-medium text-black">{p.name}</td>
                   <td className="px-3 py-2.5 text-black/50">{p.city}</td>
                   <td className="px-3 py-2.5 text-black/70">{p.phase}</td>
-                  <td className="px-3 py-2.5 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[p.status] || "bg-gray-100"}`}>
-                      {p.status}
-                    </span>
-                  </td>
+                  <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[p.status] || "bg-gray-100"}`}>{p.status}</span></td>
                   <td className="px-3 py-2.5 text-right font-medium">{formatEur(p.totalBudget)}</td>
                 </tr>
               ))}
-              {spvs.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-black/40">
-                    Nema projekata
-                  </td>
-                </tr>
-              )}
+              {spvs.length === 0 && (<tr><td colSpan={5} className="px-3 py-8 text-center text-black/40">Nema projekata</td></tr>)}
             </tbody>
           </table>
         </div>
@@ -157,6 +166,12 @@ export default function OwnerDashboardPage() {
           </div>
         </div>
       )}
+
+      <p className="text-xs text-gray-400 mt-8 text-center">
+        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
+        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
+        RIVUS ne pruza pravne, porezne niti financijske savjete.
+      </p>
     </div>
   );
 }
