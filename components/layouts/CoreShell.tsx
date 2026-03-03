@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSpvById } from "@/lib/data-client";
 import { useState } from "react";
+import { PlatformStatusBanner } from '@/components/ui/PlatformStatusBanner';
 import {
   Home, Shield, Building2, BarChart3, Landmark, Euro, FileText,
   FolderOpen, CheckSquare, Download, Users, Bell, Settings, Eye,
@@ -58,10 +59,6 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   ];
 
   // === SIDEBAR: SPV DETAIL ===
-  
-
-  // === SIDEBAR: CORE D.O.O. ===
-    // === SIDEBAR: SPV DETAIL ===
   const spvSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
@@ -103,7 +100,6 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "Prihodi", href: "/dashboard/core/prihodi", icon: Euro },
         { label: "Rashodi", href: "/dashboard/core/rashodi", icon: DollarSign },
         { label: "Rezultat (P&L)", href: "/dashboard/core/neto", icon: BarChart3 },
-
       ],
     },
     {
@@ -268,7 +264,6 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               <div className="text-[11px] font-semibold text-[#007AFF] uppercase">SPV</div>
               <div className="text-[14px] font-bold text-black mt-0.5">{spvData?.code || "..."}</div>
               <div className="text-[12px] text-black/50 truncate">{spvData?.name || ""}</div>
-              
             </div>
           )}
 
@@ -337,7 +332,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           >
             <span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.2</div>
+          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.7</div>
         </div>
       </aside>
 
@@ -414,9 +409,11 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto bg-[#f5f5f7] p-6">{children}</div>
+        <div className="flex-1 overflow-auto bg-[#f5f5f7]">
+          <PlatformStatusBanner />
+          <div className="p-6">{children}</div>
+        </div>
       </main>
     </div>
   );
 }
-

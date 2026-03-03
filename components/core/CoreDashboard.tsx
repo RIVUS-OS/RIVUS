@@ -4,13 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
+// P19 Hooks
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
+
 import { RiskEnginePanel, calculateRiskScore, getRiskLevel } from "./RiskEnginePanel";
 import { NextActionPanel, generateNextActions } from "./NextActionPanel";
 import { LifecycleFunnelPanel, generateLifecycleData } from "./LifecycleFunnelPanel";
 import { FinancialExposurePanel, generateFinancialData } from "./FinancialExposurePanel";
 import { IntelligentEventLogPanel, generateIntelligentEvents } from "./IntelligentEventLogPanel";
 
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 
 function dot(tone: "green" | "yellow" | "red") {
   if (tone === "green") return "bg-emerald-500";
@@ -44,6 +49,12 @@ function SystemPill({
 export default function CoreDashboard() {
   const router = useRouter();
 
+  // P19: Platform mode + permission check
+  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
+  const { allowed: canAccessDashboard, loading: permLoading } = usePermission('core_dashboard');
+
+  const writeDisabled = isSafe || isLockdown || isForensic;
+
   const [spvCount, setSpvCount] = useState(0);
   const [blockedSpvCount, setBlockedSpvCount] = useState(0);
   const [overdueTasks, setOverdueTasks] = useState(0);
@@ -57,8 +68,38 @@ export default function CoreDashboard() {
   const [intelligentEvents, setIntelligentEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (!permLoading && canAccessDashboard) {
+      loadDashboardData();
+
+      // P19: Audit log dashboard access
+      logAudit({
+        action: 'CORE_DASHBOARD_VIEW',
+        entity_type: 'dashboard',
+        details: { context: 'control_room' },
+      });
+    }
+  }, [permLoading, canAccessDashboard]);
+
+  // P19: Permission denied
+  if (!permLoading && !canAccessDashboard) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
+          <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za Control Room dashboard.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (modeLoading || permLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
   async function loadDashboardData() {
     const supabase = supabaseBrowser;
@@ -139,19 +180,15 @@ export default function CoreDashboard() {
       case "active":
         router.push("/dashboard/core/projekti");
         break;
-
       case "blocked":
         router.push("/dashboard/core/blokade");
         break;
-
       case "overdue":
         router.push("/dashboard/core/blokade");
         break;
-
       case "mandatory":
         router.push("/dashboard/core/mandatory");
         break;
-
       case "risk":
         if (riskLevel === "Visok" || riskLevel === "Srednji") {
           router.push("/dashboard/core/blokade");
@@ -159,7 +196,6 @@ export default function CoreDashboard() {
           router.push("/dashboard/core/projekti");
         }
         break;
-
       default:
         router.push("/dashboard/core/projekti");
         break;
@@ -172,8 +208,14 @@ export default function CoreDashboard() {
         <h1 className="text-[22px] font-bold text-black">Nadzorna ploca</h1>
 
         <button
-          onClick={() => router.push("/dashboard/core/projekti")}
-          className="apple-blue-btn px-4 py-2 rounded-lg text-[13px] flex items-center gap-2"
+          onClick={() => !writeDisabled && router.push("/dashboard/core/projekti")}
+          disabled={writeDisabled}
+          className={`px-4 py-2 rounded-lg text-[13px] flex items-center gap-2 transition-colors ${
+            writeDisabled
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'apple-blue-btn'
+          }`}
+          title={writeDisabled ? 'Write operacije blokirane u trenutnom modu' : undefined}
         >
           <Plus size={16} />
           Dodaj SPV
@@ -209,6 +251,13 @@ export default function CoreDashboard() {
       )}
 
       <IntelligentEventLogPanel events={intelligentEvents} />
+
+      {/* P19: Disclaimer (PAGE-SPEC v3.0 obavezan) */}
+      <p className="text-xs text-gray-400 mt-8 text-center">
+        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
+        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
+        RIVUS ne pruza pravne, porezne niti financijske savjete.
+      </p>
     </div>
   );
 }
