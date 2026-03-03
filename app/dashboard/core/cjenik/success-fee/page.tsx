@@ -1,4 +1,0 @@
-﻿"use client";
-export default function CjenikSuccessFeePage() {
-  return (<div className="space-y-6"><div><h1 className="text-[22px] font-bold text-black">Cjenik - Success Fee</h1></div><div className="bg-white rounded-xl border border-gray-200 p-6"><div className="text-center"><div className="text-3xl font-bold text-green-600">3-5%</div><div className="text-[14px] text-black/50 mt-2">od prodajne cijene nekretnine</div></div><div className="mt-6 pt-4 border-t border-gray-100 space-y-2 text-[12px]"><div className="flex justify-between"><span className="text-black/50">Minimalni fee</span><span className="font-bold">5.000 EUR</span></div><div className="flex justify-between"><span className="text-black/50">Obracun</span><span className="font-bold">Po realizaciji prodaje</span></div><div className="flex justify-between"><span className="text-black/50">Rok placanja</span><span className="font-bold">15 dana od realizacije</span></div></div></div></div>);
-}
