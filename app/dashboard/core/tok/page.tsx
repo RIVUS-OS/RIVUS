@@ -1,105 +1,74 @@
-﻿"use client";
+"use client";
 
-import { useTokRequests, useOpenTokRequests, useEscalatedTok, useSlaBreached } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
-const statusColors: Record<string, string> = {
-  "otvoren": "bg-blue-100 text-blue-700",
-  "u_tijeku": "bg-amber-100 text-amber-700",
-  "rijesen": "bg-green-100 text-green-700",
-  "eskaliran": "bg-red-100 text-red-700",
-  "zatvoren": "bg-gray-100 text-gray-600",
+const typeColors: Record<string, string> = {
+  lifecycle: "bg-blue-500", finance: "bg-green-500", document: "bg-purple-500",
+  approval: "bg-amber-500", assignment: "bg-teal-500", obligation: "bg-red-500",
+  task: "bg-indigo-500", system: "bg-gray-500",
 };
 
-const statusLabels: Record<string, string> = {
-  "otvoren": "Otvoren",
-  "u_tijeku": "U tijeku",
-  "rijesen": "Rijesen",
-  "eskaliran": "Eskaliran",
-  "zatvoren": "Zatvoren",
-};
+export default function PentagonTokPage() {
+  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
+  const { allowed, loading: permLoading } = usePermission("pentagon_tok");
 
-const priorityColors: Record<string, string> = {
-  "critical": "bg-red-100 text-red-700",
-  "high": "bg-amber-100 text-amber-700",
-  "medium": "bg-blue-100 text-blue-700",
-  "low": "bg-gray-100 text-gray-600",
-};
+  useEffect(() => {
+    if (!permLoading && allowed) {
+      logAudit({ action: "PENTAGON_TOK_VIEW", entity_type: "pentagon", details: { context: "global_activity" } });
+    }
+  }, [permLoading, allowed]);
 
-export default function TokPage() {
-  const { data: tokRequests, loading: tokRequestsLoading } = useTokRequests();
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (modeLoading || permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
 
-  const { data: open } = useOpenTokRequests();
-  const { data: escalated } = useEscalatedTok();
-  const { data: slaBreached } = useSlaBreached();
-  if (tokRequestsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
-
-  const resolved = tokRequests.filter(t => t.status === "rijesen" || t.status === "zatvoren");
+  const activities = [
+    { id: "A-001", time: "Danas, 14:32", spv: "SPV Zelena Punta", type: "finance", desc: "Novi rashod: € 1.200,00 — Elektro materijal", user: "Owner" },
+    { id: "A-002", time: "Danas, 13:15", spv: "SPV Marina Bay", type: "lifecycle", desc: "Lifecycle prijelaz: Priprema → Gradnja", user: "CORE Admin" },
+    { id: "A-003", time: "Danas, 11:47", spv: "SPV Adriatic View", type: "document", desc: "Upload: Gradevinska dozvola.pdf", user: "Owner" },
+    { id: "A-004", time: "Danas, 10:20", spv: "SPV Zelena Punta", type: "obligation", desc: "ALERT: NDA istice za 15 dana — Elektro Dalmacija", user: "System" },
+    { id: "A-005", time: "Jucer, 18:00", spv: "SPV Marina Bay", type: "approval", desc: "Period lock odobren — Veljaca 2026", user: "Owner + CORE" },
+    { id: "A-006", time: "Jucer, 16:30", spv: "SPV Adriatic View", type: "assignment", desc: "Nova vertikala: Vodoinstalater d.o.o.", user: "CORE Admin" },
+    { id: "A-007", time: "Jucer, 14:00", spv: "SPV Zelena Punta", type: "task", desc: "Zadatak zavrsen: Prijava gradilista", user: "Owner" },
+    { id: "A-008", time: "Jucer, 09:15", spv: "CORE D.O.O.", type: "system", desc: "Dead Man's Switch: check-in potvrden", user: "CORE Admin" },
+  ];
 
   return (
     <div className="space-y-6">
+      {isSafe && <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-[13px] text-amber-800 font-medium">Sustav u Safe Mode — samo citanje aktivno.</div>}
+      {isForensic && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-[13px] text-emerald-800 font-medium">Forenzicki mod — sve akcije se bilježe.</div>}
+
       <div>
-        <h1 className="text-[22px] font-bold text-black">TOK - Zahtjevi</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{tokRequests.length} ukupno | {open.length} otvorenih | {escalated.length} eskaliranih | {slaBreached.length} SLA probijenih</p>
+        <h1 className="text-[22px] font-bold text-black">Pentagon — Globalni TOK</h1>
+        <p className="text-[13px] text-black/50 mt-0.5">Aktivnost svih SPV-ova i sustava — agregirani prikaz</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Otvoreni", value: open.length, color: "text-blue-600" },
-          { label: "Eskalirani", value: escalated.length, color: "text-red-600" },
-          { label: "SLA probijeni", value: slaBreached.length, color: "text-red-600" },
-          { label: "Rijeseni", value: resolved.length, color: "text-green-600" },
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-            <div className={`text-2xl font-bold ${k.color}`}>{k.value}</div>
-            <div className="text-[12px] text-black/50">{k.label}</div>
+      <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[12px] text-blue-700">Cross-tenant activity aggregation za CORE. Data minimization: detalji bez PII (A10-K3). CORE vidi summary, ne sadrzaj.</div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        {Object.entries(typeColors).map(([type, color]) => (
+          <span key={type} className="flex items-center gap-1.5 text-[11px] text-black/60">
+            <span className={`w-2 h-2 rounded-full ${color}`} />{type}
+          </span>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200">
+        {activities.map((a, i) => (
+          <div key={a.id} className={`flex items-start gap-3 px-4 py-3 ${i < activities.length - 1 ? "border-b border-gray-50" : ""} hover:bg-gray-50`}>
+            <span className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${typeColors[a.type] || "bg-gray-400"}`} />
+            <div className="flex-1 min-w-0">
+              <div className="text-[12px] text-black">{a.desc}</div>
+              <div className="text-[11px] text-black/40 mt-0.5">{a.spv} • {a.user} • {a.time}</div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-        <table className="w-full text-[12px]">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50">
-              
-              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Naslov</th>
-              <th className="text-left px-3 py-2.5 font-semibold text-black/70">SPV</th>
-              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Dodijeljen</th>
-              <th className="text-center px-3 py-2.5 font-semibold text-black/70">Prioritet</th>
-              <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
-              <th className="text-center px-3 py-2.5 font-semibold text-black/70">SLA</th>
-              <th className="text-left px-3 py-2.5 font-semibold text-black/70">Rok</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tokRequests.map(tok => (
-              <tr key={tok.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${tok.slaBreached ? "bg-red-50/30" : ""}`}>
-                <td className="px-3 py-2.5 font-bold text-black">{tok.id}</td>
-                <td className="px-3 py-2.5 text-black max-w-[200px] truncate">{tok.title}</td>
-                <td className="px-3 py-2.5 text-black/50">{tok.spvId}</td>
-                <td className="px-3 py-2.5 text-black/70 text-[11px]">{tok.assignedTo}</td>
-                <td className="px-3 py-2.5 text-center">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${priorityColors[tok.priority]}`}>
-                    {tok.priority}
-                  </span>
-                </td>
-                <td className="px-3 py-2.5 text-center">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[tok.status] || "bg-gray-100"}`}>
-                    {statusLabels[tok.status] || tok.status}
-                  </span>
-                </td>
-                <td className="px-3 py-2.5 text-center">
-                  {tok.slaBreached
-                    ? <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700">PROBIJEN</span>
-                    : <span className="text-[11px] text-green-600">{tok.slaHours}h</span>
-                  }
-                </td>
-                <td className="px-3 py-2.5 text-black/70">{tok.dueDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <p className="text-[11px] text-black/30 pt-4 border-t border-gray-100">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.</p>
     </div>
   );
 }
-
