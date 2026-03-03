@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -6,9 +6,11 @@ import { supabaseBrowser } from "../../lib/supabaseBrowser";
 
 const ROLE_TO_PATH: Record<string, string> = {
   Core: "/dashboard/core",
-  SPV_Owner: "/dashboard/spv_owner",
+  Owner: "/dashboard/owner",
+  SPV_Owner: "/dashboard/owner",
   Vertical: "/dashboard/vertical",
-  Knjigovodja: "/dashboard/knjigovodja",
+  Accounting: "/dashboard/accounting",
+  Knjigovodja: "/dashboard/accounting",
   Bank: "/dashboard/bank",
   Holding: "/dashboard/holding",
 };

@@ -33,25 +33,13 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const spvBase = spvId ? `/dashboard/core/spv/${spvId}` : "";
   const { data: spvData } = useSpvById(spvId || "");
 
-  const coreDooPages = [
-    "/dashboard/core/core-dashboard", "/dashboard/core/prihodi", "/dashboard/core/rashodi",
-    "/dashboard/core/neto", "/dashboard/core/place",
-    "/dashboard/core/it", "/dashboard/core/marketing", "/dashboard/core/pravni",
-    "/dashboard/core/izdani-racuni", "/dashboard/core/primljeni-racuni", "/dashboard/core/eracuni",
-    "/dashboard/core/nenaplaceno", "/dashboard/core/dospjeli", "/dashboard/core/storna",
-    "/dashboard/core/blagajna", "/dashboard/core/devizni", "/dashboard/core/projekcija",
-    "/dashboard/core/pdv", "/dashboard/core/dobit", "/dashboard/core/predujmovi",
-    "/dashboard/core/bilanca", "/dashboard/core/bruto", "/dashboard/core/staranje", "/dashboard/core/analitika",
-    "/dashboard/core/core-dokumenti", "/dashboard/core/core-ugovori", "/dashboard/core/cjenik", "/dashboard/core/izvoz",
-    "/dashboard/core/core-postavke", "/dashboard/core/bankovni-racuni", "/dashboard/core/porezne-stope",
-    "/dashboard/core/knjigovodstvo"
-  ];
-  const isInsideCoreDoo = coreDooPages.some(p => pathname.startsWith(p));
+  // CORE D.O.O. = /dashboard/core-company/*
+  const isInsideCoreDoo = pathname.startsWith("/dashboard/core-company");
 
   // === HEADER NAV (Context Switcher) ===
   const headerNav = [
     { label: "RIVUS OS", href: "/dashboard/core", icon: Shield },
-    { label: "RIVUS Operater", href: "/dashboard/core/core-dashboard", icon: Building2 },
+    { label: "CORE D.O.O.", href: "/dashboard/core-company", icon: Building2 },
     { label: "SPV", href: "/dashboard/owner", icon: Briefcase },
     { label: "Banke", href: "/dashboard/bank", icon: Landmark },
     { label: "Vertikale", href: "/dashboard/vertical", icon: GitBranch },
@@ -86,74 +74,48 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  // === SIDEBAR: CORE D.O.O. ===
+  // === SIDEBAR: CORE D.O.O. (/dashboard/core-company/*) ===
   const coreDooSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
       items: [
-        { label: "Nadzorna ploca", href: "/dashboard/core/core-dashboard", icon: Home },
+        { label: "Nadzorna ploca", href: "/dashboard/core-company", icon: Home },
       ],
     },
     {
       title: "PRIHODI & RASHODI",
       items: [
-        { label: "Prihodi", href: "/dashboard/core/prihodi", icon: Euro },
-        { label: "Rashodi", href: "/dashboard/core/rashodi", icon: DollarSign },
-        { label: "Rezultat (P&L)", href: "/dashboard/core/neto", icon: BarChart3 },
+        { label: "Prihodi", href: "/dashboard/core-company/prihodi", icon: Euro },
+        { label: "Rashodi", href: "/dashboard/core-company/rashodi", icon: DollarSign },
       ],
     },
     {
       title: "FAKTURIRANJE",
       items: [
-        { label: "Izdani racuni", href: "/dashboard/core/izdani-racuni", icon: FileText },
-        { label: "Primljeni racuni", href: "/dashboard/core/primljeni-racuni", icon: FileText },
-        { label: "Nenaplaceno", href: "/dashboard/core/nenaplaceno", icon: Clock },
-        { label: "Dospjeli", href: "/dashboard/core/dospjeli", icon: AlertTriangle },
-        { label: "Storna", href: "/dashboard/core/storna", icon: RefreshCw },
-        { label: "eRacuni", href: "/dashboard/core/eracuni", icon: FileText },
+        { label: "Izdani racuni", href: "/dashboard/core-company/izdani-racuni", icon: FileText },
+        { label: "Primljeni racuni", href: "/dashboard/core-company/primljeni-racuni", icon: FileText },
+        { label: "eRacuni", href: "/dashboard/core-company/eracuni", icon: FileText },
       ],
     },
     {
-      title: "NOVcANI TOK",
+      title: "POREZNO & IZVJESTAJI",
       items: [
-        { label: "ziro racun", href: "/dashboard/core/blagajna", icon: Landmark },
-        { label: "Devizni racun", href: "/dashboard/core/devizni", icon: Globe },
-        { label: "Cash flow", href: "/dashboard/core/projekcija", icon: TrendingUp },
-      ],
-    },
-    {
-      title: "POREZNO",
-      items: [
-        { label: "PDV pregled (simulacija)", href: "/dashboard/core/pdv", icon: FileText },
-        { label: "Porez na dobit", href: "/dashboard/core/dobit", icon: DollarSign },
-        { label: "Predujmovi", href: "/dashboard/core/predujmovi", icon: Clock },
-      ],
-    },
-    {
-      title: "IZVJEsTAJI",
-      items: [
-        { label: "Bilanca (informativna)", href: "/dashboard/core/bilanca", icon: BarChart3 },
-        { label: "Bruto bilanca (informativna)", href: "/dashboard/core/bruto", icon: BarChart3 },
-        { label: "Staranje potrazivanja", href: "/dashboard/core/staranje", icon: AlertTriangle },
-        { label: "Analiticke kartice", href: "/dashboard/core/analitika", icon: Search },
+        { label: "PDV pregled", href: "/dashboard/core-company/pdv", icon: FileText },
+        { label: "Bilanca (informativna)", href: "/dashboard/core-company/bilanca", icon: BarChart3 },
+        { label: "Blagajna", href: "/dashboard/core-company/blagajna", icon: Landmark },
       ],
     },
     {
       title: "DOKUMENTI",
       items: [
-        { label: "Dokumenti", href: "/dashboard/core/core-dokumenti", icon: FolderOpen },
-        { label: "Ugovori", href: "/dashboard/core/core-ugovori", icon: FileStack },
-        { label: "Cjenik usluga", href: "/dashboard/core/cjenik", icon: DollarSign },
-        { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
+        { label: "Dokumenti", href: "/dashboard/core-company/core-dokumenti", icon: FolderOpen },
+        { label: "Ugovori", href: "/dashboard/core-company/core-ugovori", icon: FileStack },
       ],
     },
     {
       title: "POSTAVKE",
       items: [
-        { label: "Postavke firme", href: "/dashboard/core/core-postavke", icon: Settings },
-        { label: "Bankovni racuni", href: "/dashboard/core/bankovni-racuni", icon: Landmark },
-        { label: "Porezne stope", href: "/dashboard/core/porezne-stope", icon: FileText },
-        { label: "Knjigovodstvo", href: "/dashboard/core/knjigovodstvo", icon: BookOpen },
+        { label: "Postavke firme", href: "/dashboard/core-company/core-postavke", icon: Settings },
       ],
     },
   ];
@@ -170,9 +132,20 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       title: "PENTAGON",
       items: [
         { label: "Pentagon", href: "/dashboard/core/pentagon", icon: Shield },
+        { label: "TOK kontrola", href: "/dashboard/core/tok", icon: MessageCircle },
+        { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
+        { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
         { label: "Dijagnostika", href: "/dashboard/core/compliance", icon: Eye },
         { label: "Blokade", href: "/dashboard/core/blokade", icon: Lock },
         { label: "Mandatory", href: "/dashboard/core/mandatory", icon: AlertCircle },
+      ],
+    },
+    {
+      title: "UPRAVLJANJE",
+      items: [
+        { label: "Assignmenti", href: "/dashboard/core/assignments", icon: UserCog },
+        { label: "Obveze", href: "/dashboard/core/obligations", icon: ClipboardList },
+        { label: "GDPR", href: "/dashboard/core/gdpr", icon: ShieldCheck },
       ],
     },
     {
@@ -186,33 +159,17 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      title: "KONTROLA",
-      items: [
-        { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle },
-        { label: "Rizik", href: "/dashboard/core/rizik", icon: AlertTriangle },
-        { label: "Orkestracija", href: "/dashboard/core/orkestracija", icon: GitBranch },
-      ],
-    },
-    {
-      title: "TOK",
-      items: [
-        { label: "TOK kontrola", href: "/dashboard/core/tok", icon: MessageCircle },
-        { label: "Eskalacije", href: "/dashboard/core/tok/eskalacije", icon: AlertTriangle },
-        { label: "SLA", href: "/dashboard/core/tok/sla", icon: ClipboardList },
-      ],
-    },
-    {
       title: "EVIDENCIJA",
       items: [
         { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
         { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
         { label: "Izvjestaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
-        { label: "Izvoz", href: "/dashboard/core/izvoz", icon: Download },
       ],
     },
     {
       title: "SUSTAV",
       items: [
+        { label: "Platform Mode", href: "/dashboard/core/platform-mode", icon: Shield },
         { label: "Korisnici", href: "/dashboard/core/korisnici", icon: Users },
         { label: "Uloge", href: "/dashboard/core/uloge", icon: ShieldCheck },
         { label: "Obavijesti", href: "/dashboard/core/obavijesti", icon: Bell },
@@ -222,7 +179,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "",
       items: [
-        { label: "CORE D.O.O.", href: "/dashboard/core/core-dashboard", icon: Building2 },
+        { label: "CORE D.O.O.", href: "/dashboard/core-company", icon: Building2 },
       ],
     },
   ];
@@ -254,7 +211,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               className="w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-md text-[13px] font-medium text-[#007AFF] hover:bg-[#007AFF]/10 transition-all"
             >
               <ArrowLeft size={16} strokeWidth={2} />
-              <span>Natrag na Monitoring</span>
+              <span>{isInsideCoreDoo ? "Natrag na Monitoring" : "Natrag na Monitoring"}</span>
             </button>
           )}
 
@@ -284,7 +241,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               )}
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const needsExactMatch = item.href === "/dashboard/core" || (isInsideSpv && item.href === spvBase);
+                  const needsExactMatch = item.href === "/dashboard/core" || item.href === "/dashboard/core-company" || (isInsideSpv && item.href === spvBase);
                   const isActive = pathname === item.href ||
                     (!needsExactMatch && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
@@ -332,7 +289,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           >
             <span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.7</div>
+          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.14</div>
         </div>
       </aside>
 
@@ -341,10 +298,9 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         <header className="h-14 border-b border-[#d1d1d6] bg-white flex items-center justify-between px-6">
           <div className="flex items-center gap-1 overflow-x-auto">
             {headerNav.map((item, idx) => {
-              if (item.label === "separator") {
-                return <div key={`sep-${idx}`} className="h-6 w-px bg-[#d1d1d6] mx-1 flex-shrink-0" />;
-              }
-              const isActive = pathname.startsWith(item.href);
+              const isActive = item.href === "/dashboard/core"
+                ? pathname === "/dashboard/core" || (pathname.startsWith("/dashboard/core/") && !pathname.startsWith("/dashboard/core-company"))
+                : pathname.startsWith(item.href);
               const Icon = item.icon;
               return (
                 <button
@@ -364,7 +320,10 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3 flex-shrink-0">
-            <button className="relative p-2 hover:bg-black/[0.04] rounded-lg transition-colors">
+            <button
+              onClick={() => router.push("/dashboard/notifications")}
+              className="relative p-2 hover:bg-black/[0.04] rounded-lg transition-colors"
+            >
               <Bell size={18} className="text-black/70" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
             </button>
