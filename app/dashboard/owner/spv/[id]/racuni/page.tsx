@@ -1,21 +1,48 @@
-﻿"use client";
+"use client";
 
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useSpvById, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 const statusLabels: Record<string, string> = { "placen": "Placen", "ceka": "Ceka", "kasni": "Kasni", "storniran": "Storniran" };
 const statusColors: Record<string, string> = { "placen": "bg-green-100 text-green-700", "ceka": "bg-amber-100 text-amber-700", "kasni": "bg-red-100 text-red-700", "storniran": "bg-gray-100 text-gray-500" };
 
 export default function OwnerSpvRacuniPage() {
   const { id } = useParams();
-  const { data: spv } = useSpvById(id as string);
-  const { data: issued } = useIssuedInvoices(id as string);
-  const { data: received } = useReceivedInvoices(id as string);
+  const spvId = id as string;
+  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
+  const { allowed, loading: permLoading } = usePermission("invoice_write");
+  const { data: spv } = useSpvById(spvId);
+  const { data: issued } = useIssuedInvoices(spvId);
+  const { data: received } = useReceivedInvoices(spvId);
+  const writeDisabled = isSafe || isLockdown || isForensic;
+
+  useEffect(() => {
+    if (!permLoading && allowed && spvId) {
+      logAudit({ action: "OWNER_SPV_INVOICES_VIEW", entity_type: "invoice", spv_id: spvId, details: { context: "owner_workspace_tab", issued: issued.length, received: received.length } });
+    }
+  }, [permLoading, allowed, spvId, issued.length, received.length]);
+
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (modeLoading || permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-[22px] font-bold text-black">{spv.id} - Racuni</h1><p className="text-[13px] text-black/50 mt-0.5">{issued.length} izdanih | {received.length} primljenih</p></div>
+      {isSafe && <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-[13px] text-amber-800 font-medium">Sustav u Safe Mode — izdavanje racuna onemoguceno.</div>}
+      {isForensic && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-[13px] text-emerald-800 font-medium">Forenzicki mod — sve akcije se bilježe.</div>}
+
+      <div className="flex items-center justify-between">
+        <div><h1 className="text-[22px] font-bold text-black">{spv.id} - Racuni</h1><p className="text-[13px] text-black/50 mt-0.5">{issued.length} izdanih | {received.length} primljenih</p></div>
+        <button disabled={writeDisabled} className={`px-4 py-2 rounded-lg text-[13px] font-semibold ${writeDisabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-black text-white hover:bg-gray-800"}`}>+ Novi racun</button>
+      </div>
+
+      <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[12px] text-blue-700">Racun storno umjesto brisanja (A10-K1). eRacun delivery status dozvoljen i pod period lockom (A10-K6). Export zahtijeva audit zapis (A10-K7).</div>
+
       {issued.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
           <div className="px-4 py-3 border-b border-gray-100 text-[14px] font-bold">Izdani ({issued.length})</div>
@@ -39,6 +66,7 @@ export default function OwnerSpvRacuniPage() {
           </table>
         </div>
       )}
+
       {received.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
           <div className="px-4 py-3 border-b border-gray-100 text-[14px] font-bold">Primljeni ({received.length})</div>
@@ -62,6 +90,8 @@ export default function OwnerSpvRacuniPage() {
           </table>
         </div>
       )}
+
+      <p className="text-[11px] text-black/30 pt-4 border-t border-gray-100">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.</p>
     </div>
   );
 }
