@@ -17,8 +17,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabaseBrowser } from "./supabaseBrowser";
-// --- LOCAL TYPE DEFINITIONS (formerly mock-data.ts) ---
-// All interfaces include [key: string]: any for forward-compat with hook mappers.
+import type { SpvRow, DocumentRow, InvoiceRow, FinanceEntryRow, TaskRow, DecisionRow, TokRequestRow, ActivityLogRow, ContractRow, PdvQuarterRow, VertikalaRow, UserSpvAssignmentRow } from "./types-db";
+
+// --- UI TYPE DEFINITIONS (camelCase, no [key: string]: any) ---
+// V2.5-1: Clean UI types. DB row types in types-db.ts.
+// fetchRaw() returns DB rows, mappers convert to these UI types.
 
 export type SpvPhase = string;
 export type SpvStatus = string;
@@ -34,23 +37,25 @@ export interface Spv {
   owner: string; accountantId: string | null; bankId: string;
   completionDate: string; blockReason: string | null;
   units: number | undefined; area: number | undefined; description: string;
-  [key: string]: any;
 }
 
 export interface Invoice {
-  id: string; spvId: string; spvName: string; number: string; client: string;
+  id: string; spvId: string | null; spvName: string; number: string; client: string;
   amount: number; totalAmount: number; currency: string;
   issuedAt: string; dueDate: string; date: string; paidAt: string | null;
   status: string; direction: "issued" | "received";
   category: string; notes: string;
-  [key: string]: any;
+  type: "izdani" | "primljeni";
+  clientId: string; netAmount: number; vatRate: number; vatAmount: number;
+  paidDate: string;
+  description: string;
 }
 
 export interface Transaction {
-  id: string; spvId: string; spvName: string; description: string; amount: number;
+  id: string; spvId: string | null; spvName: string; description: string; amount: number;
   currency: string; date: string; type: string; category: string;
   invoiceRef: string | null;
-  [key: string]: any;
+  credit: number; debit: number; balance: number;
 }
 
 export interface Task {
@@ -58,7 +63,8 @@ export interface Task {
   assignee: string; assigneeId: string; priority: string;
   status: string; dueDate: string;
   createdAt: string; isMandatory: boolean;
-  [key: string]: any;
+  assignedTo: string; assignedRole: string;
+  createdDate: string; completedDate: string; category: string;
 }
 
 export interface Document {
@@ -67,14 +73,16 @@ export interface Document {
   uploadedAt: string; uploadedBy: string; size: number;
   status: string; isMandatory: boolean;
   expiresAt: string | null; version: number;
-  [key: string]: any;
+  uploadDate: string; fileSize: string; mandatory: boolean; category: string;
+  verification_status: string | null; filePath: string | null;
+  verification_expected_type: string | null; verification_rejection_reason: string | null;
 }
 
 export interface Decision {
   id: string; spvId: string; spvName: string; title: string; description: string;
   requestedBy: string; requestedAt: string; decidedBy: string | null; decidedAt: string | null;
   status: string; category: string; priority: string;
-  [key: string]: any;
+  date: string; decidedDate: string;
 }
 
 export interface TokRequest {
@@ -83,14 +91,14 @@ export interface TokRequest {
   priority: string; status: string;
   slaDeadline: string; slaHours: number; slaBreached: boolean;
   resolvedAt: string | null; category: string;
-  [key: string]: any;
+  assignedTo: string; createdDate: string; dueDate: string; resolvedDate: string;
 }
 
 export interface ActivityLog {
   id: string; spvId: string | null; spvName: string; action: string; description: string;
   userId: string; userName: string; timestamp: string;
   category: string; severity: string; details: string; actor: string;
-  [key: string]: any;
+  entityType: string; entityId: string;
 }
 
 export interface Contract {
@@ -101,43 +109,42 @@ export interface Contract {
   number: string; partyA: string; partyB: string; partyBId: string;
   startDate: string; endDate: string; services: string;
   monthlyFee: number | null; commissionPercent: number | null;
-  [key: string]: any;
 }
 
 export interface PdvQuarter {
   id: string; spvId: string; spvName: string; quarter: string; year: number;
   inputVat: number; outputVat: number; netVat: number; currency: string;
   status: string; filedAt: string | null;
-  [key: string]: any;
+  difference: number; dueDate: string;
 }
 
 export interface Vertical {
   id: string; name: string; type: string; contactPerson: string; email: string; phone: string;
   spvCount: number; spvNames: string[]; activeContracts: number; ndaStatus: string; dpaStatus: string;
   rating: number; status: string; commission: number;
-  [key: string]: any;
+  contact: string; sectors: Sector[]; active: boolean; statusLabel: string;
+  ndaSigned: boolean; ndaDate: string | null; assignedSpvs: string[];
 }
 
 export interface Accountant {
   id: string; name: string; company: string; email: string; phone: string;
   spvCount: number; spvNames: string[]; ndaStatus: string; dpaStatus: string;
   activeFrom: string; status: string;
-  [key: string]: any;
+  coversEntities: string[]; coversSpvs: string[];
+  pricePerMonth: number; contact: string; contractDate: string | null;
 }
 
 export interface Bank {
   id: string; name: string; contactPerson: string; email: string; phone: string;
   totalEvaluations: number; approved: number; pending: number; rejected: number;
-  totalApprovedAmount: number; spvNames: string[];
-  [key: string]: any;
+  totalApprovedAmount: number; spvNames: string[]; evaluationPending: string | null; relationshipType: string; contact: string; status: string; spvs: string[];
 }
 
 export interface PnlMonth {
   id: string; month: string; year: number; totalRevenue: number; totalExpenses: number;
-  netIncome: number; margin: number; currency: string;
-  revenueBreakdown: { platform: number; services: number; vertikale: number; verticalCommissions: number; [k: string]: number };
-  expenseBreakdown: { operational: number; legal: number; marketing: number; it: number; [k: string]: number };
-  [key: string]: any;
+  netIncome: number; margin: number; currency: string; revenue: number; expenses: number; net: number;
+  revenueBreakdown: { platform: number; services: number; vertikale: number; verticalCommissions: number };
+  expenseBreakdown: { operational: number; legal: number; marketing: number; it: number };
 }
 // --- GENERIC FETCH HOOK ------------------------------------------------------
 
@@ -202,7 +209,7 @@ function mapPhase(stage: string | null): SpvPhase {
   return map[stage || ""] || "Kreirano";
 }
 
-function deriveStatus(row: { is_blocked: boolean; core_approved: boolean; lifecycle_stage: string }): SpvStatus {
+function deriveStatus(row: Pick<SpvRow, 'is_blocked' | 'core_approved' | 'lifecycle_stage'>): SpvStatus {
   if (row.is_blocked) return "blokiran";
   if (row.lifecycle_stage === "Completed" || row.lifecycle_stage === "Zavrseno") return "zavrsen";
   if (!row.core_approved) return "u_izradi";
@@ -271,7 +278,7 @@ export const SECTORS: Record<string, { label: string; icon: string; color: strin
 
 // --- SPV HOOKS ----------------------------------------------------------------
 
-async function fetchSpvsRaw(): Promise<any[]> {
+async function fetchSpvsRaw(): Promise<Spv[]> {
   const { data, error } = await supabaseBrowser
     .from("spvs")
     .select(`*, owner:user_profiles!spvs_owner_id_fkey(full_name)`)
@@ -280,21 +287,13 @@ async function fetchSpvsRaw(): Promise<any[]> {
   if (error) { console.error("fetchSpvs:", error); return []; }
 
   return (data || []).map((row: Record<string, unknown>) => {
-    const r = row as {
-      id: string; spv_code: string; project_name: string; lifecycle_stage: string;
-      core_approved: boolean; is_blocked: boolean; blocked_reason: string | null;
-      address: string | null; city: string | null; sector: string | null;
-      oib: string | null; created_at: string; description: string | null;
-      estimated_profit: number; total_budget: number; completion_date: string | null;
-      units: number | null; area: number | null;
-      accountant_id: string | null; bank_id: string | null;
-      owner: { full_name: string } | null;
-    };
+    const r = row as unknown as SpvRow;
     const status = deriveStatus(r);
     return {
       id: r.id,
-      code: (r as any).spv_code || r.id.slice(0, 8),
+      code: r.spv_code || r.id.slice(0, 8),
       name: r.project_name || "",
+      projectName: r.project_name || "",
       address: r.address || "",
       city: r.city || "",
       sector: (r.sector || "nekretnine") as Sector,
@@ -305,17 +304,23 @@ async function fetchSpvsRaw(): Promise<any[]> {
       statusLabel: statusLabel(status),
       oib: r.oib || "",
       founded: fmtDate(r.created_at),
+      createdAt: fmtDate(r.created_at),
       owner: r.owner?.full_name || "—",
+      ownerName: r.owner?.full_name || "—",
       accountantId: r.accountant_id || null,
       bankId: r.bank_id || "",
       estimatedProfit: Number(r.estimated_profit) || 0,
       totalBudget: Number(r.total_budget) || 0,
       completionDate: fmtDate(r.completion_date),
+      completionPct: 0,
       blockReason: r.blocked_reason || null,
+      isBlocked: r.is_blocked,
+      coreApproved: r.core_approved,
+      platformStatus: r.platform_status || "ACTIVE",
       units: r.units || undefined,
       area: r.area ? Number(r.area) : undefined,
       description: r.description || "",
-    };
+    } as Spv;
   });
 }
 
