@@ -17,7 +17,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabaseBrowser } from "./supabaseBrowser";
-import type { SpvRow, DocumentRow, InvoiceRow, FinanceEntryRow, TaskRow, DecisionRow, TokRequestRow, ActivityLogRow, ContractRow, PdvQuarterRow, VertikalaRow, UserSpvAssignmentRow } from "./types-db";
+import type { SpvRow, DocumentRow, InvoiceRow, FinanceEntryRow, TaskRow, DecisionRow, TokRequestRow, ActivityLogRow, ContractRow, PdvQuarterRow, VertikalaRow, UserSpvAssignmentRow, BankEvaluationRow, CoreCompanyFinanceRow } from "./types-db";
+import { mapDocumentRow, groupVertikale, mapSingleVertikala, groupAccountantAssignments, mapSingleAccountant, groupBankEvaluations, computePnlMonths } from "./mappers";
 
 // --- UI TYPE DEFINITIONS (camelCase, no [key: string]: any) ---
 // V2.5-1: Clean UI types. DB row types in types-db.ts.
@@ -368,28 +369,8 @@ async function fetchDocsRaw(spvId?: string): Promise<any[]> {
   if (error) { console.error("fetchDocs:", error); return []; }
 
   return (data || []).map((row: Record<string, unknown>) => {
-    const r = row as {
-      id: string; file_name: string; document_type: string; spv_id: string;
-      status: string; version: number; file_size_bytes: number; created_at: string;
-      uploader: { full_name: string } | null;
-    };
-    return {
-      id: r.id,
-      name: r.file_name || "",
-      type: (r.document_type || "ostalo") as Document["type"],
-      spvId: r.spv_id || "",
-      uploadedBy: r.uploader?.full_name || "—",
-      uploadDate: fmtDate(r.created_at),
-      status: (r.status || "ceka_pregled") as Document["status"],
-      version: r.version || 1,
-      fileSize: fmtFileSize(r.file_size_bytes),
-      mandatory: r.document_type === "mandatory",
-      category: r.document_type || "ostalo",
-      verification_status: (row as any).verification_status || null,
-      filePath: (row as any).file_path || null,
-        verification_expected_type: (row as any).verification_expected_type || null,
-      verification_rejection_reason: (row as any).verification_rejection_reason || null,
-    };
+    const r = row as unknown as DocumentRow;
+    return mapDocumentRow(r);
   });
 }
 
@@ -844,40 +825,13 @@ export function useVerticals(): UseDataResult<Vertical[]> {
       .select(`*, spv:spvs!vertikale_spv_id_fkey(project_name)`)
       .order("created_at", { ascending: false });
     if (error) { console.error("useVerticals:", error); return []; }
-    // Group by naziv (company name) to match mock Vertical shape
-    const grouped = new Map<string, any>();
-    for (const r of data || []) {
-      const key = (r as any).naziv || r.id;
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          id: r.id,
-          name: (r as any).naziv || "",
-          type: (r as any).tip || "",
-          commission: Number((r as any).provizija_pct) || 0,
-          sectors: [],
-          active: (r as any).status === "ACTIVE",
-          statusLabel: (r as any).status === "ACTIVE" ? "Aktivan" : (r as any).status || "",
-          contact: (r as any).kontakt_osoba || "",
-          email: (r as any).kontakt_email || "",
-          phone: (r as any).kontakt_telefon || "",
-          ndaSigned: true,
-          ndaDate: fmtDate((r as any).ugovor_datum),
-          assignedSpvs: [(r as any).spv_id],
-        });
-      } else {
-        const existing = grouped.get(key)!;
-        if (!(existing.assignedSpvs as string[]).includes((r as any).spv_id)) {
-          (existing.assignedSpvs as string[]).push((r as any).spv_id);
-        }
-      }
-    }
-    return Array.from(grouped.values());
+    return groupVertikale((data || []) as unknown as VertikalaRow[]);
   }, []);
 }
 
 export function useActiveVerticals(): UseDataResult<Vertical[]> {
   return useSupabaseQuery(async () => {
-    const all = await fetchVertikaleForCompat();
+    const all = await fetchVertikaleTyped();
     return all.filter((v) => v.active);
   }, []);
 }
@@ -890,21 +844,7 @@ export function useVerticalsBySpv(spvId: string): UseDataResult<Vertical[]> {
       .eq("spv_id", spvId)
       .order("created_at", { ascending: false });
     if (error || !data) return [];
-    return data.map((r: any) => ({
-      id: r.id,
-      name: r.naziv || "",
-      type: r.tip || "",
-      commission: Number(r.provizija_pct) || 0,
-      sectors: [],
-      active: r.status === "ACTIVE",
-      statusLabel: r.status === "ACTIVE" ? "Aktivan" : r.status || "",
-      contact: r.kontakt_osoba || "",
-      email: r.kontakt_email || "",
-      phone: r.kontakt_telefon || "",
-      ndaSigned: true,
-      ndaDate: fmtDate(r.ugovor_datum),
-      assignedSpvs: [r.spv_id],
-    })) as any[];
+    return (data as unknown as VertikalaRow[]).map(r => mapSingleVertikala(r));
   }, [], [spvId]);
 }
 
@@ -913,47 +853,18 @@ export function useVerticalById(id: string): UseDataResult<Vertical | null> {
     const { data, error } = await supabaseBrowser
       .from("vertikale").select("*").eq("id", id).single();
     if (error || !data) return null;
-    const r = data as any;
-    return {
-      id: r.id, name: r.naziv || "", type: r.tip || "",
-      commission: Number(r.provizija_pct) || 0, sectors: [],
-      active: r.status === "ACTIVE",
-      statusLabel: r.status === "ACTIVE" ? "Aktivan" : r.status || "",
-      contact: r.kontakt_osoba || "", email: r.kontakt_email || "",
-      phone: r.kontakt_telefon || "", ndaSigned: true,
-      ndaDate: fmtDate(r.ugovor_datum), assignedSpvs: [r.spv_id],
-    } as any;
+    return mapSingleVertikala(data as unknown as VertikalaRow);
   }, null, [id]);
 }
 
-// Helper for vertical compat mapping
-async function fetchVertikaleForCompat(): Promise<any[]> {
+// Helper for vertical compat mapping (typed)
+async function fetchVertikaleTyped(): Promise<Vertical[]> {
   const { data, error } = await supabaseBrowser
     .from("vertikale")
     .select("*")
     .order("created_at", { ascending: false });
   if (error || !data) return [];
-  const grouped = new Map<string, any>();
-  for (const r of data) {
-    const key = (r as any).naziv || r.id;
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        id: r.id, name: (r as any).naziv || "", type: (r as any).tip || "",
-        commission: Number((r as any).provizija_pct) || 0, sectors: [],
-        active: (r as any).status === "ACTIVE",
-        statusLabel: (r as any).status === "ACTIVE" ? "Aktivan" : (r as any).status || "",
-        contact: (r as any).kontakt_osoba || "", email: (r as any).kontakt_email || "",
-        phone: (r as any).kontakt_telefon || "", ndaSigned: true,
-        ndaDate: fmtDate((r as any).ugovor_datum), assignedSpvs: [(r as any).spv_id],
-      });
-    } else {
-      const existing = grouped.get(key)!;
-      if (!(existing.assignedSpvs as string[]).includes((r as any).spv_id)) {
-        (existing.assignedSpvs as string[]).push((r as any).spv_id);
-      }
-    }
-  }
-  return Array.from(grouped.values());
+  return groupVertikale(data as unknown as VertikalaRow[]);
 }
 
 // --- Accountants â†’ derives from user_spv_assignments role='ACCOUNTING' ---
@@ -968,30 +879,7 @@ export function useAccountants(): UseDataResult<Accountant[]> {
       .eq("role", "ACCOUNTING")
       .eq("is_active", true);
     if (error || !data) return [];
-    // Group by user (one accountant can cover multiple SPVs)
-    const grouped = new Map<string, any>();
-    for (const r of data) {
-      const uid = (r as any).user_id;
-      if (!grouped.has(uid)) {
-        grouped.set(uid, {
-          id: uid,
-          name: (r as any).user?.full_name || "â€”",
-          coversEntities: [],
-          coversSpvs: [(r as any).spv_id],
-          pricePerMonth: 0,
-          contact: (r as any).user?.full_name || "",
-          email: (r as any).user?.email || "",
-          status: "aktivan",
-          contractDate: fmtDate((r as any).assigned_at),
-        });
-      } else {
-        const existing = grouped.get(uid)!;
-        if (!existing.coversSpvs.includes((r as any).spv_id)) {
-          existing.coversSpvs.push((r as any).spv_id);
-        }
-      }
-    }
-    return Array.from(grouped.values());
+    return groupAccountantAssignments(data as unknown as UserSpvAssignmentRow[]);
   }, []);
 }
 
@@ -1005,18 +893,7 @@ export function useAccountantBySpv(spvId: string): UseDataResult<Accountant | nu
       .eq("is_active", true)
       .limit(1);
     if (error || !data || data.length === 0) return null;
-    const r = data[0] as any;
-    return {
-      id: r.user_id,
-      name: r.user?.full_name || "â€”",
-      coversEntities: [],
-      coversSpvs: [spvId],
-      pricePerMonth: 0,
-      contact: r.user?.full_name || "",
-      email: r.user?.email || "",
-      status: "aktivan",
-      contractDate: fmtDate(r.assigned_at),
-    } as any;
+    return mapSingleAccountant(data[0] as unknown as UserSpvAssignmentRow);
   }, null, [spvId]);
 }
 
@@ -1027,7 +904,7 @@ export function useSpvsWithoutAccountant(): UseDataResult<Spv[]> {
   }, []);
 }
 
-// --- Banks â†’ derives from bank_evaluations ---
+// --- Banks (from bank_evaluations, typed) ---
 export function useBanks(): UseDataResult<Bank[]> {
   return useSupabaseQuery(async () => {
     const { data, error } = await supabaseBrowser
@@ -1035,35 +912,11 @@ export function useBanks(): UseDataResult<Bank[]> {
       .select(`*, spv:spvs!bank_evaluations_spv_id_fkey(project_name)`)
       .order("created_at", { ascending: false });
     if (error || !data) return [];
-    // Group by bank_name
-    const grouped = new Map<string, any>();
-    for (const r of data) {
-      const bankName = (r as any).bank_name || "Unknown";
-      if (!grouped.has(bankName)) {
-        grouped.set(bankName, {
-          id: r.id,
-          name: bankName,
-          spvs: [(r as any).spv_id],
-          relationshipType: (r as any).evaluation_type || "",
-          contact: (r as any).contact_person || "",
-          status: (r as any).status === "APPROVED" ? "aktivan" : (r as any).status || "",
-          evaluationPending: (r as any).status === "PENDING" ? (r as any).spv_id : null,
-        });
-      } else {
-        const existing = grouped.get(bankName)!;
-        if (!existing.spvs.includes((r as any).spv_id)) {
-          existing.spvs.push((r as any).spv_id);
-        }
-        if ((r as any).status === "PENDING") {
-          existing.evaluationPending = (r as any).spv_id;
-        }
-      }
-    }
-    return Array.from(grouped.values());
+    return groupBankEvaluations(data as unknown as BankEvaluationRow[]);
   }, []);
 }
 
-// --- PnL Months â†’ computed from core_company_finance ---
+// --- PnL Months (from core_company_finance, typed) ---
 export function usePnlMonths(): UseDataResult<PnlMonth[]> {
   return useSupabaseQuery(async () => {
     const { data, error } = await supabaseBrowser
@@ -1072,58 +925,7 @@ export function usePnlMonths(): UseDataResult<PnlMonth[]> {
       .eq("is_storno", false)
       .order("entry_date", { ascending: true });
     if (error || !data) return [];
-
-    // Group by month
-    const months = new Map<string, any>();
-    const monthNames = [
-      "", "SijeÄanj", "VeljaÄa", "OÅ¾ujak", "Travanj", "Svibanj", "Lipanj",
-      "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"
-    ];
-
-    for (const r of data) {
-      const d = new Date((r as any).entry_date);
-      const m = d.getMonth() + 1;
-      const y = d.getFullYear();
-      const key = `${y}-${String(m).padStart(2, "0")}`;
-
-      if (!months.has(key)) {
-        months.set(key, {
-          month: `${monthNames[m]} ${y}.`,
-          monthNum: m, year: y,
-          revenue: 0, expenses: 0, net: 0, margin: 0,
-          revenueBreakdown: {
-            platformFees: 0, brandLicence: 0, pmServices: 0,
-            successFees: 0, verticalCommissions: 0,
-          },
-        });
-      }
-
-      const entry = months.get(key)!;
-      const amount = Number((r as any).gross_amount) || 0;
-
-      if ((r as any).entry_type === "INCOME") {
-        entry.revenue += amount;
-        // Map category to breakdown
-        const cat = ((r as any).category || "").toLowerCase();
-        if (cat.includes("platform")) entry.revenueBreakdown.platformFees += amount;
-        else if (cat.includes("brand")) entry.revenueBreakdown.brandLicence += amount;
-        else if (cat.includes("pm") || cat.includes("management")) entry.revenueBreakdown.pmServices += amount;
-        else if (cat.includes("success")) entry.revenueBreakdown.successFees += amount;
-        else if (cat.includes("vertical") || cat.includes("commission")) entry.revenueBreakdown.verticalCommissions += amount;
-      } else {
-        entry.expenses += amount;
-      }
-    }
-
-    // Compute net & margin
-    const result = Array.from(months.values()).map((m) => ({
-      ...m,
-      net: m.revenue - m.expenses,
-      margin: m.revenue > 0 ? Math.round(((m.revenue - m.expenses) / m.revenue) * 1000) / 10 : 0,
-    }));
-
-    // Sort descending by date
-    return result.sort((a, b) => (b.year * 100 + b.monthNum) - (a.year * 100 + a.monthNum));
+    return computePnlMonths(data as unknown as CoreCompanyFinanceRow[]);
   }, []);
 }
 

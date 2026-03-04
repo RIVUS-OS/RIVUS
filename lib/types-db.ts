@@ -213,3 +213,28 @@ export interface UserSpvAssignmentRow {
   user: { full_name: string; email: string } | null;
   spv: { project_name: string } | null;
 }
+
+// --- BANK EVALUATIONS ---
+export interface BankEvaluationRow {
+  id: string;
+  bank_name: string;
+  spv_id: string;
+  evaluation_type: string;
+  contact_person: string | null;
+  status: string;
+  created_at: string;
+  // FK join
+  spv: { project_name: string } | null;
+}
+
+// --- CORE COMPANY FINANCE ---
+export interface CoreCompanyFinanceRow {
+  id: string;
+  entry_type: string;
+  category: string;
+  description: string | null;
+  gross_amount: number;
+  entry_date: string;
+  is_storno: boolean;
+  created_at: string;
+}
