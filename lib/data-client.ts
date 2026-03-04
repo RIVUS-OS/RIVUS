@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // RIVUS OS — CLIENT DATA LAYER (Phase C)
 // lib/data-client.ts
 //
@@ -17,26 +17,128 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabaseBrowser } from "./supabaseBrowser";
-import {
-  Spv,
-  Invoice,
-  Transaction,
-  Task,
-  Document,
-  Decision,
-  TokRequest,
-  ActivityLog,
-  Contract,
-  PdvQuarter,
-  Vertical,
-  Accountant,
-  Bank,
-  PnlMonth,
-  Sector,
-  SpvPhase,
-  SpvStatus,
-} from "./mock-data";
+// --- LOCAL TYPE DEFINITIONS (formerly mock-data.ts) ---
+// All interfaces include [key: string]: any for forward-compat with hook mappers.
 
+export type SpvPhase = string;
+export type SpvStatus = string;
+export type Sector = string;
+
+export interface Spv {
+  id: string; projectName: string; oib: string; address: string; city: string;
+  sector: Sector; sectorLabel: string; phase: SpvPhase; status: SpvStatus; statusLabel: string;
+  ownerName: string; isBlocked: boolean; coreApproved: boolean; platformStatus: string;
+  createdAt: string; completionPct: number; name: string;
+  totalBudget: number; estimatedProfit: number;
+  code: string; lifecycle_stage: string; founded: string;
+  owner: string; accountantId: string | null; bankId: string;
+  completionDate: string; blockReason: string | null;
+  units: number | undefined; area: number | undefined; description: string;
+  [key: string]: any;
+}
+
+export interface Invoice {
+  id: string; spvId: string; spvName: string; number: string; client: string;
+  amount: number; totalAmount: number; currency: string;
+  issuedAt: string; dueDate: string; date: string; paidAt: string | null;
+  status: string; direction: "issued" | "received";
+  category: string; notes: string;
+  [key: string]: any;
+}
+
+export interface Transaction {
+  id: string; spvId: string; spvName: string; description: string; amount: number;
+  currency: string; date: string; type: string; category: string;
+  invoiceRef: string | null;
+  [key: string]: any;
+}
+
+export interface Task {
+  id: string; spvId: string; spvName: string; title: string; description: string;
+  assignee: string; assigneeId: string; priority: string;
+  status: string; dueDate: string;
+  createdAt: string; isMandatory: boolean;
+  [key: string]: any;
+}
+
+export interface Document {
+  id: string; spvId: string; spvName: string; title: string; fileName: string; name: string;
+  type: string;
+  uploadedAt: string; uploadedBy: string; size: number;
+  status: string; isMandatory: boolean;
+  expiresAt: string | null; version: number;
+  [key: string]: any;
+}
+
+export interface Decision {
+  id: string; spvId: string; spvName: string; title: string; description: string;
+  requestedBy: string; requestedAt: string; decidedBy: string | null; decidedAt: string | null;
+  status: string; category: string; priority: string;
+  [key: string]: any;
+}
+
+export interface TokRequest {
+  id: string; spvId: string; spvName: string; title: string; description: string;
+  requestedBy: string; requestedAt: string; assignee: string;
+  priority: string; status: string;
+  slaDeadline: string; slaHours: number; slaBreached: boolean;
+  resolvedAt: string | null; category: string;
+  [key: string]: any;
+}
+
+export interface ActivityLog {
+  id: string; spvId: string | null; spvName: string; action: string; description: string;
+  userId: string; userName: string; timestamp: string;
+  category: string; severity: string; details: string; actor: string;
+  [key: string]: any;
+}
+
+export interface Contract {
+  id: string; spvId: string; spvName: string; title: string; counterparty: string;
+  type: string;
+  signedAt: string | null; expiresAt: string | null; value: number; currency: string;
+  status: string;
+  number: string; partyA: string; partyB: string; partyBId: string;
+  startDate: string; endDate: string; services: string;
+  monthlyFee: number | null; commissionPercent: number | null;
+  [key: string]: any;
+}
+
+export interface PdvQuarter {
+  id: string; spvId: string; spvName: string; quarter: string; year: number;
+  inputVat: number; outputVat: number; netVat: number; currency: string;
+  status: string; filedAt: string | null;
+  [key: string]: any;
+}
+
+export interface Vertical {
+  id: string; name: string; type: string; contactPerson: string; email: string; phone: string;
+  spvCount: number; spvNames: string[]; activeContracts: number; ndaStatus: string; dpaStatus: string;
+  rating: number; status: string; commission: number;
+  [key: string]: any;
+}
+
+export interface Accountant {
+  id: string; name: string; company: string; email: string; phone: string;
+  spvCount: number; spvNames: string[]; ndaStatus: string; dpaStatus: string;
+  activeFrom: string; status: string;
+  [key: string]: any;
+}
+
+export interface Bank {
+  id: string; name: string; contactPerson: string; email: string; phone: string;
+  totalEvaluations: number; approved: number; pending: number; rejected: number;
+  totalApprovedAmount: number; spvNames: string[];
+  [key: string]: any;
+}
+
+export interface PnlMonth {
+  id: string; month: string; year: number; totalRevenue: number; totalExpenses: number;
+  netIncome: number; margin: number; currency: string;
+  revenueBreakdown: { platform: number; services: number; vertikale: number; verticalCommissions: number; [k: string]: number };
+  expenseBreakdown: { operational: number; legal: number; marketing: number; it: number; [k: string]: number };
+  [key: string]: any;
+}
 // --- GENERIC FETCH HOOK ------------------------------------------------------
 
 interface UseDataResult<T> {
@@ -108,7 +210,7 @@ function deriveStatus(row: { is_blocked: boolean; core_approved: boolean; lifecy
 }
 
 function statusLabel(status: SpvStatus): string {
-  const labels: Record<SpvStatus, string> = {
+  const labels: Record<string, string> = {
     aktivan: "Aktivan", blokiran: "Blokiran", u_izradi: "U izradi",
     na_cekanju: "Na cekanju", zavrsen: "Zavrsen",
   };
@@ -143,7 +245,7 @@ function mapPriority(p: number | string | null): string {
   return map[Number(p)] || "medium";
 }
 
-function mapInvoiceStatus(s: string | null): Invoice["status"] {
+function mapInvoiceStatus(s: string | null): string {
   const map: Record<string, Invoice["status"]> = {
     paid: "placen", pending: "ceka", overdue: "kasni", cancelled: "storniran",
     "placen": "placen", "ceka": "ceka", kasni: "kasni", storniran: "storniran",
@@ -158,7 +260,7 @@ export const formatEur = (amount: number) =>
 
 export const formatDate = (dateStr: string) => dateStr;
 
-export const SECTORS: Record<Sector, { label: string; icon: string; color: string }> = {
+export const SECTORS: Record<string, { label: string; icon: string; color: string }> = {
   nekretnine: { label: "Nekretnine", icon: "???", color: "blue" },
   energetika: { label: "Energetika", icon: "?", color: "amber" },
   turizam: { label: "Turizam", icon: "??", color: "teal" },
@@ -169,7 +271,7 @@ export const SECTORS: Record<Sector, { label: string; icon: string; color: strin
 
 // --- SPV HOOKS ----------------------------------------------------------------
 
-async function fetchSpvsRaw(): Promise<Spv[]> {
+async function fetchSpvsRaw(): Promise<any[]> {
   const { data, error } = await supabaseBrowser
     .from("spvs")
     .select(`*, owner:user_profiles!spvs_owner_id_fkey(full_name)`)
@@ -213,7 +315,7 @@ async function fetchSpvsRaw(): Promise<Spv[]> {
       units: r.units || undefined,
       area: r.area ? Number(r.area) : undefined,
       description: r.description || "",
-    } satisfies Spv;
+    };
   });
 }
 
@@ -249,7 +351,7 @@ export function useBlockedSpvs(): UseDataResult<Spv[]> {
 
 // --- DOCUMENTS ----------------------------------------------------------------
 
-async function fetchDocsRaw(spvId?: string): Promise<Document[]> {
+async function fetchDocsRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("documents")
     .select(`*, uploader:user_profiles!documents_uploaded_by_fkey(full_name)`)
@@ -306,7 +408,7 @@ export function usePendingDocs(): UseDataResult<Document[]> {
 
 // --- INVOICES -----------------------------------------------------------------
 
-async function fetchInvoicesRaw(spvId?: string, direction?: string): Promise<Invoice[]> {
+async function fetchInvoicesRaw(spvId?: string, direction?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("invoices")
     .select("*")
@@ -375,7 +477,7 @@ export function useOverdueInvoices(): UseDataResult<Invoice[]> {
 
 // --- TRANSACTIONS (spv_finance_entries) ---------------------------------------
 
-async function fetchTransactionsRaw(spvId?: string): Promise<Transaction[]> {
+async function fetchTransactionsRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("spv_finance_entries")
     .select("*")
@@ -411,7 +513,7 @@ export function useTransactions(spvId?: string): UseDataResult<Transaction[]> {
 
 // --- TASKS --------------------------------------------------------------------
 
-async function fetchTasksRaw(spvId?: string): Promise<Task[]> {
+async function fetchTasksRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("tasks").select(`*, assignee:user_profiles!tasks_assigned_to_fkey(full_name)`)
     .is("deleted_at", null).order("created_at", { ascending: false });
@@ -457,7 +559,7 @@ export function useOpenTasks(): UseDataResult<Task[]> {
 
 // --- DECISIONS ----------------------------------------------------------------
 
-async function fetchDecisionsRaw(spvId?: string): Promise<Decision[]> {
+async function fetchDecisionsRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("decisions")
     .select(`*,
@@ -503,7 +605,7 @@ export function usePendingDecisions(): UseDataResult<Decision[]> {
 
 // --- TOK REQUESTS -------------------------------------------------------------
 
-async function fetchTokRaw(spvId?: string): Promise<TokRequest[]> {
+async function fetchTokRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("tok_requests")
     .select(`*,
@@ -568,7 +670,7 @@ export function useSlaBreached(): UseDataResult<TokRequest[]> {
 
 // --- ACTIVITY LOG -------------------------------------------------------------
 
-async function fetchActivityRaw(spvId?: string, limit = 50): Promise<ActivityLog[]> {
+async function fetchActivityRaw(spvId?: string, limit = 50): Promise<any[]> {
   let query = supabaseBrowser
     .from("activity_log")
     .select(`*, actor:user_profiles!activity_log_user_id_fkey(full_name)`)
@@ -603,7 +705,7 @@ export function useActivityLog(spvId?: string, limit?: number): UseDataResult<Ac
 
 // --- CONTRACTS ----------------------------------------------------------------
 
-async function fetchContractsRaw(spvId?: string): Promise<Contract[]> {
+async function fetchContractsRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("contracts")
     .select("*")
@@ -654,7 +756,7 @@ export function useExpiringContracts(): UseDataResult<Contract[]> {
 
 // --- PDV QUARTERS -------------------------------------------------------------
 
-async function fetchPdvRaw(spvId?: string): Promise<PdvQuarter[]> {
+async function fetchPdvRaw(spvId?: string): Promise<any[]> {
   let query = supabaseBrowser
     .from("pdv_quarters")
     .select("*")
@@ -738,7 +840,7 @@ export function useVerticals(): UseDataResult<Vertical[]> {
       .order("created_at", { ascending: false });
     if (error) { console.error("useVerticals:", error); return []; }
     // Group by naziv (company name) to match mock Vertical shape
-    const grouped = new Map<string, Vertical>();
+    const grouped = new Map<string, any>();
     for (const r of data || []) {
       const key = (r as any).naziv || r.id;
       if (!grouped.has(key)) {
@@ -797,7 +899,7 @@ export function useVerticalsBySpv(spvId: string): UseDataResult<Vertical[]> {
       ndaSigned: true,
       ndaDate: fmtDate(r.ugovor_datum),
       assignedSpvs: [r.spv_id],
-    })) as Vertical[];
+    })) as any[];
   }, [], [spvId]);
 }
 
@@ -815,18 +917,18 @@ export function useVerticalById(id: string): UseDataResult<Vertical | null> {
       contact: r.kontakt_osoba || "", email: r.kontakt_email || "",
       phone: r.kontakt_telefon || "", ndaSigned: true,
       ndaDate: fmtDate(r.ugovor_datum), assignedSpvs: [r.spv_id],
-    } as Vertical;
+    } as any;
   }, null, [id]);
 }
 
 // Helper for vertical compat mapping
-async function fetchVertikaleForCompat(): Promise<Vertical[]> {
+async function fetchVertikaleForCompat(): Promise<any[]> {
   const { data, error } = await supabaseBrowser
     .from("vertikale")
     .select("*")
     .order("created_at", { ascending: false });
   if (error || !data) return [];
-  const grouped = new Map<string, Vertical>();
+  const grouped = new Map<string, any>();
   for (const r of data) {
     const key = (r as any).naziv || r.id;
     if (!grouped.has(key)) {
@@ -862,7 +964,7 @@ export function useAccountants(): UseDataResult<Accountant[]> {
       .eq("is_active", true);
     if (error || !data) return [];
     // Group by user (one accountant can cover multiple SPVs)
-    const grouped = new Map<string, Accountant>();
+    const grouped = new Map<string, any>();
     for (const r of data) {
       const uid = (r as any).user_id;
       if (!grouped.has(uid)) {
@@ -909,7 +1011,7 @@ export function useAccountantBySpv(spvId: string): UseDataResult<Accountant | nu
       email: r.user?.email || "",
       status: "aktivan",
       contractDate: fmtDate(r.assigned_at),
-    } as Accountant;
+    } as any;
   }, null, [spvId]);
 }
 
@@ -929,7 +1031,7 @@ export function useBanks(): UseDataResult<Bank[]> {
       .order("created_at", { ascending: false });
     if (error || !data) return [];
     // Group by bank_name
-    const grouped = new Map<string, Bank>();
+    const grouped = new Map<string, any>();
     for (const r of data) {
       const bankName = (r as any).bank_name || "Unknown";
       if (!grouped.has(bankName)) {
@@ -967,7 +1069,7 @@ export function usePnlMonths(): UseDataResult<PnlMonth[]> {
     if (error || !data) return [];
 
     // Group by month
-    const months = new Map<string, PnlMonth>();
+    const months = new Map<string, any>();
     const monthNames = [
       "", "SijeÄanj", "VeljaÄa", "OÅ¾ujak", "Travanj", "Svibanj", "Lipanj",
       "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"
@@ -1106,3 +1208,25 @@ export function useFinanceSummary(): UseDataResult<{
     };
   }, { totalRevenue: 0, totalExpenses: 0, netIncome: 0, unpaidInvoices: 0, overdueAmount: 0 });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

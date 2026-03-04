@@ -1,0 +1,21 @@
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.1s
+  Running TypeScript ...
+Failed to compile.
+
+./lib/data-client.ts:282:3
+Type error: Type '{ id: string; code: any; name: string; address: string; city: string; sector: string; sectorLabel: string; phase: string; lifecycle_stage: string; status: string; statusLabel: string; oib: string; founded: string; ... 9 more ...; description: string; }[]' is not assignable to type 'Spv[]'.
+  Type '{ id: string; code: any; name: string; address: string; city: string; sector: string; sectorLabel: string; phase: string; lifecycle_stage: string; status: string; statusLabel: string; oib: string; founded: string; ... 9 more ...; description: string; }' is missing the following properties from type 'Spv': projectName, ownerName, isBlocked, coreApproved, and 3 more.
+
+  280 |   if (error) { console.error("fetchSpvs:", error); return []; }
+  281 |
+> 282 |   return (data || []).map((row: Record<string, unknown>) => {
+      |   ^
+  283 |     const r = row as {
+  284 |       id: string; spv_code: string; project_name: string; lifecycle_stage: string;
+  285 |       core_approved: boolean; is_blocked: boolean; blocked_reason: string | null;
+Next.js build worker exited with code: 1 and signal: null
