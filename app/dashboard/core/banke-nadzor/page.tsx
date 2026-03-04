@@ -1,11 +1,23 @@
-﻿"use client";
+"use client";
 
 import { useBanks, useSpvs, useSpvById } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 export default function BankeNadzorPage() {
+  const { allowed, loading: permLoading } = usePermission("bank_read");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "CORE_BANKE-NADZOR_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { data: _allSpvs } = useSpvs();
   const { data: banks, loading: banksLoading } = useBanks();
   const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
 
   if (banksLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 

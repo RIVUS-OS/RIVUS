@@ -1,6 +1,13 @@
-﻿"use client";
+"use client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 export default function HoldingProfilPage() {
+  const { allowed, loading: permLoading } = usePermission("holding_read");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "HOLDING_PROFIL_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const fields = [
     ["Naziv", "RIVUS Holding d.o.o."],
     ["OIB", "12345678901"],
@@ -11,6 +18,11 @@ export default function HoldingProfilPage() {
     ["Status", "Aktivan"],
     ["NKD", "64.20 - Djelatnost holding drustava"],
   ];
+
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
 
   return (
     <div className="space-y-6">

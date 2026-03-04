@@ -1,9 +1,19 @@
-﻿"use client";
+"use client";
 import { useSpvs, useIssuedInvoices, useReceivedInvoices, formatEur } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 export default function OwnerFinancijePage() {
+  const { allowed, loading: permLoading } = usePermission("finance_read");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "OWNER_FINANCIJE_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { data: spvs, loading } = useSpvs();
   const { data: issued } = useIssuedInvoices();
   const { data: received } = useReceivedInvoices();
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
   const data = spvs.map(p => {
     const rev = issued.filter(i => i.spvId === p.id).reduce((s,i) => s + i.totalAmount, 0);

@@ -1,11 +1,21 @@
-﻿"use client";
+"use client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 export default function CorePostavkePage() {
+  const { allowed, loading: permLoading } = usePermission("core_settings");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "CORE_POSTAVKE_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const settings = [
     { group: "Platforma", items: ["Naziv platforme", "Logo", "Domena", "Jezik", "Valuta"] },
     { group: "Notifikacije", items: ["Email obavijesti", "SLA upozorenja", "Eskalacije", "Tjedni izvjestaj"] },
     { group: "Sigurnost", items: ["2FA", "Session timeout", "IP whitelist", "Audit log"] },
     { group: "Integracije", items: ["eRacun", "KPD", "FINA", "Supabase"] },
   ];
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Postavke platforme</h1></div>

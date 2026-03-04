@@ -1,6 +1,16 @@
-﻿"use client";
+"use client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 export default function OwnerProfilPage() {
+  const { allowed, loading: permLoading } = usePermission("owner_dashboard");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "OWNER_PROFIL_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Profil - Vlasnik SPV</h1></div>

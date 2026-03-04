@@ -1,4 +1,4 @@
-// RIVUS v1.2.7 — P19: usePermission Hook
+﻿// RIVUS v1.2.7 — P19: usePermission Hook
 // Role-aware gate prema §8 matrici iz A14.
 // Svaka stranica MORA koristiti za write/action gating (A13-K9).
 'use client';
@@ -74,6 +74,7 @@ const PERMISSION_MATRIX: Record<string, string[]> = {
   // System
   platform_mode_change: ['Core'],
   notifications_read:   ['Core', 'SPV_Owner', 'Vertical', 'Bank', 'Knjigovodja', 'Holding'],
+  holding_read:         ['Holding', 'Core'],
 };
 
 // Write akcije koje se blokiraju u non-NORMAL modu
@@ -162,3 +163,4 @@ export function usePermission(action: string): PermissionResult {
 
 // Export matrice za testiranje
 export { PERMISSION_MATRIX, WRITE_ACTIONS };
+

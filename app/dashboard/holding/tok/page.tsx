@@ -1,12 +1,24 @@
-﻿"use client";
+"use client";
 
 import { useSpvs, useTokRequests } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 const statusColors: Record<string, string> = { "otvoren": "bg-blue-100 text-blue-700", "u_tijeku": "bg-amber-100 text-amber-700", "rijesen": "bg-green-100 text-green-700", "eskaliran": "bg-red-100 text-red-700", "zatvoren": "bg-gray-100 text-gray-600" };
 
 export default function HoldingTokPage() {
+  const { allowed, loading: permLoading } = usePermission("holding_read");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "HOLDING_TOK_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { data: _tokAll } = useTokRequests();
   const { data: spvs, loading: spvsLoading } = useSpvs();
+
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
 
   if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
 

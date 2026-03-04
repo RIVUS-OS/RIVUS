@@ -1,8 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 type FinancijeEntry = {
   id: string;
@@ -21,6 +24,9 @@ const KATEGORIJE = ["PRIHOD_PRODAJA", "PRIHOD_USLUGA", "RASHOD_GRADNJA", "RASHOD
 const PDV_STOPE = [0, 5, 13, 25];
 
 export default function CoreSpvFinancijePage() {
+  const { allowed, loading: permLoading } = usePermission("accounting_access");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "ACCOUNTING_SPV_SPV_FINANCIJE_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { id } = useParams();
   const [entries, setEntries] = useState<FinancijeEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +63,9 @@ export default function CoreSpvFinancijePage() {
       body: JSON.stringify({ spv_id: id, entry_type: entryType, category, description, neto_iznos: parseFloat(netoIznos), pdv_stopa: pdvStopa, datum }),
     });
     const json = await res.json();
+    if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+    if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
     if (!res.ok) { setError(json.error || "Greška"); setSubmitting(false); return; }
     setForma(false);
     setNetoIznos("");

@@ -1,5 +1,12 @@
-﻿"use client";
+"use client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 export default function CoreUlogePage() {
+  const { allowed, loading: permLoading } = usePermission("user_manage");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "CORE_ULOGE_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const roles = [
     { name: "CORE Admin", desc: "Puni pristup svim SPV-ovima i postavkama", count: 1, color: "bg-black text-white" },
     { name: "Owner", desc: "Vlasnik SPV-a, pristup vlastitim projektima", count: 3, color: "bg-blue-100 text-blue-700" },
@@ -8,6 +15,9 @@ export default function CoreUlogePage() {
     { name: "Vertical", desc: "Specijalizirani dobavljaci usluga", count: 5, color: "bg-purple-100 text-purple-700" },
     { name: "Holding", desc: "Strateski pregled portfolija", count: 1, color: "bg-gray-800 text-white" },
   ];
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   return (
     <div className="space-y-6">
       <div><h1 className="text-[22px] font-bold text-black">Uloge i dozvole</h1></div>

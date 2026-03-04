@@ -1,9 +1,19 @@
-﻿"use client";
+"use client";
 import { useAccountants, useSpvs, useSpvsWithoutAccountant, formatEur } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 export default function KnjigovodjeNadzorPage() {
+  const { allowed, loading: permLoading } = usePermission("accounting_access");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "CORE_KNJIGOVODJE-NADZOR_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { data: accountants, loading: accountantsLoading } = useAccountants();
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: spvsWithout } = useSpvsWithoutAccountant();
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   if (accountantsLoading || spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
   const totalMonthlyCost = accountants.reduce((sum, a) => sum + a.pricePerMonth, 0);
   return (

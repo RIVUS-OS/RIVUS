@@ -1,12 +1,22 @@
-﻿"use client";
+"use client";
 
 import { useParams } from "next/navigation";
 import { useSpvById, useTokRequests } from "@/lib/data-client";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { logAudit } from "@/lib/hooks/logAudit";
 
 export default function AccSpvZahtjeviPage() {
+  const { allowed, loading: permLoading } = usePermission("accounting_access");
+  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "ACCOUNTING_SPV_SPV_ZAHTJEVI_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
+
   const { id } = useParams();
   const { data: spv } = useSpvById(id as string);
   const { data: _raw_open } = useTokRequests(id as string);
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
   const open = _raw_open.filter(t => t.status === "otvoren" || t.status === "u_tijeku" || t.status === "eskaliran");
 
