@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — Formatteri (HR locale)
+// RIVUS v1.0 — Formatteri (HR locale)
 
 export function formatCurrency(amount: number | null | undefined): string {
   if (amount == null) return '0,00 €';

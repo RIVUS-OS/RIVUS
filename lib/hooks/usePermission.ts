@@ -1,4 +1,4 @@
-﻿// RIVUS v1.2.7 — P19: usePermission Hook
+// RIVUS v1.2.7 — P19: usePermission Hook
 // Role-aware gate prema §8 matrici iz A14.
 // Svaka stranica MORA koristiti za write/action gating (A13-K9).
 'use client';

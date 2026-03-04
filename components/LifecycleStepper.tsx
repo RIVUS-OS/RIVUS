@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — LifecycleStepper
+// RIVUS v1.0 — LifecycleStepper
 'use client';
 import React from 'react';
 import { LifecycleStage, type LifecycleStageType } from '@/lib/enums';

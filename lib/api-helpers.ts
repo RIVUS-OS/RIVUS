@@ -1,4 +1,4 @@
-﻿import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseServer } from "@/lib/supabaseServer";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function getAuthUser(supabase: Awaited<ReturnType<typeof supabaseServer>>) {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * OIB checksum validation (ISO 7064, MOD 11,10)
  * Matches DB function is_valid_oib() exactly.
  */

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { TrendingUp, ArrowRight, AlertTriangle } from "lucide-react";
 

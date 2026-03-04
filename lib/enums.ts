@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — Enumi (matchaju DB CHECK constraints TOcNO)
+// RIVUS v1.0 — Enumi (matchaju DB CHECK constraints TOcNO)
 
 // spvs.lifecycle_stage (lifecycle_stage_check)
 export const LifecycleStage = {

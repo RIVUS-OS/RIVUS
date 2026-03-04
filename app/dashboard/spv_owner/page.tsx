@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 // ENFORCEMENT: REDIRECT PAGE â€” legacy SPV_Owner route.
 // Redirects to /dashboard/owner. Auth checked by middleware.ts.
 

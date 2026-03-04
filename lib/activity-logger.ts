@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — Activity Logger (Immutable Audit Trail)
+// RIVUS v1.0 — Activity Logger (Immutable Audit Trail)
 // Koristi existing supabaseBrowser
 
 import { supabaseBrowser } from '@/lib/supabaseBrowser';

@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — useAuth Hook (Client Components)
+// RIVUS v1.0 — useAuth Hook (Client Components)
 'use client';
 
 import { useState, useEffect } from 'react';

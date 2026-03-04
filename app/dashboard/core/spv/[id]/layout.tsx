@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useSpvById } from "@/lib/data-client";

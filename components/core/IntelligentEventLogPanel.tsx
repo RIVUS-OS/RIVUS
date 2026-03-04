@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { AlertCircle, AlertTriangle, Info, Filter, ArrowRight, Calendar } from "lucide-react";

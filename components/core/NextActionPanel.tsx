@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { AlertCircle, Clock, CheckCircle, ArrowRight, User, FileText } from "lucide-react";
 

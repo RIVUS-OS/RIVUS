@@ -1,4 +1,4 @@
-﻿import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseServer } from "@/lib/supabaseServer";
 import { getAuthUser, unauthorized, badRequest, ok, serverError } from "@/lib/api-helpers";
 import { NextRequest } from "next/server";
 

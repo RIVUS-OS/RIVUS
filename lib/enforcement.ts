@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — Enforcement Engine
+// RIVUS v1.0 — Enforcement Engine
 
 import { LifecycleStage, ALLOWED_TRANSITIONS, type LifecycleStageType } from '@/lib/enums';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';

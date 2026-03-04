@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 // ENFORCEMENT: REDIRECT PAGE â€” no usePermission needed.
 // Routes user to role-specific dashboard. Auth checked by middleware.ts.
 

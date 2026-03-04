@@ -1,4 +1,4 @@
-﻿import JSZip from "jszip";
+import JSZip from "jszip";
 
 function formatDate(d: string | null | undefined): string {
   if (!d) return "-";

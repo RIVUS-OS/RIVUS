@@ -1,4 +1,4 @@
-﻿import { ALLOWED_TRANSITIONS, type LifecycleStageType } from "./enums";
+import { ALLOWED_TRANSITIONS, type LifecycleStageType } from "./enums";
 
 export const LIFECYCLE_STAGES = [
   "Created",

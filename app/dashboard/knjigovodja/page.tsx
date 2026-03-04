@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 // ENFORCEMENT: REDIRECT PAGE â€” legacy Knjigovodja route.
 // Redirects to /dashboard/accounting. Auth checked by middleware.ts.
 

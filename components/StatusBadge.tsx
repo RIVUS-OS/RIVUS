@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — StatusBadge
+// RIVUS v1.0 — StatusBadge
 'use client';
 import React from 'react';
 

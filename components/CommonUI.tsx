@@ -1,4 +1,4 @@
-﻿// RIVUS v1.0 — Common UI
+// RIVUS v1.0 — Common UI
 'use client';
 import React from 'react';
 
