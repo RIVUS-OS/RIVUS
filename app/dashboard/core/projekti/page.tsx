@@ -1,4 +1,6 @@
-﻿import { supabaseServer } from '@/lib/supabaseServer'
+﻿// ENFORCEMENT: SERVER PAGE - role check via supabaseServer (Core only).
+// Cannot use usePermission (server component). Auth: getUser() + role !== 'Core' -> redirect.
+import { supabaseServer } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import SpvCreateForm from '@/components/core/SpvCreateForm'
 
@@ -121,3 +123,4 @@ export default async function CoreProjektiPage() {
     </div>
   )
 }
+

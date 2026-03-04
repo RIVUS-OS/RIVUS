@@ -1,9 +1,9 @@
 ﻿// ============================================================================
-// RIVUS OS â€” Auth Middleware
+// RIVUS OS - Auth Middleware
 // middleware.ts (project root)
 //
 // Server-side auth gate. Redirects unauthenticated users to /login.
-// Runs BEFORE page render â€” no client-side flash.
+// Runs BEFORE page render - no client-side flash.
 // ============================================================================
 
 import { createServerClient } from "@supabase/ssr";

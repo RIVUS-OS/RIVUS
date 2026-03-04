@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -83,7 +83,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="text-[11px] text-black/30 mt-4 text-center">Auth through proxy.ts. Rate limiting aktivan (A10 §6.3).</div>
+          <div className="text-[11px] text-black/30 mt-4 text-center">Auth through middleware.ts. Rate limiting aktivan (A10 §6.3).</div>
         </form>
 
         {/* Legal Footer */}
