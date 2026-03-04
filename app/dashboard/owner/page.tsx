@@ -12,6 +12,8 @@ import {
   useOpenTokRequests,
   useActivityLog,
   useMissingDocs,
+  useTransactions,
+  useInvoices,
   formatEur,
 } from "@/lib/data-client";
 
@@ -33,6 +35,8 @@ export default function OwnerDashboardPage() {
   const { data: openTok } = useOpenTokRequests();
   const { data: activity } = useActivityLog(undefined, 8);
   const { data: missingDocs } = useMissingDocs();
+  const { data: transactions } = useTransactions();
+  const { data: allInvoices } = useInvoices();
 
   useEffect(() => {
     if (!permLoading && allowed) {
@@ -51,7 +55,6 @@ export default function OwnerDashboardPage() {
     return (<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>);
   }
 
-  // P19: Lockdown redirect notice
   if (isLockdown) {
     return (<div className="flex items-center justify-center h-64"><div className="text-center">
       <p className="text-lg font-semibold text-red-700">Sustav u Lockdown modu</p>
@@ -59,13 +62,27 @@ export default function OwnerDashboardPage() {
     </div></div>);
   }
 
+  // V2.5-3: Enriched financials
   const totalBudget = spvs.reduce((s, p) => s + (p.totalBudget || 0), 0);
+  const totalProfit = spvs.reduce((s, p) => s + (p.estimatedProfit || 0), 0);
+  const totalRevenue = transactions.reduce((s, t) => s + (t.credit || 0), 0);
+  const totalExpenses = transactions.reduce((s, t) => s + (t.debit || 0), 0);
+  const netResult = totalRevenue - totalExpenses;
+  const paidInvoices = allInvoices.filter(i => i.status === "placen");
+  const totalPaid = paidInvoices.reduce((s, i) => s + (i.totalAmount || 0), 0);
 
   const kpis = [
     { label: "SPV-ovi", value: String(spvs.length), sub: "u portfelju", color: "bg-blue-50 text-blue-700" },
     { label: "Otvoreni zadaci", value: String(openTasks.length), sub: overdue.length > 0 ? overdue.length + " dospjelih" : "sve u roku", color: openTasks.length > 0 ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700" },
     { label: "Neplaceni racuni", value: String(unpaid.length), sub: overdue.length > 0 ? overdue.length + " prekoracenih" : "nema prekoracenih", color: unpaid.length > 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700" },
-    { label: "Ukupni budzet", value: formatEur(totalBudget), sub: spvs.length + " projekata", color: "bg-gray-50 text-gray-700" },
+    { label: "Ukupni budzet", value: formatEur(totalBudget), sub: formatEur(totalProfit) + " procijenjeni profit", color: "bg-gray-50 text-gray-700" },
+  ];
+
+  const finKpis = [
+    { label: "Prihodi", value: formatEur(totalRevenue), color: "text-green-600" },
+    { label: "Rashodi", value: formatEur(totalExpenses), color: "text-red-600" },
+    { label: "Neto rezultat", value: formatEur(netResult), color: netResult >= 0 ? "text-green-700" : "text-red-700" },
+    { label: "Naplaceno", value: formatEur(totalPaid), color: "text-blue-600" },
   ];
 
   const statusColors: Record<string, string> = {
@@ -73,6 +90,7 @@ export default function OwnerDashboardPage() {
     blokiran: "bg-red-100 text-red-700",
     u_izradi: "bg-blue-100 text-blue-700",
     na_cekanju: "bg-gray-100 text-gray-600",
+    zavrsen: "bg-purple-100 text-purple-700",
   };
 
   const alerts: { label: string; count: number; path: string; color: string }[] = [];
@@ -83,11 +101,10 @@ export default function OwnerDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-bold text-black">Owner Dashboard</h1>
+        <h1 className="text-[22px] font-bold text-black">Owner Cockpit</h1>
         <p className="text-[13px] text-black/50 mt-0.5">Pregled svih projekata i operativnog stanja</p>
       </div>
 
-      {/* P19: Safe Mode banner */}
       {isSafe && (
         <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-[12px] text-amber-700">
           Sustav u Safe Mode — samo citanje aktivno. Kontaktirajte CORE.
@@ -103,6 +120,19 @@ export default function OwnerDashboardPage() {
             <div className="text-[11px] text-black/40 mt-0.5">{k.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* V2.5-3: Financial summary */}
+      <div>
+        <h2 className="text-[16px] font-bold text-black mb-3">Financijski pregled</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {finKpis.map((k) => (
+            <div key={k.label} className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className={`text-[20px] font-bold ${k.color}`}>{k.value}</div>
+              <div className="text-[12px] text-black/50 mt-1">{k.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Alerts */}
@@ -132,6 +162,7 @@ export default function OwnerDashboardPage() {
               <th className="text-left px-3 py-2.5 font-semibold text-black/70">Faza</th>
               <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
               <th className="text-right px-3 py-2.5 font-semibold text-black/70">Budzet</th>
+              <th className="text-right px-3 py-2.5 font-semibold text-black/70">Profit</th>
             </tr></thead>
             <tbody>
               {spvs.map((p) => (
@@ -139,11 +170,12 @@ export default function OwnerDashboardPage() {
                   <td className="px-3 py-2.5 font-medium text-black">{p.name}</td>
                   <td className="px-3 py-2.5 text-black/50">{p.city}</td>
                   <td className="px-3 py-2.5 text-black/70">{p.phase}</td>
-                  <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[p.status] || "bg-gray-100"}`}>{p.status}</span></td>
+                  <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[p.status] || "bg-gray-100"}`}>{p.statusLabel}</span></td>
                   <td className="px-3 py-2.5 text-right font-medium">{formatEur(p.totalBudget)}</td>
+                  <td className={`px-3 py-2.5 text-right font-medium ${(p.estimatedProfit || 0) >= 0 ? "text-green-600" : "text-red-600"}`}>{formatEur(p.estimatedProfit)}</td>
                 </tr>
               ))}
-              {spvs.length === 0 && (<tr><td colSpan={5} className="px-3 py-8 text-center text-black/40">Nema projekata</td></tr>)}
+              {spvs.length === 0 && (<tr><td colSpan={6} className="px-3 py-8 text-center text-black/40">Nema projekata</td></tr>)}
             </tbody>
           </table>
         </div>
