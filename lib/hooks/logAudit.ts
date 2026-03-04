@@ -166,7 +166,7 @@ export async function auditAndExecute<T>(
       ...auditParams,
       action: auditParams.action + '_FAILED',
       severity: 'warning',
-      metadata: { ...auditParams.details, error: String(e) },
+      details: { ...auditParams.details, error: String(e) },
     });
     throw e;
   }

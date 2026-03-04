@@ -1,47 +1,70 @@
 ﻿"use client";
+
 import { useRouter } from "next/navigation";
-import { useSpvs, useBlockedSpvs, useMissingDocs, useBlockedTasks } from "@/lib/data-client";
+import { Loader2 } from "lucide-react";
+import { usePermission } from "@/lib/hooks/usePermission";
+import { useMandatoryItems } from "@/lib/hooks/block-c";
+import { useSpvs, useBlockedSpvs } from "@/lib/data-client";
+
 export default function BlokadePage() {
-  const { data: spvs, loading: spvsLoading } = useSpvs();
-  const { data: blocked } = useBlockedSpvs();
-  const { data: missingDocs } = useMissingDocs();
-  const { data: blockedTasks } = useBlockedTasks();
   const router = useRouter();
-  if (spvsLoading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
+  const { allowed, loading: permLoading } = usePermission("core_dashboard");
+  const { data: spvs, loading: spvLoad } = useSpvs();
+  const { data: blocked, loading: blkLoad } = useBlockedSpvs();
+  const { data: mandatoryItems, loading: mLoad } = useMandatoryItems();
+
+  const loading = permLoading || spvLoad || blkLoad || mLoad;
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
+
+  const blockingItems = mandatoryItems.filter(i => i.blocksTransition && i.status !== "COMPLETED" && i.status !== "WAIVED");
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[22px] font-bold text-black">Blokade</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{blocked.length} blokiran SPV | {missingDocs.length} mandatory dokumenata nedostaje</p>
+        <p className="text-[13px] text-black/50 mt-0.5">{blocked.length} blokiran SPV | {blockingItems.length} mandatory stavki blokira tranziciju</p>
       </div>
-      {blocked.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+
+      {blocked.length === 0 && blockingItems.length === 0 ? (
+        <div className="bg-white rounded-xl border border-green-200 p-8 text-center">
           <div className="text-[15px] font-bold text-green-600 mb-1">Nema blokiranih SPV-ova</div>
           <div className="text-[13px] text-black/40">Svi projekti su operativni</div>
         </div>
       ) : (
-        <div className="space-y-3">
-          {blocked.map(spv => {
-            const spvMissing = missingDocs.filter(d => d.spvId === spv.id);
-            const spvBlocked = blockedTasks.filter(t => t.spvId === spv.id);
-            return (
-              <div key={spv.id} className="bg-white rounded-xl border border-red-200 p-5 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => router.push("/dashboard/core/spv/" + spv.id)}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-[15px] font-bold text-black">{spv.name}</h2>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">Blokiran</span>
+        <>
+          {blocked.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-[14px] font-bold text-red-700">Blokirani SPV-ovi ({blocked.length})</div>
+              {blocked.map(spv => (
+                <div key={spv.id} className="bg-white rounded-xl border border-red-200 p-5 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => router.push("/dashboard/core/spv/" + spv.id)}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[14px] font-bold text-black">{spv.name}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-200 text-red-800">BLOCKED</span>
                   </div>
-                  <span className="text-[12px] text-black/40">{spv.city}</span>
+                  <div className="text-[11px] text-black/40 mt-1">Status: {(spv as any).status || "---"} | Stage: {(spv as any).lifecycleStage || "---"}</div>
                 </div>
-                <div className="flex gap-4 text-[12px] text-black/50">
-                  <span>{spvMissing.length} mandatory doc nedostaje</span>
-                  <span>{spvBlocked.length} blokiranih zadataka</span>
+              ))}
+            </div>
+          )}
+
+          {blockingItems.length > 0 && (
+            <div className="bg-white rounded-xl border border-amber-200">
+              <div className="px-4 py-3 border-b border-amber-100 text-[14px] font-bold text-amber-800">Blocking mandatory stavke ({blockingItems.length})</div>
+              {blockingItems.map(item => (
+                <div key={item.id} className="px-4 py-2.5 border-b border-gray-50 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-black">{item.title}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-200 text-red-800">BLOCKS</span>
+                  </div>
+                  <div className="text-[11px] text-black/40 mt-0.5">{item.lifecyclePhase} | {item.status} | Due: {item.dueDate || "---"}</div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

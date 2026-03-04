@@ -28,12 +28,16 @@ import {
   ActivityLog,
   Contract,
   PdvQuarter,
+  Vertical,
+  Accountant,
+  Bank,
+  PnlMonth,
   Sector,
   SpvPhase,
   SpvStatus,
 } from "./mock-data";
 
-// ─── GENERIC FETCH HOOK ──────────────────────────────────────────────────────
+// --- GENERIC FETCH HOOK ------------------------------------------------------
 
 interface UseDataResult<T> {
   data: T;
@@ -73,9 +77,9 @@ function useSupabaseQuery<T>(
   return { data, loading, error, refetch: fetch };
 }
 
-// ─── HELPERS (sync — ne trebaju hook) ─────────────────────────────────────────
+// --- HELPERS (sync — ne trebaju hook) -----------------------------------------
 
-/** Map lifecycle_stage DB → mock SpvPhase */
+/** Map lifecycle_stage DB ? mock SpvPhase */
 function mapPhase(stage: string | null): SpvPhase {
   const map: Record<string, SpvPhase> = {
     "Created": "Kreirano",
@@ -147,7 +151,7 @@ function mapInvoiceStatus(s: string | null): Invoice["status"] {
   return map[s || ""] || "ceka";
 }
 
-// ─── EXPORTED FORMATTERS (sync, backward-compatible) ─────────────────────────
+// --- EXPORTED FORMATTERS (sync, backward-compatible) -------------------------
 
 export const formatEur = (amount: number) =>
   new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(amount);
@@ -155,15 +159,15 @@ export const formatEur = (amount: number) =>
 export const formatDate = (dateStr: string) => dateStr;
 
 export const SECTORS: Record<Sector, { label: string; icon: string; color: string }> = {
-  nekretnine: { label: "Nekretnine", icon: "🏗️", color: "blue" },
-  energetika: { label: "Energetika", icon: "⚡", color: "amber" },
-  turizam: { label: "Turizam", icon: "🏨", color: "teal" },
-  agro: { label: "Agro", icon: "🌾", color: "green" },
-  infrastruktura: { label: "Infrastruktura", icon: "🛣️", color: "gray" },
-  tech: { label: "Tech", icon: "💻", color: "purple" },
+  nekretnine: { label: "Nekretnine", icon: "???", color: "blue" },
+  energetika: { label: "Energetika", icon: "?", color: "amber" },
+  turizam: { label: "Turizam", icon: "??", color: "teal" },
+  agro: { label: "Agro", icon: "??", color: "green" },
+  infrastruktura: { label: "Infrastruktura", icon: "???", color: "gray" },
+  tech: { label: "Tech", icon: "??", color: "purple" },
 };
 
-// ─── SPV HOOKS ────────────────────────────────────────────────────────────────
+// --- SPV HOOKS ----------------------------------------------------------------
 
 async function fetchSpvsRaw(): Promise<Spv[]> {
   const { data, error } = await supabaseBrowser
@@ -243,7 +247,7 @@ export function useBlockedSpvs(): UseDataResult<Spv[]> {
   }, []);
 }
 
-// ─── DOCUMENTS ────────────────────────────────────────────────────────────────
+// --- DOCUMENTS ----------------------------------------------------------------
 
 async function fetchDocsRaw(spvId?: string): Promise<Document[]> {
   let query = supabaseBrowser
@@ -300,7 +304,7 @@ export function usePendingDocs(): UseDataResult<Document[]> {
   }, []);
 }
 
-// ─── INVOICES ─────────────────────────────────────────────────────────────────
+// --- INVOICES -----------------------------------------------------------------
 
 async function fetchInvoicesRaw(spvId?: string, direction?: string): Promise<Invoice[]> {
   let query = supabaseBrowser
@@ -369,7 +373,7 @@ export function useOverdueInvoices(): UseDataResult<Invoice[]> {
   }, []);
 }
 
-// ─── TRANSACTIONS (spv_finance_entries) ───────────────────────────────────────
+// --- TRANSACTIONS (spv_finance_entries) ---------------------------------------
 
 async function fetchTransactionsRaw(spvId?: string): Promise<Transaction[]> {
   let query = supabaseBrowser
@@ -405,7 +409,7 @@ export function useTransactions(spvId?: string): UseDataResult<Transaction[]> {
   return useSupabaseQuery(() => fetchTransactionsRaw(spvId), [], [spvId]);
 }
 
-// ─── TASKS ────────────────────────────────────────────────────────────────────
+// --- TASKS --------------------------------------------------------------------
 
 async function fetchTasksRaw(spvId?: string): Promise<Task[]> {
   let query = supabaseBrowser
@@ -451,7 +455,7 @@ export function useOpenTasks(): UseDataResult<Task[]> {
   }, []);
 }
 
-// ─── DECISIONS ────────────────────────────────────────────────────────────────
+// --- DECISIONS ----------------------------------------------------------------
 
 async function fetchDecisionsRaw(spvId?: string): Promise<Decision[]> {
   let query = supabaseBrowser
@@ -497,7 +501,7 @@ export function usePendingDecisions(): UseDataResult<Decision[]> {
   }, []);
 }
 
-// ─── TOK REQUESTS ─────────────────────────────────────────────────────────────
+// --- TOK REQUESTS -------------------------------------------------------------
 
 async function fetchTokRaw(spvId?: string): Promise<TokRequest[]> {
   let query = supabaseBrowser
@@ -562,7 +566,7 @@ export function useSlaBreached(): UseDataResult<TokRequest[]> {
   }, []);
 }
 
-// ─── ACTIVITY LOG ─────────────────────────────────────────────────────────────
+// --- ACTIVITY LOG -------------------------------------------------------------
 
 async function fetchActivityRaw(spvId?: string, limit = 50): Promise<ActivityLog[]> {
   let query = supabaseBrowser
@@ -597,7 +601,7 @@ export function useActivityLog(spvId?: string, limit?: number): UseDataResult<Ac
   return useSupabaseQuery(() => fetchActivityRaw(spvId, limit), [], [spvId, limit]);
 }
 
-// ─── CONTRACTS ────────────────────────────────────────────────────────────────
+// --- CONTRACTS ----------------------------------------------------------------
 
 async function fetchContractsRaw(spvId?: string): Promise<Contract[]> {
   let query = supabaseBrowser
@@ -648,7 +652,7 @@ export function useExpiringContracts(): UseDataResult<Contract[]> {
   }, []);
 }
 
-// ─── PDV QUARTERS ─────────────────────────────────────────────────────────────
+// --- PDV QUARTERS -------------------------------------------------------------
 
 async function fetchPdvRaw(spvId?: string): Promise<PdvQuarter[]> {
   let query = supabaseBrowser
@@ -681,7 +685,7 @@ export function usePdvQuarters(spvId?: string): UseDataResult<PdvQuarter[]> {
   return useSupabaseQuery(() => fetchPdvRaw(spvId), [], [spvId]);
 }
 
-// ─── DASHBOARD COUNTS ─────────────────────────────────────────────────────────
+// --- DASHBOARD COUNTS ---------------------------------------------------------
 
 export interface DashboardCounts {
   totalSpvs: number; activeSpvs: number; blockedSpvs: number;
@@ -712,25 +716,393 @@ export function useDashboardCounts(): UseDataResult<DashboardCounts> {
 }
 
 
-// ═══ PHASE C EXTENSION — Temporary mock-backed hooks ═══
 
-export function useVerticals(){return useSupabaseQuery(async()=>[],[])}
-export function useActiveVerticals(){return useSupabaseQuery(async()=>[],[])}
-export function useVerticalsBySpv(spvId: string){return useSupabaseQuery(async()=>[],[],[spvId])}
-export function useVerticalById(id: string){return useSupabaseQuery(async()=>null,null,[id])}
-export function useAccountants(){return useSupabaseQuery(async()=>[],[])}
-export function useAccountantBySpv(spvId: string){return useSupabaseQuery(async()=>null,null,[spvId])}
-export function useSpvsWithoutAccountant(){return useSupabaseQuery(async()=>{const s=await fetchSpvsRaw();return s.filter(x=>!x.accountantId)},[])}
-export function useBanks(){return useSupabaseQuery(async()=>[],[])}
-export function usePnlMonths(){return useSupabaseQuery(async()=>[],[])}
-export function useCurrentBalance(){return useSupabaseQuery(async()=>{const t=await fetchTransactionsRaw();return t.length>0?t[0].balance??0:0},0)}
-export function useBlockedTasks(){return useSupabaseQuery(async()=>{const t=await fetchTasksRaw();return t.filter(x=>x.status==="blokiran"||x.status==="eskaliran")},[])}
-export function useCriticalTasks(){return useSupabaseQuery(async()=>{const t=await fetchTasksRaw();return t.filter(x=>x.priority==="critical")},[])}
-export function useMandatoryDocs(spvId){return useSupabaseQuery(async()=>{const d=await fetchDocsRaw();return d.filter(x=>x.mandatory&&(!spvId||x.spvId===spvId))},[],[spvId])}
-export function usePentagonSummary(){return useSupabaseQuery(async()=>{const[s,d,t,i,k]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw(),fetchTasksRaw(),fetchInvoicesRaw(),fetchTokRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length,ov=i.filter(x=>x.status==="kasni").length,es=k.filter(x=>x.status==="eskaliran").length,cr=t.filter(x=>x.priority==="critical").length;return{compliance:Math.max(0,100-mi*10-bl*20),finance:Math.max(0,100-ov*15),legal:85,operational:Math.max(0,100-cr*10-es*15),risk:Math.max(0,100-bl*25-ov*10-es*10)}},{compliance:0,finance:0,legal:0,operational:0,risk:0})}
-export function useComplianceSummary(){return useSupabaseQuery(async()=>{const[s,d]=await Promise.all([fetchSpvsRaw(),fetchDocsRaw()]);const bl=s.filter(x=>x.status==="blokiran").length,mi=d.filter(x=>x.status==="nedostaje").length;return{totalSpvs:s.length,compliant:s.length-bl,warnings:Math.min(bl,1),violations:Math.max(0,bl-1),missingDocs:mi,overdueObligations:0}},{totalSpvs:0,compliant:0,warnings:0,violations:0,missingDocs:0,overdueObligations:0})}
-export function useFinanceSummary(){return useSupabaseQuery(async()=>{const inv=await fetchInvoicesRaw();const iss=inv.filter(i=>!!(i as any).direction||(i as any).direction==="issued");const rev=iss.reduce((s,i)=>s+(i.totalAmount||0),0);const unp=iss.filter(i=>i.status==="ceka"||i.status==="kasni");const od=iss.filter(i=>i.status==="kasni");return{totalRevenue:rev,totalExpenses:0,netIncome:rev,unpaidInvoices:unp.length,overdueAmount:od.reduce((s,i)=>s+(i.totalAmount||0),0)}},{totalRevenue:0,totalExpenses:0,netIncome:0,unpaidInvoices:0,overdueAmount:0})}
+// ============================================================================
+// RIVUS OS â€” C4a PATCH: data-client.ts Phase C Extension replacement
+// 
+// ZAMIJENI sekciju "PHASE C EXTENSION â€” Temporary mock-backed hooks"
+// na dnu lib/data-client.ts s ovim kodom.
+//
+// Razlog: stub hookovi vraÄ‡ali prazan niz []. Sada koriste DB tablice
+// iz Block C (v1.3.0) i mapiraju na mock-data tipove za backward compat.
+// ============================================================================
 
+// â•â•â• PHASE C â€” Real DB hooks (replacing empty stubs) â•â•â•
 
+// --- Vertikale â†’ maps DB `vertikale` table to mock `Vertical` type ---
+export function useVerticals(): UseDataResult<Vertical[]> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("vertikale")
+      .select(`*, spv:spvs!vertikale_spv_id_fkey(project_name)`)
+      .order("created_at", { ascending: false });
+    if (error) { console.error("useVerticals:", error); return []; }
+    // Group by naziv (company name) to match mock Vertical shape
+    const grouped = new Map<string, Vertical>();
+    for (const r of data || []) {
+      const key = (r as any).naziv || r.id;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          id: r.id,
+          name: (r as any).naziv || "",
+          type: (r as any).tip || "",
+          commission: Number((r as any).provizija_pct) || 0,
+          sectors: [],
+          active: (r as any).status === "ACTIVE",
+          statusLabel: (r as any).status === "ACTIVE" ? "Aktivan" : (r as any).status || "",
+          contact: (r as any).kontakt_osoba || "",
+          email: (r as any).kontakt_email || "",
+          phone: (r as any).kontakt_telefon || "",
+          ndaSigned: true,
+          ndaDate: fmtDate((r as any).ugovor_datum),
+          assignedSpvs: [(r as any).spv_id],
+        });
+      } else {
+        const existing = grouped.get(key)!;
+        if (!(existing.assignedSpvs as string[]).includes((r as any).spv_id)) {
+          (existing.assignedSpvs as string[]).push((r as any).spv_id);
+        }
+      }
+    }
+    return Array.from(grouped.values());
+  }, []);
+}
 
+export function useActiveVerticals(): UseDataResult<Vertical[]> {
+  return useSupabaseQuery(async () => {
+    const all = await fetchVertikaleForCompat();
+    return all.filter((v) => v.active);
+  }, []);
+}
 
+export function useVerticalsBySpv(spvId: string): UseDataResult<Vertical[]> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("vertikale")
+      .select("*")
+      .eq("spv_id", spvId)
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    return data.map((r: any) => ({
+      id: r.id,
+      name: r.naziv || "",
+      type: r.tip || "",
+      commission: Number(r.provizija_pct) || 0,
+      sectors: [],
+      active: r.status === "ACTIVE",
+      statusLabel: r.status === "ACTIVE" ? "Aktivan" : r.status || "",
+      contact: r.kontakt_osoba || "",
+      email: r.kontakt_email || "",
+      phone: r.kontakt_telefon || "",
+      ndaSigned: true,
+      ndaDate: fmtDate(r.ugovor_datum),
+      assignedSpvs: [r.spv_id],
+    })) as Vertical[];
+  }, [], [spvId]);
+}
+
+export function useVerticalById(id: string): UseDataResult<Vertical | null> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("vertikale").select("*").eq("id", id).single();
+    if (error || !data) return null;
+    const r = data as any;
+    return {
+      id: r.id, name: r.naziv || "", type: r.tip || "",
+      commission: Number(r.provizija_pct) || 0, sectors: [],
+      active: r.status === "ACTIVE",
+      statusLabel: r.status === "ACTIVE" ? "Aktivan" : r.status || "",
+      contact: r.kontakt_osoba || "", email: r.kontakt_email || "",
+      phone: r.kontakt_telefon || "", ndaSigned: true,
+      ndaDate: fmtDate(r.ugovor_datum), assignedSpvs: [r.spv_id],
+    } as Vertical;
+  }, null, [id]);
+}
+
+// Helper for vertical compat mapping
+async function fetchVertikaleForCompat(): Promise<Vertical[]> {
+  const { data, error } = await supabaseBrowser
+    .from("vertikale")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  const grouped = new Map<string, Vertical>();
+  for (const r of data) {
+    const key = (r as any).naziv || r.id;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        id: r.id, name: (r as any).naziv || "", type: (r as any).tip || "",
+        commission: Number((r as any).provizija_pct) || 0, sectors: [],
+        active: (r as any).status === "ACTIVE",
+        statusLabel: (r as any).status === "ACTIVE" ? "Aktivan" : (r as any).status || "",
+        contact: (r as any).kontakt_osoba || "", email: (r as any).kontakt_email || "",
+        phone: (r as any).kontakt_telefon || "", ndaSigned: true,
+        ndaDate: fmtDate((r as any).ugovor_datum), assignedSpvs: [(r as any).spv_id],
+      });
+    } else {
+      const existing = grouped.get(key)!;
+      if (!(existing.assignedSpvs as string[]).includes((r as any).spv_id)) {
+        (existing.assignedSpvs as string[]).push((r as any).spv_id);
+      }
+    }
+  }
+  return Array.from(grouped.values());
+}
+
+// --- Accountants â†’ derives from user_spv_assignments role='ACCOUNTING' ---
+export function useAccountants(): UseDataResult<Accountant[]> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("user_spv_assignments")
+      .select(`*,
+        user:user_profiles!user_spv_assignments_user_id_fkey(full_name, email),
+        spv:spvs!user_spv_assignments_spv_id_fkey(project_name)
+      `)
+      .eq("role", "ACCOUNTING")
+      .eq("is_active", true);
+    if (error || !data) return [];
+    // Group by user (one accountant can cover multiple SPVs)
+    const grouped = new Map<string, Accountant>();
+    for (const r of data) {
+      const uid = (r as any).user_id;
+      if (!grouped.has(uid)) {
+        grouped.set(uid, {
+          id: uid,
+          name: (r as any).user?.full_name || "â€”",
+          coversEntities: [],
+          coversSpvs: [(r as any).spv_id],
+          pricePerMonth: 0,
+          contact: (r as any).user?.full_name || "",
+          email: (r as any).user?.email || "",
+          status: "aktivan",
+          contractDate: fmtDate((r as any).assigned_at),
+        });
+      } else {
+        const existing = grouped.get(uid)!;
+        if (!existing.coversSpvs.includes((r as any).spv_id)) {
+          existing.coversSpvs.push((r as any).spv_id);
+        }
+      }
+    }
+    return Array.from(grouped.values());
+  }, []);
+}
+
+export function useAccountantBySpv(spvId: string): UseDataResult<Accountant | null> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("user_spv_assignments")
+      .select(`*, user:user_profiles!user_spv_assignments_user_id_fkey(full_name, email)`)
+      .eq("spv_id", spvId)
+      .eq("role", "ACCOUNTING")
+      .eq("is_active", true)
+      .limit(1);
+    if (error || !data || data.length === 0) return null;
+    const r = data[0] as any;
+    return {
+      id: r.user_id,
+      name: r.user?.full_name || "â€”",
+      coversEntities: [],
+      coversSpvs: [spvId],
+      pricePerMonth: 0,
+      contact: r.user?.full_name || "",
+      email: r.user?.email || "",
+      status: "aktivan",
+      contractDate: fmtDate(r.assigned_at),
+    } as Accountant;
+  }, null, [spvId]);
+}
+
+export function useSpvsWithoutAccountant(): UseDataResult<Spv[]> {
+  return useSupabaseQuery(async () => {
+    const s = await fetchSpvsRaw();
+    return s.filter((x) => !x.accountantId);
+  }, []);
+}
+
+// --- Banks â†’ derives from bank_evaluations ---
+export function useBanks(): UseDataResult<Bank[]> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("bank_evaluations")
+      .select(`*, spv:spvs!bank_evaluations_spv_id_fkey(project_name)`)
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    // Group by bank_name
+    const grouped = new Map<string, Bank>();
+    for (const r of data) {
+      const bankName = (r as any).bank_name || "Unknown";
+      if (!grouped.has(bankName)) {
+        grouped.set(bankName, {
+          id: r.id,
+          name: bankName,
+          spvs: [(r as any).spv_id],
+          relationshipType: (r as any).evaluation_type || "",
+          contact: (r as any).contact_person || "",
+          status: (r as any).status === "APPROVED" ? "aktivan" : (r as any).status || "",
+          evaluationPending: (r as any).status === "PENDING" ? (r as any).spv_id : null,
+        });
+      } else {
+        const existing = grouped.get(bankName)!;
+        if (!existing.spvs.includes((r as any).spv_id)) {
+          existing.spvs.push((r as any).spv_id);
+        }
+        if ((r as any).status === "PENDING") {
+          existing.evaluationPending = (r as any).spv_id;
+        }
+      }
+    }
+    return Array.from(grouped.values());
+  }, []);
+}
+
+// --- PnL Months â†’ computed from core_company_finance ---
+export function usePnlMonths(): UseDataResult<PnlMonth[]> {
+  return useSupabaseQuery(async () => {
+    const { data, error } = await supabaseBrowser
+      .from("core_company_finance")
+      .select("*")
+      .eq("is_storno", false)
+      .order("entry_date", { ascending: true });
+    if (error || !data) return [];
+
+    // Group by month
+    const months = new Map<string, PnlMonth>();
+    const monthNames = [
+      "", "SijeÄanj", "VeljaÄa", "OÅ¾ujak", "Travanj", "Svibanj", "Lipanj",
+      "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"
+    ];
+
+    for (const r of data) {
+      const d = new Date((r as any).entry_date);
+      const m = d.getMonth() + 1;
+      const y = d.getFullYear();
+      const key = `${y}-${String(m).padStart(2, "0")}`;
+
+      if (!months.has(key)) {
+        months.set(key, {
+          month: `${monthNames[m]} ${y}.`,
+          monthNum: m, year: y,
+          revenue: 0, expenses: 0, net: 0, margin: 0,
+          revenueBreakdown: {
+            platformFees: 0, brandLicence: 0, pmServices: 0,
+            successFees: 0, verticalCommissions: 0,
+          },
+        });
+      }
+
+      const entry = months.get(key)!;
+      const amount = Number((r as any).gross_amount) || 0;
+
+      if ((r as any).entry_type === "INCOME") {
+        entry.revenue += amount;
+        // Map category to breakdown
+        const cat = ((r as any).category || "").toLowerCase();
+        if (cat.includes("platform")) entry.revenueBreakdown.platformFees += amount;
+        else if (cat.includes("brand")) entry.revenueBreakdown.brandLicence += amount;
+        else if (cat.includes("pm") || cat.includes("management")) entry.revenueBreakdown.pmServices += amount;
+        else if (cat.includes("success")) entry.revenueBreakdown.successFees += amount;
+        else if (cat.includes("vertical") || cat.includes("commission")) entry.revenueBreakdown.verticalCommissions += amount;
+      } else {
+        entry.expenses += amount;
+      }
+    }
+
+    // Compute net & margin
+    const result = Array.from(months.values()).map((m) => ({
+      ...m,
+      net: m.revenue - m.expenses,
+      margin: m.revenue > 0 ? Math.round(((m.revenue - m.expenses) / m.revenue) * 1000) / 10 : 0,
+    }));
+
+    // Sort descending by date
+    return result.sort((a, b) => (b.year * 100 + b.monthNum) - (a.year * 100 + a.monthNum));
+  }, []);
+}
+
+// --- Balance from transactions (already worked) ---
+export function useCurrentBalance(): UseDataResult<number> {
+  return useSupabaseQuery(async () => {
+    const t = await fetchTransactionsRaw();
+    return t.length > 0 ? t[0].balance ?? 0 : 0;
+  }, 0);
+}
+
+// --- Task filters (already worked, just cleaner) ---
+export function useBlockedTasks(): UseDataResult<Task[]> {
+  return useSupabaseQuery(async () => {
+    const t = await fetchTasksRaw();
+    return t.filter((x) => x.status === "blokiran" || x.status === "eskaliran");
+  }, []);
+}
+
+export function useCriticalTasks(): UseDataResult<Task[]> {
+  return useSupabaseQuery(async () => {
+    const t = await fetchTasksRaw();
+    return t.filter((x) => x.priority === "critical");
+  }, []);
+}
+
+export function useMandatoryDocs(spvId?: string): UseDataResult<Document[]> {
+  return useSupabaseQuery(async () => {
+    const d = await fetchDocsRaw();
+    return d.filter((x) => x.mandatory && (!spvId || x.spvId === spvId));
+  }, [], [spvId]);
+}
+
+// --- Pentagon & Compliance (now includes Block C data) ---
+export function usePentagonSummary(): UseDataResult<{
+  compliance: number; finance: number; legal: number; operational: number; risk: number;
+}> {
+  return useSupabaseQuery(async () => {
+    const [s, d, t, i, k] = await Promise.all([
+      fetchSpvsRaw(), fetchDocsRaw(), fetchTasksRaw(), fetchInvoicesRaw(), fetchTokRaw(),
+    ]);
+    const bl = s.filter((x) => x.status === "blokiran").length;
+    const mi = d.filter((x) => x.status === "nedostaje").length;
+    const ov = i.filter((x) => x.status === "kasni").length;
+    const es = k.filter((x) => x.status === "eskaliran").length;
+    const cr = t.filter((x) => x.priority === "critical").length;
+    return {
+      compliance: Math.max(0, 100 - mi * 10 - bl * 20),
+      finance: Math.max(0, 100 - ov * 15),
+      legal: 85,
+      operational: Math.max(0, 100 - cr * 10 - es * 15),
+      risk: Math.max(0, 100 - bl * 25 - ov * 10 - es * 10),
+    };
+  }, { compliance: 0, finance: 0, legal: 0, operational: 0, risk: 0 });
+}
+
+export function useComplianceSummary(): UseDataResult<{
+  totalSpvs: number; compliant: number; warnings: number;
+  violations: number; missingDocs: number; overdueObligations: number;
+}> {
+  return useSupabaseQuery(async () => {
+    const [s, d] = await Promise.all([fetchSpvsRaw(), fetchDocsRaw()]);
+    const bl = s.filter((x) => x.status === "blokiran").length;
+    const mi = d.filter((x) => x.status === "nedostaje").length;
+    return {
+      totalSpvs: s.length, compliant: s.length - bl,
+      warnings: Math.min(bl, 1), violations: Math.max(0, bl - 1),
+      missingDocs: mi, overdueObligations: 0,
+    };
+  }, { totalSpvs: 0, compliant: 0, warnings: 0, violations: 0, missingDocs: 0, overdueObligations: 0 });
+}
+
+export function useFinanceSummary(): UseDataResult<{
+  totalRevenue: number; totalExpenses: number; netIncome: number;
+  unpaidInvoices: number; overdueAmount: number;
+}> {
+  return useSupabaseQuery(async () => {
+    const inv = await fetchInvoicesRaw();
+    const iss = inv.filter((i) => i.type === "izdani");
+    const rev = iss.reduce((s, i) => s + (i.totalAmount || 0), 0);
+    const unp = iss.filter((i) => i.status === "ceka" || i.status === "kasni");
+    const od = iss.filter((i) => i.status === "kasni");
+    return {
+      totalRevenue: rev, totalExpenses: 0, netIncome: rev,
+      unpaidInvoices: unp.length,
+      overdueAmount: od.reduce((s, i) => s + (i.totalAmount || 0), 0),
+    };
+  }, { totalRevenue: 0, totalExpenses: 0, netIncome: 0, unpaidInvoices: 0, overdueAmount: 0 });
+}
