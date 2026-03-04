@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
 export default function DashboardError({
   error,
   reset,
@@ -9,34 +7,29 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("[RIVUS DASHBOARD ERROR]", {
-      message: error.message,
-      digest: error.digest,
-      timestamp: new Date().toISOString(),
-    });
-  }, [error]);
-
   return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center space-y-3 p-6">
-        <h2 className="text-[16px] font-bold text-black">Greska pri ucitavanju</h2>
-        <p className="text-[12px] text-black/50 max-w-sm">
-          Modul nije mogao biti ucitan. Pokusajte ponovo ili se vratite na pocetnu stranicu.
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="text-center space-y-4 p-8 max-w-md">
+        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+          <span className="text-red-500 text-[20px]">!</span>
+        </div>
+        <h2 className="text-[18px] font-bold text-black">Greska na stranici</h2>
+        <p className="text-[13px] text-black/50">
+          Doslo je do greske pri ucitavanju. Pokusajte ponovno ili se vratite na pocetnu.
         </p>
         {error.digest && (
-          <p className="text-[10px] text-black/30 font-mono">REF: {error.digest}</p>
+          <p className="text-[11px] text-black/30 font-mono">REF: {error.digest}</p>
         )}
-        <div className="flex gap-2 justify-center pt-1">
+        <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
-            className="px-3 py-1.5 bg-black text-white text-[12px] rounded-lg hover:bg-black/80 transition-colors"
+            className="px-4 py-2 bg-black text-white text-[13px] font-semibold rounded-lg hover:bg-black/80 transition-colors"
           >
-            Pokusaj ponovo
+            Pokusaj ponovno
           </button>
           <a
             href="/dashboard"
-            className="px-3 py-1.5 border border-gray-200 text-black text-[12px] rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 bg-gray-100 text-black text-[13px] font-semibold rounded-lg hover:bg-gray-200 transition-colors"
           >
             Pocetna
           </a>

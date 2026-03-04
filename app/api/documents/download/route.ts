@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
@@ -23,6 +23,25 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // AUTHORIZATION CHECK: verify user has RLS access to this document
+    const { data: doc, error: docError } = await supabase
+      .from("documents")
+      .select("id")
+      .eq("file_path", filePath)
+      .maybeSingle();
+
+    if (docError || !doc) {
+      // User either has no RLS access or document doesn't exist
+      await supabase.from("activity_log").insert({
+        action: "DOCUMENT_DOWNLOAD_DENIED",
+        entity_type: "document",
+        user_id: user.id,
+        severity: "warning",
+        metadata: { filePath, reason: doc ? "rls_denied" : "not_found" },
+      });
+      return NextResponse.json({ error: "Dokument nije pronaden ili nemate pristup" }, { status: 403 });
     }
 
     const { data, error } = await supabase.storage
