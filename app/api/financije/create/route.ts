@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabaseServer'
 import { NextRequest, NextResponse } from 'next/server'
 
 // v1.1.7a — P15a: Rate limit 60 req/min (MP §6.3)
+// P39: D-001 fix — Core NE SMIJE pisati SPV financije
 
 function roundHalfUp(value: number, decimals: number): number {
   const factor = Math.pow(10, decimals)
@@ -26,22 +27,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Prekoracen limit zahtjeva (60/min)' }, { status: 429 })
   }
 
-  // P08 scope: samo CORE smije kreirati finance entries (v1.1.4b — HF-2)
+  // P39: D-001 — samo SPV_Owner i Knjigovodja smiju kreirati SPV financije
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('role')
     .eq('id', user.id)
     .single()
-  if (!profile || profile.role !== 'Core') {
+  const ALLOWED_FINANCE_ROLES = ['SPV_Owner', 'Knjigovodja']
+  if (!profile || !ALLOWED_FINANCE_ROLES.includes(profile.role)) {
     await supabase.from('activity_log').insert({
       action: 'FINANCE_CREATE_BLOCKED',
       entity_type: 'FINANCE_ENTRY',
       user_id: user.id,
       spv_id: null,
       severity: 'warning',
-      metadata: { reason: 'Insufficient role' },
+      metadata: { reason: 'Insufficient role', role: profile?.role ?? 'unknown', doctrine: 'D-001' },
     })
-    return NextResponse.json({ error: 'Samo CORE rola smije kreirati financijske unose (P08)' }, { status: 403 })
+    return NextResponse.json({ error: 'Samo SPV_Owner i Knjigovodja smiju kreirati financijske unose (D-001)' }, { status: 403 })
   }
   const body = await req.json()
   const { spv_id, entry_type, category, description, neto_iznos, pdv_stopa, datum } = body
@@ -61,6 +63,7 @@ export async function POST(req: NextRequest) {
     .select('id')
     .eq('spv_id', spv_id)
     .eq('period', entryPeriod)
+    .eq('lock_status', 'locked')
     .maybeSingle()
   if (lockCheck) {
     await supabase.from('activity_log').insert({

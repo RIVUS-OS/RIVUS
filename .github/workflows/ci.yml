@@ -30,3 +30,13 @@ jobs:
 
       - name: Typecheck
         run: npx tsc --noEmit
+
+      # P39-F: Security guardrails
+      - name: Security guardrails
+        run: |
+          echo "Checking for service_role leaks..."
+          if grep -rn 'service_role\|SERVICE_ROLE\|SUPABASE_SERVICE' app/ lib/ components/ --include="*.ts" --include="*.tsx"; then
+            echo "FAIL: service_role found in app code"
+            exit 1
+          fi
+          echo "PASS: No service_role in app code"
