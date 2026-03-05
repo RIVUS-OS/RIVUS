@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabaseServer";
+import SessionGuard from "@/components/SessionGuard";
 
+// P40: Session timeout via SessionGuard (client component)
 export default async function DashboardLayout({
   children,
 }: {
@@ -34,5 +36,5 @@ export default async function DashboardLayout({
     redirect("/unauthorized");
   }
 
-  return <>{children}</>;
+  return <SessionGuard>{children}</SessionGuard>;
 }

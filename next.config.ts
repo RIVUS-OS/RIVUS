@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+// P40-F: CORS hardening + existing security headers
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -26,6 +27,20 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders,
+      },
+      // P40-F: CORS — explicit origin whitelist za API rute
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: process.env.NEXT_PUBLIC_APP_URL || "https://rivus-two.vercel.app",
+          },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, DELETE, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Max-Age", value: "86400" },
+        ],
       },
     ];
   },

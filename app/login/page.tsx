@@ -4,24 +4,68 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
 
+// P40: Brute force protection + session management
 export default function LoginPage() {
   const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lockoutUntil, setLockoutUntil] = useState<string | null>(null);
+
+  const recordAttempt = async (success: boolean) => {
+    try {
+      await supabaseBrowser.rpc('record_login_attempt', {
+        p_email: email,
+        p_success: success,
+        p_ip: null,
+      });
+    } catch {
+      // Don't block on audit failure
+    }
+  };
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setLockoutUntil(null);
     setLoading(true);
-    const { error } = await supabaseBrowser.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-    if (error) setError(error.message);
-    else window.location.href = "/dashboard";
+
+    try {
+      // P40-C: Check brute force lockout BEFORE attempting login
+      const { data: lockCheck, error: lockErr } = await supabaseBrowser.rpc(
+        'check_login_allowed',
+        { p_email: email }
+      );
+
+      if (!lockErr && lockCheck && !lockCheck.allowed) {
+        setError(lockCheck.message || 'Racun je privremeno zakljucan.');
+        setLockoutUntil(lockCheck.locked_until);
+        await recordAttempt(false);
+        setLoading(false);
+        return;
+      }
+
+      // Attempt login
+      const { error: authError } = await supabaseBrowser.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        await recordAttempt(false);
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Record successful login
+      await recordAttempt(true);
+      window.location.href = "/dashboard";
+    } catch {
+      setError("Greska pri prijavi. Pokusajte ponovo.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,12 +111,22 @@ export default function LoginPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                minLength={12}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] text-black bg-gray-50 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors"
                 placeholder="••••••••"
               />
             </div>
 
-            {error && <p className="text-[12px] text-red-600 font-medium">{error}</p>}
+            {error && (
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200">
+                <p className="text-[12px] text-red-600 font-medium">{error}</p>
+                {lockoutUntil && (
+                  <p className="text-[11px] text-red-400 mt-1">
+                    Otkljucavanje u: {new Date(lockoutUntil).toLocaleTimeString('hr-HR')}
+                  </p>
+                )}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -83,7 +137,9 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="text-[11px] text-black/30 mt-4 text-center">Auth through middleware.ts. Rate limiting aktivan (A10 §6.3).</div>
+          <div className="text-[11px] text-black/30 mt-4 text-center">
+            Brute force zaštita aktivna. Račun se zaključava nakon 5 neuspjelih pokušaja (30 min).
+          </div>
         </form>
 
         {/* Legal Footer */}
