@@ -1,6 +1,6 @@
-// RIVUS v1.2.7 — P19: usePlatformMode Hook
-// Cita platform_mode iz platform_config tablice.
-// Svaka stranica u Bloku B MORA koristiti ovaj hook (A13-K9).
+// RIVUS v1.7.2 — usePlatformMode Hook
+// FIX: auth session check before DB query (prevents NavigatorLockAcquireTimeoutError)
+// Svaka stranica MORA koristiti ovaj hook (A13-K9).
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -34,18 +34,9 @@ interface PlatformBanner {
 
 const BANNERS: Record<PlatformModeType, PlatformBanner | null> = {
   NORMAL: null,
-  SAFE: {
-    message: 'Sustav u Safe Mode — samo citanje aktivno.',
-    variant: 'yellow',
-  },
-  LOCKDOWN: {
-    message: 'Sustav u Lockdown modu — sve operacije blokirane.',
-    variant: 'red',
-  },
-  FORENSIC: {
-    message: 'Forenzicki mod — sve akcije se biljeze.',
-    variant: 'green',
-  },
+  SAFE: { message: 'Sustav u Safe Mode \u2014 samo \u010ditanje aktivno.', variant: 'yellow' },
+  LOCKDOWN: { message: 'Sustav u Lockdown modu \u2014 sve operacije blokirane.', variant: 'red' },
+  FORENSIC: { message: 'Forenzički mod \u2014 sve akcije se bilježe.', variant: 'green' },
 };
 
 export function usePlatformMode(): PlatformModeState {
@@ -55,6 +46,15 @@ export function usePlatformMode(): PlatformModeState {
 
   const fetchMode = useCallback(async () => {
     try {
+      // v1.7.2 FIX: Check auth session BEFORE DB query
+      // Prevents NavigatorLockAcquireTimeoutError on cold page load
+      const { data: { session } } = await supabaseBrowser.auth.getSession();
+      if (!session) {
+        setMode(PlatformMode.NORMAL);
+        setLoading(false);
+        return;
+      }
+
       const { data, error: dbError } = await supabaseBrowser
         .from('platform_config')
         .select('value')
@@ -62,7 +62,6 @@ export function usePlatformMode(): PlatformModeState {
         .single();
 
       if (dbError) {
-        // Fail-closed: ako ne mozemo procitati status, SAFE mode
         console.error('[usePlatformMode] DB error, defaulting to SAFE:', dbError.message);
         setMode(PlatformMode.SAFE);
         setError(dbError.message);
@@ -74,7 +73,6 @@ export function usePlatformMode(): PlatformModeState {
         setMode(val as PlatformModeType);
         setError(null);
       } else {
-        // Nepoznata vrijednost = fail-closed
         console.error('[usePlatformMode] Unknown mode value:', val);
         setMode(PlatformMode.SAFE);
         setError('Nepoznat platform status: ' + val);
@@ -91,17 +89,11 @@ export function usePlatformMode(): PlatformModeState {
   useEffect(() => {
     fetchMode();
 
-    // Realtime subscription na platform_config promjene
     const channel = supabaseBrowser
       .channel('platform-mode-watch')
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'platform_config',
-          filter: 'key=eq.platform_mode',
-        },
+        { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.platform_mode' },
         (payload) => {
           const newVal = payload.new?.value as string;
           if (newVal && Object.values(PlatformMode).includes(newVal as PlatformModeType)) {
@@ -112,9 +104,7 @@ export function usePlatformMode(): PlatformModeState {
       )
       .subscribe();
 
-    return () => {
-      supabaseBrowser.removeChannel(channel);
-    };
+    return () => { supabaseBrowser.removeChannel(channel); };
   }, [fetchMode]);
 
   return {
