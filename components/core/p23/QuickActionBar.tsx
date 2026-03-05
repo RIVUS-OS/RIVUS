@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * RIVUS OS — P23: QuickActionBar (Control Room)
- * Brze akcije: Novi SPV, Pregled obveza, Assignments.
- * Write disabled u Safe/Lockdown/Forensic modu.
- */
-
 import { useRouter } from "next/navigation";
 import { Plus, ClipboardList, Users } from "lucide-react";
 
@@ -18,24 +12,9 @@ export default function QuickActionBar({ writeDisabled, onCreateSpv }: QuickActi
   const router = useRouter();
 
   const actions = [
-    {
-      label: "Novi SPV",
-      icon: <Plus className="w-4 h-4" />,
-      onClick: onCreateSpv || (() => router.push("/dashboard/core/spv-lista")),
-      requiresWrite: true,
-    },
-    {
-      label: "Obveze",
-      icon: <ClipboardList className="w-4 h-4" />,
-      onClick: () => router.push("/dashboard/core/obligations"),
-      requiresWrite: false,
-    },
-    {
-      label: "Assignments",
-      icon: <Users className="w-4 h-4" />,
-      onClick: () => router.push("/dashboard/core/assignments"),
-      requiresWrite: false,
-    },
+    { label: "Novi SPV", icon: <Plus className="w-3.5 h-3.5" />, onClick: onCreateSpv || (() => router.push("/dashboard/core/spv-lista")), requiresWrite: true },
+    { label: "Obveze", icon: <ClipboardList className="w-3.5 h-3.5" />, onClick: () => router.push("/dashboard/core/obligations"), requiresWrite: false },
+    { label: "Assignments", icon: <Users className="w-3.5 h-3.5" />, onClick: () => router.push("/dashboard/core/assignments"), requiresWrite: false },
   ];
 
   return (
@@ -47,12 +26,12 @@ export default function QuickActionBar({ writeDisabled, onCreateSpv }: QuickActi
             key={a.label}
             onClick={() => !disabled && a.onClick()}
             disabled={disabled}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-semibold transition-all duration-150 ${
               disabled
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                ? "bg-black/[0.04] text-black/25 cursor-not-allowed"
                 : a.requiresWrite
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-white border border-gray-200 text-black/70 hover:bg-gray-50"
+                  ? "bg-black text-white hover:bg-black/85 active:scale-[0.97]"
+                  : "bg-white/70 backdrop-blur-sm border border-black/[0.08] text-black/60 hover:text-black hover:border-black/[0.15]"
             }`}
             title={disabled ? "Write operacije blokirane u trenutnom modu" : undefined}
           >
