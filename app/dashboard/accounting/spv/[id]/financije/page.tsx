@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { Loader2 } from "lucide-react";
 import { usePermission } from "@/lib/hooks/usePermission";
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
 import { logAudit } from "@/lib/hooks/logAudit";
 
 type FinancijeEntry = {
@@ -24,6 +25,9 @@ const KATEGORIJE = ["PRIHOD_PRODAJA", "PRIHOD_USLUGA", "RASHOD_GRADNJA", "RASHOD
 const PDV_STOPE = [0, 5, 13, 25];
 
 export default function CoreSpvFinancijePage() {
+  // V2.5-7: Platform mode enforcement
+  const { isSafe, isLockdown } = usePlatformMode();
+
   const { allowed, loading: permLoading } = usePermission("accounting_access");
   useEffect(() => { if (!permLoading && allowed) logAudit({ action: "ACCOUNTING_SPV_SPV_FINANCIJE_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
 
@@ -53,6 +57,19 @@ export default function CoreSpvFinancijePage() {
   }
 
   useEffect(() => { loadEntries(); }, [id]);
+
+  // V2.5-7: Lockdown redirect
+  if (isLockdown) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-red-700">Sustav u Lockdown modu</p>
+          <p className="text-sm text-gray-500 mt-1">Kontaktirajte CORE administratora.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   async function handleSubmit() {
     setSubmitting(true);
