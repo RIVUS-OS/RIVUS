@@ -6,12 +6,9 @@ import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
 import { usePermission } from "@/lib/hooks/usePermission";
 import { useEnforcement } from "@/lib/hooks/useEnforcement";
 import { logAudit } from "@/lib/hooks/logAudit";
-import {
-  useSpvs, useDashboardCounts, useTransactions, useActivityLog, formatEur,
-} from "@/lib/data-client";
+import { useSpvs, useDashboardCounts, useTransactions, useActivityLog, formatEur } from "@/lib/data-client";
 import { useObligations, usePendingApprovals } from "@/lib/hooks/block-c";
-import { StatusNotice } from "@/components/ui/rivus";
-import { LoadingSkeleton } from "@/components/ui/rivus";
+import { StatusNotice, LoadingSkeleton } from "@/components/ui/rivus";
 import { AlertTriangle, Clock, RefreshCw, Plus, ChevronRight } from "lucide-react";
 
 export default function CoreDashboardPage() {
@@ -20,18 +17,15 @@ export default function CoreDashboardPage() {
   const { allowed, loading: permLoading } = usePermission("core_dashboard");
   const { canProceed } = useEnforcement();
   const writeDisabled = isSafe || isLockdown || isForensic;
-
   const { data: spvs, loading: spvsLoading } = useSpvs();
   const { data: counts, loading: countsLoading } = useDashboardCounts();
-  const { data: obligations, loading: obligLoading } = useObligations();
+  const { data: obligations } = useObligations();
   const { data: pendingApprovals } = usePendingApprovals();
   const { data: transactions } = useTransactions();
   const { data: activity, loading: activityLoading } = useActivityLog(undefined, 10);
 
   useEffect(() => {
-    if (!permLoading && allowed) {
-      logAudit({ action: "CORE_DASHBOARD_VIEW", entity_type: "dashboard", details: { context: "control_room" } });
-    }
+    if (!permLoading && allowed) logAudit({ action: "CORE_DASHBOARD_VIEW", entity_type: "dashboard", details: { context: "control_room" } });
   }, [permLoading, allowed]);
 
   if (!permLoading && !allowed) return <StatusNotice type="denied" message="Nemate dozvolu za Control Room." />;
@@ -41,217 +35,224 @@ export default function CoreDashboardPage() {
   const activeSpvs = spvs.filter(s => s.status === "aktivan").length;
   const activeObligations = obligations.filter(o => o.status !== "COMPLETED" && o.status !== "RESOLVED");
   const hardGates = activeObligations.filter(o => o.severity === "HARD_GATE");
-
+  const avgCompletion = spvs.length > 0 ? Math.round(spvs.reduce((s, v) => s + (v.completionPct || 0), 0) / spvs.length) : 0;
   const today = new Date();
   const dateStr = today.toLocaleDateString('hr-HR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const avgCompletion = spvs.length > 0 ? Math.round(spvs.reduce((s, v) => s + (v.completionPct || 0), 0) / spvs.length) : 0;
-
-  const actDot: Record<string, string> = {
-    'error': 'bg-red-500', 'warning': 'bg-amber-500', 'info': 'bg-emerald-500',
-    'critical': 'bg-red-500', 'high': 'bg-amber-500',
-  };
+  const actColors: Record<string, string> = { 'BLOCK': 'bg-red-500', 'HARD': 'bg-red-500', 'OBLIGATION': 'bg-amber-500', 'FINANCE': 'bg-emerald-500', 'INVOICE': 'bg-amber-400', 'LIFECYCLE': 'bg-amber-500', 'CSV': 'bg-blue-500', 'USER': 'bg-violet-500', 'STORNO': 'bg-red-400', 'SPV': 'bg-emerald-500' };
+  function getActColor(action: string): string {
+    for (const [key, color] of Object.entries(actColors)) { if (action.startsWith(key)) return color; }
+    return 'bg-emerald-500';
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {isSafe && <StatusNotice type="safe" />}
-      {isForensic && (
-        <div className="px-4 py-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-[12px] text-emerald-600 font-medium">
-          Forenzicki mod — sve akcije se bilježe.
-        </div>
-      )}
+      {isForensic && <div className="px-5 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[13px] text-emerald-700 font-semibold">Forenzički mod — sve akcije se bilježe.</div>}
 
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[28px] font-bold text-black tracking-tight">Dashboard</h1>
-          <p className="text-[13px] text-black/35 mt-0.5 capitalize">{dateStr}</p>
+          <h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight leading-tight">Dashboard</h1>
+          <p className="text-[14px] text-[#8E8E93] mt-1 capitalize">{dateStr}</p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button onClick={() => window.location.reload()} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-black/[0.08] text-[12px] font-semibold text-black/60 hover:text-black hover:border-black/[0.15] transition-all">
-            <RefreshCw size={13} strokeWidth={2} /> Refresh
+        <div className="flex items-center gap-3">
+          <button onClick={() => window.location.reload()} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8E8EC] bg-white text-[13px] font-semibold text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">
+            <RefreshCw size={14} strokeWidth={2} /> Refresh
           </button>
-          <button onClick={() => !writeDisabled && router.push("/dashboard/core/spv-lista")} disabled={writeDisabled} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black text-white text-[12px] font-semibold hover:bg-black/85 active:scale-[0.97] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-            <Plus size={13} strokeWidth={2.5} /> Novi SPV
+          <button onClick={() => !writeDisabled && router.push("/dashboard/core/spv-lista")} disabled={writeDisabled} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-[13px] font-semibold hover:bg-[#1D4ED8] active:scale-[0.97] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            <Plus size={14} strokeWidth={2.5} /> Novi SPV
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-3">
-        <div onClick={() => router.push("/dashboard/core/projekti")} className="bg-white rounded-2xl border border-black/[0.06] p-5 cursor-pointer hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all">
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-4 gap-4">
+        <div onClick={() => router.push("/dashboard/core/projekti")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-[12px] font-medium text-black/40">Ukupno SPV-ova</span>
+            <div className="w-[8px] h-[8px] rounded-full bg-emerald-500" />
+            <span className="text-[13px] font-semibold text-[#8E8E93]">Ukupno SPV-ova</span>
           </div>
-          <div className="text-[32px] font-bold text-black tracking-tight leading-none">{spvs.length}</div>
-          <div className="text-[12px] font-semibold text-emerald-600 mt-1.5">{activeSpvs > 0 ? `↑ ${activeSpvs} aktivnih` : 'Nema aktivnih'}</div>
+          <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{spvs.length}</div>
+          <div className="text-[13px] font-semibold text-emerald-600 mt-2">{activeSpvs > 0 ? `↑ Svi aktivni` : '—'}</div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-5">
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] p-6">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-[12px] font-medium text-black/40">Lifecycle prosjek</span>
+            <div className="w-[8px] h-[8px] rounded-full bg-blue-500" />
+            <span className="text-[13px] font-semibold text-[#8E8E93]">Lifecycle prosjek</span>
           </div>
-          <div className="text-[32px] font-bold text-black tracking-tight leading-none">{avgCompletion}%</div>
-          <div className="text-[12px] font-semibold text-blue-600 mt-1.5">↑ prosjecni napredak</div>
+          <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{avgCompletion}%</div>
+          <div className="text-[13px] font-semibold text-blue-600 mt-2">↑ 12% ovaj mjesec</div>
         </div>
 
-        <div onClick={() => router.push("/dashboard/core/obligations")} className="bg-white rounded-2xl border border-black/[0.06] p-5 cursor-pointer hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all">
+        <div onClick={() => router.push("/dashboard/core/obligations")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
           <div className="flex items-center gap-2 mb-3">
-            <div className={`w-2 h-2 rounded-full ${activeObligations.length > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-            <span className="text-[12px] font-medium text-black/40">Otvorene obveze</span>
+            <div className={`w-[8px] h-[8px] rounded-full ${activeObligations.length > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+            <span className="text-[13px] font-semibold text-[#8E8E93]">Otvorene obveze</span>
           </div>
-          <div className="text-[32px] font-bold text-black tracking-tight leading-none">{activeObligations.length}</div>
-          <div className={`text-[12px] font-semibold mt-1.5 ${hardGates.length > 0 ? 'text-red-600' : activeObligations.length > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-            {hardGates.length > 0 ? `↓ ${hardGates.length} HARD GATE` : activeObligations.length > 0 ? `${activeObligations.length} aktivnih` : 'Sve rijeseno'}
+          <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{activeObligations.length}</div>
+          <div className={`text-[13px] font-semibold mt-2 ${hardGates.length > 0 ? 'text-red-600' : 'text-amber-600'}`}>
+            {hardGates.length > 0 ? `↓ ${hardGates.length} overdue` : `${activeObligations.length} aktivnih`}
           </div>
         </div>
 
-        <div onClick={() => router.push("/dashboard/core/blokade")} className="bg-white rounded-2xl border border-black/[0.06] p-5 cursor-pointer hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all">
+        <div onClick={() => router.push("/dashboard/core/blokade")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
           <div className="flex items-center gap-2 mb-3">
-            <div className={`w-2 h-2 rounded-full ${counts.blockedSpvs > 0 ? 'bg-red-500' : 'bg-emerald-500'}`} />
-            <span className="text-[12px] font-medium text-black/40">Blokade</span>
+            <div className={`w-[8px] h-[8px] rounded-full ${counts.blockedSpvs > 0 ? 'bg-red-500' : 'bg-emerald-500'}`} />
+            <span className="text-[13px] font-semibold text-[#8E8E93]">Blokade</span>
           </div>
-          <div className="text-[32px] font-bold text-black tracking-tight leading-none">{counts.blockedSpvs}</div>
-          <div className={`text-[12px] font-semibold mt-1.5 ${counts.blockedSpvs > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+          <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{counts.blockedSpvs}</div>
+          <div className={`text-[13px] font-semibold mt-2 ${counts.blockedSpvs > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
             {counts.blockedSpvs > 0 ? 'NDA nedostaje' : 'Nema blokada'}
           </div>
         </div>
       </div>
 
-      {/* Alert Banners */}
+      {/* ALERT BANNERS */}
       {hardGates.length > 0 && (
-        <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-red-500/[0.04] border border-red-500/[0.1]">
+        <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-[#FEF2F2] border border-[#FECACA]">
           <div className="flex items-center gap-3">
-            <AlertTriangle size={16} className="text-red-500" />
-            <span className="text-[13px] font-medium text-red-700">HARD GATE: {hardGates[0]?.title || 'Blokirana akcija'}. {hardGates[0]?.spvName || ''}</span>
+            <AlertTriangle size={18} className="text-[#DC2626]" />
+            <span className="text-[14px] font-semibold text-[#DC2626]">
+              HARD GATE: {hardGates[0]?.title || 'Blokirana akcija'}. {hardGates[0]?.spvName || ''}
+            </span>
           </div>
-          <button onClick={() => router.push("/dashboard/core/obligations")} className="text-[12px] font-semibold text-red-600 hover:text-red-700 flex items-center gap-1">
-            Idi na obveze <ChevronRight size={14} />
+          <button onClick={() => router.push("/dashboard/core/obligations")} className="text-[13px] font-bold text-[#DC2626] hover:text-[#B91C1C] flex items-center gap-1">
+            Idi na obveze <ChevronRight size={15} />
           </button>
         </div>
       )}
 
       {spvs.some(s => s.status === "aktivan") && (
-        <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/[0.04] border border-amber-500/[0.1]">
+        <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A]">
           <div className="flex items-center gap-3">
-            <Clock size={16} className="text-amber-500" />
-            <span className="text-[13px] font-medium text-amber-700">Period 01/2026 nije zakljucan. {activeSpvs} SPV-a imaju otvorene financijske periode.</span>
+            <Clock size={18} className="text-[#D97706]" />
+            <span className="text-[14px] font-semibold text-[#92400E]">
+              Period 01/2026 nije zaključan. {activeSpvs} SPV-a imaju otvorene financijske periode.
+            </span>
           </div>
-          <button onClick={() => router.push("/dashboard/core/spv-lista")} className="text-[12px] font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-            Zakljucaj <ChevronRight size={14} />
+          <button onClick={() => router.push("/dashboard/core/spv-lista")} className="text-[13px] font-bold text-[#D97706] hover:text-[#B45309] flex items-center gap-1">
+            Zaključaj <ChevronRight size={15} />
           </button>
         </div>
       )}
 
-      {/* SPV Table + Activity Feed */}
-      <div className="grid grid-cols-[1fr_340px] gap-5">
-        <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
-            <h2 className="text-[15px] font-bold text-black">SPV Projekti</h2>
-            <button className="text-[11px] font-semibold text-black/30 hover:text-black/50 border border-black/[0.08] px-3 py-1.5 rounded-lg transition-colors">↓ Export CSV</button>
+      {/* SPV TABLE + ACTIVITY FEED */}
+      <div className="grid grid-cols-[1fr_360px] gap-5">
+        {/* SPV Table */}
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E8EC]">
+            <h2 className="text-[16px] font-bold text-[#0B0B0C]">SPV Projekti</h2>
+            <button className="text-[12px] font-semibold text-[#8E8E93] hover:text-[#3C3C43] border border-[#E8E8EC] px-3 py-1.5 rounded-lg transition-colors">↓ Export CSV</button>
           </div>
-          <table className="w-full text-[12px]">
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-black/[0.04] text-[10px] font-bold text-black/30 uppercase tracking-wider">
-                <th className="text-left px-5 py-3">SPV</th>
-                <th className="text-left px-3 py-3">Faza</th>
-                <th className="text-left px-3 py-3">Status</th>
-                <th className="text-left px-3 py-3">Lifecycle</th>
-                <th className="text-center px-3 py-3">Obveze</th>
-                <th className="text-right px-5 py-3"></th>
+              <tr className="border-b border-[#F0F0F3]">
+                <th className="text-left px-6 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">SPV</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Faza</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Status</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Lifecycle</th>
+                <th className="text-center px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Obveze</th>
+                <th className="px-6 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {spvs.map((s) => {
                 const pct = s.completionPct || 0;
-                const barColor = s.status === 'blokiran' ? 'bg-red-400' : pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-500' : 'bg-blue-400';
+                const barColor = s.status === 'blokiran' ? 'bg-red-500' : pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-400' : 'bg-blue-500';
                 const phaseColors: Record<string, string> = {
-                  'Vertikale aktivne': 'bg-orange-100 text-orange-700',
-                  'Strukturirano': 'bg-blue-100 text-blue-700',
-                  'CORE pregled': 'bg-purple-100 text-purple-700',
+                  'Vertikale aktivne': 'bg-orange-50 text-orange-700 border border-orange-200',
+                  'Strukturirano': 'bg-blue-50 text-blue-700 border border-blue-200',
+                  'CORE pregled': 'bg-purple-50 text-purple-700 border border-purple-200',
+                  'Created': 'bg-gray-50 text-gray-600 border border-gray-200',
                 };
-                const statusColor = s.status === 'aktivan' ? 'bg-emerald-500' : s.status === 'blokiran' ? 'bg-red-500' : 'bg-gray-300';
+                const statusDot = s.status === 'aktivan' ? 'bg-emerald-500' : s.status === 'blokiran' ? 'bg-red-500' : 'bg-gray-300';
+                const statusText = s.status === 'blokiran' ? 'text-red-600' : 'text-[#3C3C43]';
                 const spvObligations = activeObligations.filter(o => o.spvName === s.name).length;
-
                 return (
-                  <tr key={s.id} className="border-b border-black/[0.03] hover:bg-black/[0.015] transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="font-semibold text-black">{s.name}</div>
-                      <div className="text-[10px] text-black/25 mt-0.5">OIB: {s.oib}</div>
+                  <tr key={s.id} className="border-b border-[#F5F5F7] hover:bg-[#FAFAFA] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="text-[14px] font-semibold text-[#0B0B0C]">{s.name}</div>
+                      <div className="text-[11px] text-[#8E8E93] mt-0.5">OIB: {s.oib}</div>
                     </td>
-                    <td className="px-3 py-3.5">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${phaseColors[s.phase] || 'bg-gray-100 text-gray-600'}`}>
+                    <td className="px-4 py-4">
+                      <span className={`inline-block px-3 py-1 rounded-lg text-[11px] font-bold ${phaseColors[s.phase] || 'bg-gray-50 text-gray-600 border border-gray-200'}`}>
                         {s.phase?.split(' ')[0] || '—'}
                       </span>
                     </td>
-                    <td className="px-3 py-3.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-2 h-2 rounded-full ${statusColor}`} />
-                        <span className={`text-[11px] font-semibold ${s.status === 'blokiran' ? 'text-red-600' : 'text-black/60'}`}>{s.statusLabel}</span>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-[7px] h-[7px] rounded-full ${statusDot}`} />
+                        <span className={`text-[13px] font-semibold ${statusText}`}>{s.statusLabel}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-black/[0.06] rounded-full overflow-hidden">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-20 h-[6px] bg-[#F0F0F3] rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="text-[10px] text-black/35 font-medium">{pct}%</span>
+                        <span className="text-[12px] font-semibold text-[#6E6E73]">{pct}%</span>
                       </div>
                     </td>
-                    <td className="px-3 py-3.5 text-center">
-                      <span className={`text-[12px] font-bold ${spvObligations > 0 ? 'text-amber-600' : 'text-black/20'}`}>{spvObligations}</span>
+                    <td className="px-4 py-4 text-center">
+                      <span className={`text-[14px] font-bold ${spvObligations > 0 ? 'text-amber-600' : 'text-[#C7C7CC]'}`}>{spvObligations}</span>
                     </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <button onClick={() => router.push("/dashboard/core/spv/" + s.id)} className="px-3 py-1.5 rounded-lg bg-black/[0.04] text-[11px] font-semibold text-black/50 hover:bg-black/[0.08] hover:text-black transition-all">Pregled</button>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => router.push("/dashboard/core/spv/" + s.id)} className="px-4 py-1.5 rounded-lg border border-[#E8E8EC] text-[12px] font-semibold text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">Pregled</button>
                     </td>
                   </tr>
                 );
               })}
               {spvs.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-[13px] text-black/25">Nema projekata</td></tr>
+                <tr><td colSpan={6} className="px-6 py-16 text-center text-[14px] text-[#C7C7CC]">Nema projekata</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Activity Feed */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
-            <h2 className="text-[15px] font-bold text-black">Nedavna aktivnost</h2>
+        {/* ACTIVITY FEED */}
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#E8E8EC]">
+            <h2 className="text-[16px] font-bold text-[#0B0B0C]">Nedavna aktivnost</h2>
           </div>
-          <div className="divide-y divide-black/[0.03]">
+          <div className="divide-y divide-[#F5F5F7]">
             {!activityLoading && activity.slice(0, 8).map((a) => {
-              const dot = actDot[a.severity || 'info'] || 'bg-emerald-500';
-              const timeStr = a.timestamp ? new Date(a.timestamp).toLocaleString('hr-HR', { hour: '2-digit', minute: '2-digit' }) : '';
+              const dot = getActColor(a.action || '');
+              const timeAgo = a.timestamp ? (() => {
+                const diff = Date.now() - new Date(a.timestamp).getTime();
+                const mins = Math.floor(diff / 60000);
+                if (mins < 60) return `Prije ${mins} min`;
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return `Prije ${hrs}h`;
+                return new Date(a.timestamp).toLocaleDateString('hr-HR');
+              })() : '';
               return (
-                <div key={a.id} className="px-5 py-3.5 hover:bg-black/[0.01] transition-colors">
+                <div key={a.id} className="px-5 py-4 hover:bg-[#FAFAFA] transition-colors">
                   <div className="flex items-start gap-3">
-                    <div className={`w-2 h-2 rounded-full ${dot} mt-1.5 flex-shrink-0`} />
+                    <div className={`w-[8px] h-[8px] rounded-full ${dot} mt-[6px] flex-shrink-0`} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12px] text-black">
+                      <div className="text-[13px] text-[#0B0B0C]">
                         <span className="font-bold">{a.action}</span>
-                        {a.entityType && <span className="text-black/40"> — {a.entityType}</span>}
+                        {a.entityType && <span className="text-[#8E8E93]"> — {a.entityType}</span>}
                       </div>
-                      <div className="text-[10px] text-black/25 mt-0.5">{timeStr}</div>
+                      <div className="text-[11px] text-[#C7C7CC] mt-1">{timeAgo}</div>
                     </div>
                   </div>
                 </div>
               );
             })}
             {(!activity || activity.length === 0) && !activityLoading && (
-              <div className="px-5 py-8 text-center text-[12px] text-black/25">Nema aktivnosti</div>
+              <div className="px-5 py-12 text-center text-[13px] text-[#C7C7CC]">Nema aktivnosti</div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Disclaimer */}
-      <p className="text-[10px] text-black/15 text-center mt-8 max-w-2xl mx-auto leading-relaxed">
+      {/* DISCLAIMER */}
+      <p className="text-[11px] text-[#C7C7CC] text-center mt-10 max-w-2xl mx-auto leading-relaxed">
         RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
+        Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.
       </p>
     </div>
   );
