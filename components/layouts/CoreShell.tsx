@@ -40,9 +40,9 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const headerNav = [
     { label: "RIVUS OS", href: "/dashboard/core", icon: Shield },
     { label: "CORE D.O.O.", href: "/dashboard/core-company", icon: Building2 },
-    { label: "SPV", href: "/dashboard/owner", icon: Briefcase },
-    { label: "Banke", href: "/dashboard/bank", icon: Landmark },
-    { label: "Vertikale", href: "/dashboard/vertical", icon: GitBranch },
+    { label: "SPV", href: "/dashboard/core/spv-lista", icon: Briefcase },
+    { label: "Banke", href: "/dashboard/core/banke-nadzor", icon: Landmark },
+    { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: GitBranch },
     { label: "Holding", href: "/dashboard/holding", icon: Layers },
   ];
 
