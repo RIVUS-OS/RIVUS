@@ -5,18 +5,19 @@ import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSpvById } from "@/lib/data-client";
 import { useState } from "react";
 import { PlatformStatusBanner } from '@/components/ui/PlatformStatusBanner';
+import Image from "next/image";
 import {
   Home, Shield, Building2, BarChart3, Landmark, Euro, FileText,
-  FolderOpen, CheckSquare, Download, Users, Bell, Settings, Eye,
+  FolderOpen, CheckSquare, Users, Bell, Settings, Eye,
   Layers, Zap, AlertTriangle, CheckCircle, BookOpen, Briefcase,
   UserCog, FileStack, GitBranch, AlertCircle, ShieldCheck, DollarSign,
-  ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle, TrendingUp, Clock, RefreshCw, Globe, Search,
+  ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle, LogOut,
 } from "lucide-react";
 
 type NavItem = {
   label: string;
   href: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
   disabled?: boolean;
   disabledTooltip?: string;
 };
@@ -32,13 +33,11 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const spvId = spvMatch ? spvMatch[1] : null;
   const spvBase = spvId ? `/dashboard/core/spv/${spvId}` : "";
   const { data: spvData } = useSpvById(spvId || "");
-
-  // CORE D.O.O. = /dashboard/core-company/*
   const isInsideCoreDoo = pathname.startsWith("/dashboard/core-company");
 
-  // === HEADER NAV (Context Switcher) ===
+  // === HEADER NAV ===
   const headerNav = [
-    { label: "RIVUS OS", href: "/dashboard/core", icon: Shield },
+    { label: "Control Room", href: "/dashboard/core", icon: Shield },
     { label: "CORE D.O.O.", href: "/dashboard/core-company", icon: Building2 },
     { label: "SPV", href: "/dashboard/core/spv-lista", icon: Briefcase },
     { label: "Banke", href: "/dashboard/core/banke-nadzor", icon: Landmark },
@@ -74,12 +73,12 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  // === SIDEBAR: CORE D.O.O. (/dashboard/core-company/*) ===
+  // === SIDEBAR: CORE D.O.O. ===
   const coreDooSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
       items: [
-        { label: "Nadzorna ploca", href: "/dashboard/core-company", icon: Home },
+        { label: "Nadzorna ploča", href: "/dashboard/core-company", icon: Home },
       ],
     },
     {
@@ -92,16 +91,16 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     {
       title: "FAKTURIRANJE",
       items: [
-        { label: "Izdani racuni", href: "/dashboard/core-company/izdani-racuni", icon: FileText },
-        { label: "Primljeni racuni", href: "/dashboard/core-company/primljeni-racuni", icon: FileText },
-        { label: "eRacuni", href: "/dashboard/core-company/eracuni", icon: FileText },
+        { label: "Izdani računi", href: "/dashboard/core-company/izdani-racuni", icon: FileText },
+        { label: "Primljeni računi", href: "/dashboard/core-company/primljeni-racuni", icon: FileText },
+        { label: "eRačuni", href: "/dashboard/core-company/eracuni", icon: FileText },
       ],
     },
     {
-      title: "POREZNO & IZVJESTAJI",
+      title: "POREZNO & IZVJEŠTAJI",
       items: [
         { label: "PDV pregled", href: "/dashboard/core-company/pdv", icon: FileText },
-        { label: "Bilanca (informativna)", href: "/dashboard/core-company/bilanca", icon: BarChart3 },
+        { label: "Bilanca", href: "/dashboard/core-company/bilanca", icon: BarChart3 },
         { label: "Blagajna", href: "/dashboard/core-company/blagajna", icon: Landmark },
       ],
     },
@@ -120,7 +119,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  // === SIDEBAR: MONITORING (Control Room) ===
+  // === SIDEBAR: CONTROL ROOM ===
   const controlRoomSidebar: { title: string; items: NavItem[] }[] = [
     {
       title: "",
@@ -153,9 +152,9 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: "SPV Projekti", href: "/dashboard/core/projekti", icon: Building2 },
         { label: "Vertikale", href: "/dashboard/core/vertikale-nadzor", icon: Briefcase },
-        { label: "Knjigovodje", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
+        { label: "Knjigovođe", href: "/dashboard/core/knjigovodje-nadzor", icon: UserCog },
         { label: "Banke", href: "/dashboard/core/banke-nadzor", icon: Landmark },
-        { label: "Financije (nadzor)", href: "/dashboard/core/financije-nadzor", icon: Euro },
+        { label: "Financije", href: "/dashboard/core/financije-nadzor", icon: Euro },
       ],
     },
     {
@@ -163,7 +162,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: "Dnevnik", href: "/dashboard/core/dnevnik", icon: BookOpen },
         { label: "Aktivnosti", href: "/dashboard/core/aktivnosti", icon: Zap },
-        { label: "Izvjestaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
+        { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: FileStack },
       ],
     },
     {
@@ -176,74 +175,68 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
         { label: "Postavke", href: "/dashboard/core/postavke", icon: Settings },
       ],
     },
-    {
-      title: "",
-      items: [
-        { label: "CORE D.O.O.", href: "/dashboard/core-company", icon: Building2 },
-      ],
-    },
   ];
 
-  // === ACTIVE SIDEBAR ===
   const activeSidebar = isInsideSpv ? spvSidebar : isInsideCoreDoo ? coreDooSidebar : controlRoomSidebar;
   const showBackButton = isInsideSpv || isInsideCoreDoo;
 
   async function handleLogout() {
-    const supabase = supabaseBrowser;
-    await supabase.auth.signOut();
+    await supabaseBrowser.auth.signOut();
     router.push("/login");
   }
 
   return (
     <div className="flex h-screen bg-[#f5f5f7]">
       {/* SIDEBAR */}
-      <aside className="w-[240px] border-r border-[#d1d1d6] bg-[#fafafa] flex flex-col">
-        <div className="h-14 border-b border-[#d1d1d6] flex items-center px-4 gap-2">
-          <Layers size={18} className="text-[#007AFF]" />
-          <div className="text-[15px] font-bold text-black tracking-tight">RIVUS OS</div>
+      <aside className="w-[232px] border-r border-black/[0.08] bg-white/60 backdrop-blur-xl flex flex-col">
+        {/* Logo header */}
+        <div className="h-[52px] border-b border-black/[0.06] flex items-center px-4 gap-2.5">
+          <Image src="/logo-icon.png" alt="RIVUS" width={22} height={22} />
+          <span className="text-[14px] font-bold text-black tracking-tight">RIVUS</span>
+          <span className="text-[10px] font-medium text-black/30 tracking-wider">OS</span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-2.5 py-3 scrollbar-thin">
           {/* Back button */}
           {showBackButton && (
             <button
               onClick={() => router.push("/dashboard/core")}
-              className="w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-md text-[13px] font-medium text-[#007AFF] hover:bg-[#007AFF]/10 transition-all"
+              className="w-full flex items-center gap-2 px-3 py-2 mb-2.5 rounded-lg text-[12px] font-semibold text-black/50 hover:text-black hover:bg-black/[0.04] transition-all"
             >
-              <ArrowLeft size={16} strokeWidth={2} />
-              <span>{isInsideCoreDoo ? "Natrag na Monitoring" : "Natrag na Monitoring"}</span>
+              <ArrowLeft size={14} strokeWidth={2.5} />
+              <span>Natrag</span>
             </button>
           )}
 
-          {/* SPV header */}
+          {/* SPV context header */}
           {isInsideSpv && (
-            <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
-              <div className="text-[11px] font-semibold text-[#007AFF] uppercase">SPV</div>
-              <div className="text-[14px] font-bold text-black mt-0.5">{spvData?.code || "..."}</div>
-              <div className="text-[12px] text-black/50 truncate">{spvData?.name || ""}</div>
+            <div className="px-3 py-2.5 mb-3 rounded-xl bg-black/[0.03] border border-black/[0.05]">
+              <div className="text-[10px] font-bold text-black/30 uppercase tracking-wider">SPV</div>
+              <div className="text-[13px] font-bold text-black mt-0.5">{spvData?.code || "..."}</div>
+              <div className="text-[11px] text-black/40 truncate">{spvData?.name || ""}</div>
             </div>
           )}
 
-          {/* CORE D.O.O. header */}
+          {/* CORE D.O.O. context header */}
           {isInsideCoreDoo && (
-            <div className="px-3 py-2 mb-3 rounded-md bg-[#007AFF]/5 border border-[#007AFF]/10">
-              <div className="text-[11px] font-semibold text-[#007AFF] uppercase">Interna firma</div>
-              <div className="text-[14px] font-bold text-black mt-0.5">RIVUS CORE d.o.o.</div>
+            <div className="px-3 py-2.5 mb-3 rounded-xl bg-black/[0.03] border border-black/[0.05]">
+              <div className="text-[10px] font-bold text-black/30 uppercase tracking-wider">Firma</div>
+              <div className="text-[13px] font-bold text-black mt-0.5">RIVUS CORE d.o.o.</div>
             </div>
           )}
 
+          {/* Nav sections */}
           {activeSidebar.map((section, idx) => (
-            <div key={idx} className="mb-5">
+            <div key={idx} className="mb-4">
               {section.title && (
-                <div className="px-2 mb-2 text-[11px] font-semibold tracking-wide text-black/50 uppercase">
+                <div className="px-3 mb-1.5 text-[10px] font-bold tracking-widest text-black/25 uppercase">
                   {section.title}
                 </div>
               )}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {section.items.map((item) => {
-                  const needsExactMatch = item.href === "/dashboard/core" || item.href === "/dashboard/core-company" || (isInsideSpv && item.href === spvBase);
-                  const isActive = pathname === item.href ||
-                    (!needsExactMatch && pathname.startsWith(item.href + "/"));
+                  const needsExact = item.href === "/dashboard/core" || item.href === "/dashboard/core-company" || (isInsideSpv && item.href === spvBase);
+                  const isActive = pathname === item.href || (!needsExact && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const isDisabled = item.disabled || false;
 
@@ -253,27 +246,22 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                       onClick={() => !isDisabled && router.push(item.href)}
                       disabled={isDisabled}
                       className={`
-                        w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all
+                        w-full flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[12px] font-medium transition-all
                         ${isActive
-                          ? "bg-[#007AFF] text-white shadow-sm"
+                          ? "bg-black text-white"
                           : isDisabled
-                            ? "text-black/30 cursor-not-allowed"
-                            : "text-black hover:bg-black/[0.05]"
+                            ? "text-black/20 cursor-not-allowed"
+                            : "text-black/60 hover:text-black hover:bg-black/[0.04]"
                         }
                       `}
                       title={isDisabled ? item.disabledTooltip : undefined}
                     >
                       <Icon
-                        size={16}
-                        strokeWidth={2}
-                        className={isActive ? "text-white" : isDisabled ? "text-black/30" : "text-[#8E8E93]"}
+                        size={15}
+                        strokeWidth={isActive ? 2.5 : 1.8}
+                        className={isActive ? "text-white" : isDisabled ? "text-black/20" : "text-black/35"}
                       />
                       <span className="flex-1 text-left truncate">{item.label}</span>
-                      {isDisabled && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/10 text-black/40 font-bold uppercase">
-                          Uskoro
-                        </span>
-                      )}
                     </button>
                   );
                 })}
@@ -282,21 +270,24 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="border-t border-[#d1d1d6] p-3">
+        {/* Footer */}
+        <div className="border-t border-black/[0.06] px-3 py-2.5">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium text-black/70 hover:bg-black/[0.05] transition-all"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-black/40 hover:text-black/70 hover:bg-black/[0.04] transition-all"
           >
+            <LogOut size={14} strokeWidth={1.8} />
             <span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[11px] font-medium text-black/40">v1.2.14</div>
+          <div className="mt-1.5 px-3 text-[10px] font-medium text-black/20">v1.7.1</div>
         </div>
       </aside>
 
       {/* MAIN */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-[#d1d1d6] bg-white flex items-center justify-between px-6">
-          <div className="flex items-center gap-1 overflow-x-auto">
+        {/* Top bar */}
+        <header className="h-[52px] border-b border-black/[0.06] bg-white/80 backdrop-blur-xl flex items-center justify-between px-5">
+          <div className="flex items-center gap-0.5 overflow-x-auto">
             {headerNav.map((item, idx) => {
               const isActive = item.href === "/dashboard/core"
                 ? pathname === "/dashboard/core" || (pathname.startsWith("/dashboard/core/") && !pathname.startsWith("/dashboard/core-company"))
@@ -306,63 +297,60 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                 <button
                   key={item.href + idx}
                   onClick={() => router.push(item.href)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
                     isActive
-                      ? "text-[#007AFF] bg-[#007AFF]/10"
-                      : "text-black/60 hover:text-black hover:bg-black/[0.04]"
+                      ? "text-black bg-black/[0.06]"
+                      : "text-black/35 hover:text-black/60 hover:bg-black/[0.03]"
                   }`}
                 >
-                  {Icon && <Icon size={14} strokeWidth={2} />}
+                  <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
                   <span>{item.label}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => router.push("/dashboard/notifications")}
               className="relative p-2 hover:bg-black/[0.04] rounded-lg transition-colors"
             >
-              <Bell size={18} className="text-black/70" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
+              <Bell size={16} strokeWidth={1.8} className="text-black/40" />
+              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 bg-red-500 rounded-full" />
             </button>
 
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-black/[0.04] transition-all"
+                className="h-8 w-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold hover:bg-black/80 transition-colors"
               >
-                <div className="text-right">
-                  <div className="text-[13px] font-semibold text-black">Jurke Maricic</div>
-                  <div className="text-[11px] font-medium text-black/50">jurke@rivus.hr</div>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-[#007AFF] flex items-center justify-center text-white text-[14px] font-bold">
-                  J
-                </div>
+                J
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl border border-[#d1d1d6] shadow-lg overflow-hidden z-50">
-                  <div className="p-3 border-b border-[#d1d1d6]">
-                    <div className="text-[13px] font-bold text-black">Jurke Maricic</div>
-                    <div className="text-[12px] font-medium text-black/50 mt-0.5">CORE Administrator</div>
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white/90 backdrop-blur-xl rounded-xl border border-black/[0.08] shadow-[0_8px_30px_rgba(0,0,0,0.08)] overflow-hidden z-50">
+                    <div className="p-3 border-b border-black/[0.06]">
+                      <div className="text-[12px] font-bold text-black">Jurke Maricic</div>
+                      <div className="text-[11px] text-black/35 mt-0.5">CORE Administrator</div>
+                    </div>
+                    <div className="p-1">
+                      <button
+                        onClick={() => { router.push("/dashboard/core/postavke"); setUserMenuOpen(false); }}
+                        className="w-full text-left px-3 py-1.5 rounded-lg text-[12px] font-medium text-black/60 hover:bg-black/[0.04]"
+                      >
+                        Postavke
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-3 py-1.5 rounded-lg text-[12px] font-medium text-red-500/80 hover:bg-red-50"
+                      >
+                        Odjava
+                      </button>
+                    </div>
                   </div>
-                  <div className="p-1.5">
-                    <button
-                      onClick={() => { router.push("/dashboard/core/postavke"); setUserMenuOpen(false); }}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-black/70 hover:bg-black/[0.04]"
-                    >
-                      Postavke
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-semibold text-red-600 hover:bg-red-50"
-                    >
-                      Odjava
-                    </button>
-                  </div>
-                </div>
+                </>
               )}
             </div>
           </div>
@@ -370,7 +358,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1 overflow-auto bg-[#f5f5f7]">
           <PlatformStatusBanner />
-          <div className="p-6">{children}</div>
+          <div className="p-6 max-w-[1200px]">{children}</div>
         </div>
       </main>
     </div>
