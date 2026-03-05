@@ -15,14 +15,8 @@ export default function LoginPage() {
 
   const recordAttempt = async (success: boolean) => {
     try {
-      await supabaseBrowser.rpc('record_login_attempt', {
-        p_email: email,
-        p_success: success,
-        p_ip: null,
-      });
-    } catch {
-      // Don't block on audit failure
-    }
+      await supabaseBrowser.rpc('record_login_attempt', { p_email: email, p_success: success, p_ip: null });
+    } catch { /* Don't block on audit failure */ }
   };
 
   const onLogin = async (e: React.FormEvent) => {
@@ -32,11 +26,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { data: lockCheck, error: lockErr } = await supabaseBrowser.rpc(
-        'check_login_allowed',
-        { p_email: email }
-      );
-
+      const { data: lockCheck, error: lockErr } = await supabaseBrowser.rpc('check_login_allowed', { p_email: email });
       if (!lockErr && lockCheck && !lockCheck.allowed) {
         setError(lockCheck.message || 'Račun je privremeno zaključan.');
         setLockoutUntil(lockCheck.locked_until);
@@ -45,16 +35,10 @@ export default function LoginPage() {
         return;
       }
 
-      const { error: authError } = await supabaseBrowser.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { error: authError } = await supabaseBrowser.auth.signInWithPassword({ email, password });
       if (authError) {
         await recordAttempt(false);
-        setError(authError.message === 'Invalid login credentials' 
-          ? 'Neispravni podaci za prijavu.' 
-          : authError.message);
+        setError(authError.message === 'Invalid login credentials' ? 'Neispravni podaci za prijavu.' : authError.message);
         setLoading(false);
         return;
       }
@@ -68,61 +52,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* Subtle gradient orb background */}
-      <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-black/[0.02] to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-gradient-to-tr from-black/[0.015] to-transparent rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-[380px] w-full relative z-10">
+    <div className="min-h-screen bg-[#F7F7F8] flex flex-col items-center justify-center px-4" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif' }}>
+      <div className="max-w-[400px] w-full">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <Image
-            src="/logo-icon.png"
-            alt="RIVUS"
-            width={56}
-            height={56}
-            className="mb-4"
-            priority
-          />
-          <Image
-            src="/logo-text.png"
-            alt="RIVUS"
-            width={140}
-            height={32}
-            className="opacity-90"
-            priority
-          />
-          <div className="mt-2 text-[11px] font-medium tracking-[0.2em] text-black/30 uppercase">
+          <Image src="/logo-icon.png" alt="RIVUS" width={56} height={56} className="mb-4" priority />
+          <Image src="/logo-text.png" alt="RIVUS" width={140} height={32} priority />
+          <div className="mt-3 text-[11px] font-semibold tracking-[0.2em] text-[#8E8E93] uppercase">
             Governance Engine
           </div>
         </div>
 
         {/* Platform Status Banners */}
         {!modeLoading && isLockdown && (
-          <div className="mb-5 px-4 py-3 rounded-2xl bg-red-500/5 border border-red-500/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[12px] font-medium text-red-600/80">
+          <div className="mb-5 px-5 py-3.5 rounded-2xl bg-[#FEF2F2] border border-[#FECACA]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[13px] font-semibold text-[#DC2626]">
                 Sustav u Lockdown modu. Prijava samo za CORE administratora.
               </span>
             </div>
           </div>
         )}
         {!modeLoading && isSafe && (
-          <div className="mb-5 px-4 py-3 rounded-2xl bg-amber-500/5 border border-amber-500/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-[12px] font-medium text-amber-600/80">
+          <div className="mb-5 px-5 py-3.5 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-[13px] font-semibold text-[#92400E]">
                 Safe Mode — samo čitanje nakon prijave.
               </span>
             </div>
           </div>
         )}
         {!modeLoading && isForensic && (
-          <div className="mb-5 px-4 py-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[12px] font-medium text-emerald-600/80">
+          <div className="mb-5 px-5 py-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="text-[13px] font-semibold text-emerald-700">
                 Forenzički mod — sve akcije se bilježe.
               </span>
             </div>
@@ -130,11 +96,11 @@ export default function LoginPage() {
         )}
 
         {/* Login Card */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-black/[0.06] shadow-[0_2px_20px_rgba(0,0,0,0.04)] p-7">
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] p-8">
           <form onSubmit={onLogin} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="block text-[11px] font-semibold text-black/40 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.06em] mb-2">
                 Email
               </label>
               <input
@@ -144,14 +110,14 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 autoFocus
-                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] border border-black/[0.06] text-[14px] text-black placeholder-black/20 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 rounded-xl bg-[#F7F7F8] border border-[#E8E8EC] text-[14px] font-medium text-[#0B0B0C] placeholder-[#C7C7CC] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all"
                 placeholder="vas@email.hr"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-[11px] font-semibold text-black/40 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.06em] mb-2">
                 Lozinka
               </label>
               <input
@@ -161,17 +127,17 @@ export default function LoginPage() {
                 required
                 minLength={8}
                 autoComplete="current-password"
-                className="w-full px-4 py-3 rounded-xl bg-black/[0.03] border border-black/[0.06] text-[14px] text-black placeholder-black/20 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 rounded-xl bg-[#F7F7F8] border border-[#E8E8EC] text-[14px] font-medium text-[#0B0B0C] placeholder-[#C7C7CC] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all"
                 placeholder="••••••••"
               />
             </div>
 
             {/* Error */}
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-red-500/5 border border-red-500/10">
-                <p className="text-[13px] text-red-600/80 font-medium">{error}</p>
+              <div className="px-4 py-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA]">
+                <p className="text-[13px] text-[#DC2626] font-semibold">{error}</p>
                 {lockoutUntil && (
-                  <p className="text-[11px] text-red-400/60 mt-1">
+                  <p className="text-[11px] text-[#DC2626]/60 mt-1">
                     Otključavanje: {new Date(lockoutUntil).toLocaleTimeString('hr-HR')}
                   </p>
                 )}
@@ -182,7 +148,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-black text-white text-[14px] font-semibold hover:bg-black/85 active:scale-[0.98] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+              className="w-full py-3 rounded-xl bg-[#2563EB] text-white text-[14px] font-semibold hover:bg-[#1D4ED8] active:scale-[0.98] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -201,17 +167,17 @@ export default function LoginPage() {
 
         {/* Security notice */}
         <div className="mt-4 text-center">
-          <p className="text-[11px] text-black/20">
+          <p className="text-[11px] text-[#C7C7CC]">
             Zaštićeno — račun se zaključava nakon 5 neuspjelih pokušaja.
           </p>
         </div>
 
         {/* Footer */}
         <div className="mt-10 text-center space-y-3">
-          <div className="text-[11px] text-black/25 font-medium">
+          <div className="text-[11px] text-[#8E8E93] font-medium">
             RIVUS CORE d.o.o. · rivus.hr
           </div>
-          <p className="text-[10px] text-black/15 max-w-[320px] mx-auto leading-relaxed">
+          <p className="text-[10px] text-[#C7C7CC] max-w-[340px] mx-auto leading-relaxed">
             RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
             Odgovornost za izvršenje obveza ostaje na odgovornoj strani.
             RIVUS ne pruža pravne, porezne niti financijske savjete.
