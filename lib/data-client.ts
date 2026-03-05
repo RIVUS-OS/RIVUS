@@ -3,10 +3,10 @@
 // lib/data-client.ts
 //
 // React hookovi za "use client" stranice. Koriste supabaseBrowser.
-// Zamjena za import { SPVS, DOCUMENTS, ... } from "@/lib/mock-data"
+// Zamjena za import { SPVS, DOCUMENTS, ... } from "@/lib/legacy"
 //
 // Stranice migriraju:
-//   PRIJE:  import { SPVS, getTasksBySpv } from "@/lib/mock-data"
+//   PRIJE:  import { SPVS, getTasksBySpv } from "@/lib/legacy"
 //   POSLIJE: import { useSpvs, useTasks } from "@/lib/data-client"
 //
 // Svaki hook vraca { data, loading, error }
@@ -189,7 +189,7 @@ function useSupabaseQuery<T>(
 
 // --- HELPERS (sync — ne trebaju hook) -----------------------------------------
 
-/** Map lifecycle_stage DB ? mock SpvPhase */
+/** Map lifecycle_stage DB ? legacy SpvPhase */
 function mapPhase(stage: string | null): SpvPhase {
   const map: Record<string, SpvPhase> = {
     "Created": "Kreirano",
@@ -340,7 +340,7 @@ export function useSpvById(id: string): UseDataResult<Spv | null> {
   );
 }
 
-// Convenience filter hooks (match mock-data helper API)
+// Convenience filter hooks (match legacy helper API)
 export function useActiveSpvs(): UseDataResult<Spv[]> {
   return useSupabaseQuery(async () => {
     const spvs = await fetchSpvsRaw();
@@ -808,16 +808,16 @@ export function useDashboardCounts(): UseDataResult<DashboardCounts> {
 // ============================================================================
 // RIVUS OS â€” C4a PATCH: data-client.ts Phase C Extension replacement
 // 
-// ZAMIJENI sekciju "PHASE C EXTENSION â€” Temporary mock-backed hooks"
+// ZAMIJENI sekciju "PHASE C EXTENSION â€” Real DB hooks"
 // na dnu lib/data-client.ts s ovim kodom.
 //
 // Razlog: stub hookovi vraÄ‡ali prazan niz []. Sada koriste DB tablice
-// iz Block C (v1.3.0) i mapiraju na mock-data tipove za backward compat.
+// iz Block C (v1.3.0) i mapiraju na legacy tipove za backward compat.
 // ============================================================================
 
 // â•â•â• PHASE C â€” Real DB hooks (replacing empty stubs) â•â•â•
 
-// --- Vertikale â†’ maps DB `vertikale` table to mock `Vertical` type ---
+// --- Vertikale â†’ maps DB `vertikale` table to legacy `Vertical` type ---
 export function useVerticals(): UseDataResult<Vertical[]> {
   return useSupabaseQuery(async () => {
     const { data, error } = await supabaseBrowser
