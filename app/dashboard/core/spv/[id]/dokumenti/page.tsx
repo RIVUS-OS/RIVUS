@@ -69,7 +69,7 @@ export default function SpvDokumentiPage() {
   const writeDisabled = isSafe || isLockdown || isForensic || role === 'Core';
 
   const { data: spv } = useSpvById(spvId);
-  const { data: docs } = useDocuments(spvId);
+  const { data: docs = [] } = useDocuments(spvId);
   const { data: _raw_missing } = useMissingDocs();
 
   // P19: Audit log
@@ -106,7 +106,7 @@ export default function SpvDokumentiPage() {
 
   if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {String(id)}</div>;
 
-  const missing = (_raw_missing || []).filter((d: any) => d.spvId === id);
+  const missing = (_raw_missing || []).filter((d: any) => d.spvId === spvId);
 
   return (
     <div className="space-y-6">
