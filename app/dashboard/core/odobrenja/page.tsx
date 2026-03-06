@@ -1,99 +1,202 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
-import { usePendingApprovals, useApprovals } from "@/lib/hooks/block-c";
-import { StatusNotice, LoadingSkeleton } from "@/components/ui/rivus";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { useApprovals } from "@/lib/hooks/block-c";
+import { CheckCircle, XCircle, Clock, ArrowRight } from "lucide-react";
+
+// ============================================================================
+// RIVUS OS — Odobrenja
+// Centralna decision queue
+// MASTER UI SPEC v1.0: Decision Screen, 4 taba
+// Na čekanju | Odobreno | Odbijeno | Povijest
+// ============================================================================
+
+const TABS = ["Na čekanju", "Odobreno", "Odbijeno", "Povijest"] as const;
+type Tab = typeof TABS[number];
 
 export default function OdobrenjaPage() {
+  const [tab, setTab] = useState<Tab>("Na čekanju");
+  const { mode } = usePlatformMode();
   const router = useRouter();
-  const { isSafe, isLockdown, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading } = usePermission("core_dashboard");
-  const { data: pending, loading: pendLoading } = usePendingApprovals();
-  const { data: all } = useApprovals();
-  const writeDisabled = isSafe || isLockdown;
+  const { data: approvals } = useApprovals();
 
-  useEffect(() => {
-    if (!permLoading && allowed) logAudit({ action: "PENTAGON_APPROVALS_VIEW", entity_type: "odobrenja", details: {} });
-  }, [permLoading, allowed]);
+  const pending = approvals.filter(a => a.status === "PENDING");
+  const approved = approvals.filter(a => a.status === "APPROVED");
+  const rejected = approvals.filter(a => a.status === "REJECTED");
 
-  if (!permLoading && !allowed) return <StatusNotice type="denied" />;
-  if (!modeLoading && isLockdown) return <StatusNotice type="lockdown" />;
-  if (modeLoading || permLoading || pendLoading) return <LoadingSkeleton type="page" />;
-
-  const resolved = all.filter(a => a.status === "APPROVED" || a.status === "REJECTED");
+  const isSafe = mode === "SAFE" || mode === "LOCKDOWN";
 
   return (
-    <div className="space-y-5">
-      {isSafe && <StatusNotice type="safe" />}
-      <div>
-        <h1 className="text-[24px] font-bold text-[#0B0B0C] tracking-tight">Odobrenja</h1>
-        <p className="text-[13px] text-[#8E8E93] mt-0.5">Centralna queue za sve pending odluke</p>
+    <div>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-1">
+          <CheckCircle size={24} strokeWidth={2} className="text-[#2563EB]" />
+          <h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Odobrenja</h1>
+        </div>
+        <p className="text-[14px] text-[#6E6E73]">Što čeka formalnu odluku?</p>
       </div>
 
-      {/* KPI */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
-          <div className="flex items-center gap-2 mb-1"><Clock size={14} className="text-amber-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Cekaju odluku</span></div>
-          <div className="text-[28px] font-bold text-amber-600">{pending.length}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
-          <div className="flex items-center gap-2 mb-1"><CheckCircle size={14} className="text-emerald-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Odobreno</span></div>
-          <div className="text-[28px] font-bold text-emerald-600">{all.filter(a => a.status === "APPROVED").length}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
-          <div className="flex items-center gap-2 mb-1"><XCircle size={14} className="text-red-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Odbijeno</span></div>
-          <div className="text-[28px] font-bold text-red-600">{all.filter(a => a.status === "REJECTED").length}</div>
-        </div>
-      </div>
-
-      {/* Pending */}
-      <div className="bg-white rounded-xl border border-[#E8E8EC] overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[#E8E8EC]"><h2 className="text-[14px] font-bold text-[#0B0B0C]">Cekaju odobrenje</h2></div>
-        <div className="divide-y divide-[#F5F5F7]">
-          {pending.length === 0 && <div className="px-5 py-10 text-center text-[13px] text-[#C7C7CC]">Nema pending odobrenja</div>}
-          {pending.map(a => (
-            <div key={a.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] transition-colors">
-              <div>
-                <div className="text-[13px] font-semibold text-[#0B0B0C]">{a.approvalType}</div>
-                <div className="text-[11px] text-[#8E8E93] mt-0.5">{a.spvId || 'Platforma'} · {a.requestedByName || 'Nepoznato'}</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button disabled={writeDisabled} className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-bold hover:bg-emerald-600 disabled:opacity-30 transition-all">Odobri</button>
-                <button disabled={writeDisabled} className="px-3 py-1.5 rounded-lg bg-white border border-red-300 text-red-600 text-[11px] font-bold hover:bg-red-50 disabled:opacity-30 transition-all">Odbij</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* History */}
-      {resolved.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#E8E8EC] overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-[#E8E8EC]"><h2 className="text-[14px] font-bold text-[#0B0B0C]">Povijest</h2></div>
-          <div className="divide-y divide-[#F5F5F7] max-h-[300px] overflow-y-auto">
-            {resolved.slice(0, 10).map(a => (
-              <div key={a.id} className="px-5 py-3 flex items-center justify-between">
-                <div>
-                  <div className="text-[12px] font-semibold text-[#3C3C43]">{a.approvalType}</div>
-                  <div className="text-[10px] text-[#8E8E93]">{a.spvId}</div>
-                </div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${a.status === "APPROVED" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>{a.status === "APPROVED" ? "Odobreno" : "Odbijeno"}</span>
-              </div>
-            ))}
+      {/* KPI Strip */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-4 py-3 flex items-center gap-3">
+          <Clock size={16} className="text-amber-500" />
+          <div>
+            <div className="text-[20px] font-bold text-[#0B0B0C]">{pending.length}</div>
+            <div className="text-[11px] text-[#8E8E93]">Na čekanju</div>
           </div>
+        </div>
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-4 py-3 flex items-center gap-3">
+          <CheckCircle size={16} className="text-emerald-500" />
+          <div>
+            <div className="text-[20px] font-bold text-[#0B0B0C]">{approved.length}</div>
+            <div className="text-[11px] text-[#8E8E93]">Odobreno</div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-4 py-3 flex items-center gap-3">
+          <XCircle size={16} className="text-red-500" />
+          <div>
+            <div className="text-[20px] font-bold text-[#0B0B0C]">{rejected.length}</div>
+            <div className="text-[11px] text-[#8E8E93]">Odbijeno</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">
+        {TABS.map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${
+              tab === t ? "text-[#2563EB] border-[#2563EB]" : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"
+            }`}>{t}{t === "Na čekanju" && pending.length > 0 ? ` (${pending.length})` : ""}</button>
+        ))}
+      </div>
+
+      {/* Safe mode warning */}
+      {isSafe && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+          <span className="text-[12px] font-semibold text-amber-700">Approve/Reject onemogućen — sustav je u {mode} modu.</span>
         </div>
       )}
 
-      <p className="text-[10px] text-[#C7C7CC] text-center mt-6 max-w-2xl mx-auto leading-relaxed">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+      {/* === TAB: Na čekanju === */}
+      {tab === "Na čekanju" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+          {pending.length === 0 && (
+            <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema pending odobrenja — sve je odlučeno.</div>
+          )}
+          {pending.map(a => (
+            <div key={a.id} className="px-5 py-4 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <Clock size={18} className="text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-semibold text-[#0B0B0C]">{a.approvalType}</div>
+                <div className="text-[12px] text-[#8E8E93] mt-0.5">
+                  {a.requestedByName || "Nepoznato"} · {a.spvId || "Platforma"}
+                  {a.amount ? ` · ${a.amount.toLocaleString("hr")} EUR` : ""}
+                </div>
+                <div className="text-[11px] text-[#C7C7CC] mt-0.5">{new Date(a.requestedAt).toLocaleString("hr")}</div>
+              </div>
+              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                a.urgency === "CRITICAL" ? "bg-red-50 text-red-700" :
+                a.urgency === "HIGH" ? "bg-amber-50 text-amber-700" :
+                "bg-[#F5F5F7] text-[#8E8E93]"
+              }`}>{a.urgency}</span>
+              {!isSafe && (
+                <div className="flex gap-2">
+                  <button className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[12px] font-semibold hover:bg-emerald-600 transition-colors">Odobri</button>
+                  <button className="px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-[12px] font-semibold hover:bg-red-100 transition-colors">Odbij</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* === TAB: Odobreno === */}
+      {tab === "Odobreno" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+          {approved.length === 0 && (
+            <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema odobrenih stavki.</div>
+          )}
+          {approved.map(a => (
+            <div key={a.id} className="px-5 py-3.5 flex items-center gap-4">
+              <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold text-[#0B0B0C]">{a.approvalType}</div>
+                <div className="text-[11px] text-[#8E8E93]">{a.requestedByName} · Odobrio: {a.decidedByName || "—"}</div>
+              </div>
+              <div className="text-[11px] text-[#C7C7CC]">{a.decidedAt ? new Date(a.decidedAt).toLocaleDateString("hr") : "—"}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* === TAB: Odbijeno === */}
+      {tab === "Odbijeno" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+          {rejected.length === 0 && (
+            <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema odbijenih stavki.</div>
+          )}
+          {rejected.map(a => (
+            <div key={a.id} className="px-5 py-3.5 flex items-center gap-4">
+              <XCircle size={16} className="text-red-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold text-[#0B0B0C]">{a.approvalType}</div>
+                <div className="text-[11px] text-[#8E8E93]">{a.requestedByName} · Odbio: {a.decidedByName || "—"}</div>
+                {a.decisionReason && <div className="text-[11px] text-red-600 mt-0.5">Razlog: {a.decisionReason}</div>}
+              </div>
+              <div className="text-[11px] text-[#C7C7CC]">{a.decidedAt ? new Date(a.decidedAt).toLocaleDateString("hr") : "—"}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* === TAB: Povijest === */}
+      {tab === "Povijest" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#E8E8EC]">
+                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Tip</th>
+                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Zatražio</th>
+                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Status</th>
+                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Odlučio</th>
+                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Datum</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F5F5F7]">
+              {approvals.map(a => (
+                <tr key={a.id} className="hover:bg-[#FAFAFA] transition-colors">
+                  <td className="px-5 py-3 text-[12px] font-semibold text-[#0B0B0C]">{a.approvalType}</td>
+                  <td className="px-5 py-3 text-[12px] text-[#6E6E73]">{a.requestedByName || "—"}</td>
+                  <td className="px-5 py-3">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                      a.status === "APPROVED" ? "bg-emerald-50 text-emerald-700" :
+                      a.status === "REJECTED" ? "bg-red-50 text-red-700" :
+                      a.status === "PENDING" ? "bg-amber-50 text-amber-700" :
+                      "bg-[#F5F5F7] text-[#8E8E93]"
+                    }`}>{a.status}</span>
+                  </td>
+                  <td className="px-5 py-3 text-[12px] text-[#6E6E73]">{a.decidedByName || "—"}</td>
+                  <td className="px-5 py-3 text-[12px] text-[#6E6E73] font-mono">{a.decidedAt ? new Date(a.decidedAt).toLocaleDateString("hr") : new Date(a.requestedAt).toLocaleDateString("hr")}</td>
+                </tr>
+              ))}
+              {approvals.length === 0 && (
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema zapisa</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Disclaimer */}
+      <div className="mt-8 text-[11px] text-[#C7C7CC] leading-relaxed">
+        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.
+      </div>
     </div>
   );
 }
-
