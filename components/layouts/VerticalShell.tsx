@@ -27,7 +27,7 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
 
   async function handleLogout() {
     await supabaseBrowser.auth.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   }
 
   return (
@@ -126,3 +126,4 @@ export default function VerticalShell({ children }: { children: React.ReactNode 
     </div>
   );
 }
+

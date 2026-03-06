@@ -1,4 +1,4 @@
 import CoreShell from "@/components/layouts/CoreShell";
-export default function HoldingLayout({ children }: { children: React.ReactNode }) {
+export default function ModulesLayout({ children }: { children: React.ReactNode }) {
   return <CoreShell>{children}</CoreShell>;
 }

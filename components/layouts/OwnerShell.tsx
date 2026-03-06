@@ -31,7 +31,7 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
 
   async function handleLogout() {
     await supabaseBrowser.auth.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   }
 
   function renderSidebar() {
@@ -153,3 +153,4 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+

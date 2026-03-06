@@ -26,7 +26,7 @@ export default function AccountingShell({ children }: { children: React.ReactNod
 
   async function handleLogout() {
     await supabaseBrowser.auth.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   }
 
   return (
@@ -125,3 +125,4 @@ export default function AccountingShell({ children }: { children: React.ReactNod
     </div>
   );
 }
+
