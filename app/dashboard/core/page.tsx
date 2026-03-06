@@ -9,7 +9,7 @@ import { logAudit } from "@/lib/hooks/logAudit";
 import { useSpvs, useDashboardCounts, useTransactions, useActivityLog, formatEur } from "@/lib/data-client";
 import { useObligations, usePendingApprovals } from "@/lib/hooks/block-c";
 import { StatusNotice, LoadingSkeleton } from "@/components/ui/rivus";
-import { AlertTriangle, Clock, RefreshCw, Plus, ChevronRight } from "lucide-react";
+import { AlertTriangle, Clock, RefreshCw, Plus, ChevronRight, Shield } from "lucide-react";
 
 export default function CoreDashboardPage() {
   const router = useRouter();
@@ -39,28 +39,53 @@ export default function CoreDashboardPage() {
   const today = new Date();
   const dateStr = today.toLocaleDateString('hr-HR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const actColors: Record<string, string> = { 'BLOCK': 'bg-red-500', 'HARD': 'bg-red-500', 'OBLIGATION': 'bg-amber-500', 'FINANCE': 'bg-emerald-500', 'INVOICE': 'bg-amber-400', 'LIFECYCLE': 'bg-amber-500', 'CSV': 'bg-blue-500', 'USER': 'bg-violet-500', 'STORNO': 'bg-red-400', 'SPV': 'bg-emerald-500' };
+  // Health score per SPV
+  function getSpvHealth(s: typeof spvs[0]): { score: number; color: string; dot: string; label: string } {
+    if (s.status === 'blokiran') return { score: 0, color: 'border-red-300 bg-red-50', dot: 'bg-red-500', label: 'Blokiran' };
+    const spvObl = activeObligations.filter(o => o.spvName === s.name).length;
+    const pct = s.completionPct || 0;
+    if (spvObl > 2 || hardGates.some(h => h.spvName === s.name)) return { score: 30, color: 'border-red-200 bg-red-50/50', dot: 'bg-red-500', label: 'Kritično' };
+    if (spvObl > 0) return { score: 60, color: 'border-amber-200 bg-amber-50/50', dot: 'bg-amber-500', label: 'Upozorenje' };
+    return { score: 90, color: 'border-emerald-200 bg-emerald-50/30', dot: 'bg-emerald-500', label: 'Zdravo' };
+  }
+
+  const actColors: Record<string, string> = { 'BLOCK': 'bg-red-500', 'HARD': 'bg-red-500', 'OBLIGATION': 'bg-amber-500', 'FINANCE': 'bg-emerald-500', 'INVOICE': 'bg-amber-400', 'LIFECYCLE': 'bg-amber-500', 'CSV': 'bg-blue-500', 'USER': 'bg-violet-500', 'STORNO': 'bg-red-400', 'SPV': 'bg-emerald-500', 'CORE': 'bg-blue-500', 'PENTAGON': 'bg-blue-500' };
   function getActColor(action: string): string {
     for (const [key, color] of Object.entries(actColors)) { if (action.startsWith(key)) return color; }
     return 'bg-emerald-500';
   }
 
-  return (
-    <div className="space-y-7">
-      {isSafe && <StatusNotice type="safe" />}
-      {isForensic && <div className="px-5 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[13px] text-emerald-700 font-semibold">Forenzički mod — sve akcije se bilježe.</div>}
+  // System health score
+  const healthScore = Math.max(0, 100 - (hardGates.length * 25) - (counts.blockedSpvs * 15) - (activeObligations.length * 3));
 
-      {/* HEADER */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight leading-tight">Dashboard</h1>
-          <p className="text-[14px] text-[#8E8E93] mt-1 capitalize">{dateStr}</p>
+  return (
+    <div className="space-y-7" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif' }}>
+      {isSafe && <StatusNotice type="safe" />}
+      {isForensic && <div className="px-5 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[13px] text-emerald-700 font-semibold">Forenzicki mod — sve akcije se bilježe.</div>}
+
+      {/* SYSTEM HEALTH BAR */}
+      <div className="flex items-center justify-between bg-white rounded-2xl border border-[#E8E8EC] px-6 py-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Shield size={16} className={healthScore > 70 ? "text-emerald-500" : healthScore > 40 ? "text-amber-500" : "text-red-500"} />
+            <span className="text-[14px] font-bold text-[#0B0B0C]">System Health</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-32 h-2 bg-[#F0F0F3] rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${healthScore > 70 ? 'bg-emerald-500' : healthScore > 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${healthScore}%` }} />
+            </div>
+            <span className={`text-[14px] font-bold ${healthScore > 70 ? 'text-emerald-600' : healthScore > 40 ? 'text-amber-600' : 'text-red-600'}`}>{healthScore}</span>
+          </div>
+          <div className="h-4 w-px bg-[#E8E8EC]" />
+          <span className="text-[12px] text-[#8E8E93]">Mode: <span className="font-semibold text-[#3C3C43]">{isSafe ? 'SAFE' : isForensic ? 'FORENSIC' : 'NORMAL'}</span></span>
+          <div className="h-4 w-px bg-[#E8E8EC]" />
+          <span className="text-[12px] text-[#8E8E93]">{spvs.length} SPV · {activeObligations.length} obveza · {counts.blockedSpvs} blokada</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => window.location.reload()} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8E8EC] bg-white text-[13px] font-semibold text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">
+          <button onClick={() => window.location.reload()} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E8E8EC] bg-white text-[13px] font-semibold text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">
             <RefreshCw size={14} strokeWidth={2} /> Refresh
           </button>
-          <button onClick={() => !writeDisabled && router.push("/dashboard/core/spv-lista")} disabled={writeDisabled} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-[13px] font-semibold hover:bg-[#1D4ED8] active:scale-[0.97] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+          <button onClick={() => !writeDisabled && router.push("/dashboard/core/spv-lista")} disabled={writeDisabled} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-semibold hover:bg-[#1D4ED8] active:scale-[0.97] transition-all disabled:opacity-30">
             <Plus size={14} strokeWidth={2.5} /> Novi SPV
           </button>
         </div>
@@ -68,156 +93,98 @@ export default function CoreDashboardPage() {
 
       {/* KPI CARDS */}
       <div className="grid grid-cols-4 gap-4">
-        <div onClick={() => router.push("/dashboard/core/projekti")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-[8px] h-[8px] rounded-full bg-emerald-500" />
-            <span className="text-[13px] font-semibold text-[#8E8E93]">Ukupno SPV-ova</span>
-          </div>
+        <div onClick={() => router.push("/dashboard/core/spv-lista")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 mb-3"><div className="w-[8px] h-[8px] rounded-full bg-emerald-500" /><span className="text-[13px] font-semibold text-[#8E8E93]">Ukupno SPV-ova</span></div>
           <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{spvs.length}</div>
-          <div className="text-[13px] font-semibold text-emerald-600 mt-2">{activeSpvs > 0 ? `↑ Svi aktivni` : '—'}</div>
+          <div className="text-[13px] font-semibold text-emerald-600 mt-2">{activeSpvs > 0 ? `↑ ${activeSpvs} aktivnih` : '—'}</div>
         </div>
-
         <div className="bg-white rounded-2xl border border-[#E8E8EC] p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-[8px] h-[8px] rounded-full bg-blue-500" />
-            <span className="text-[13px] font-semibold text-[#8E8E93]">Lifecycle prosjek</span>
-          </div>
+          <div className="flex items-center gap-2 mb-3"><div className="w-[8px] h-[8px] rounded-full bg-blue-500" /><span className="text-[13px] font-semibold text-[#8E8E93]">Lifecycle prosjek</span></div>
           <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{avgCompletion}%</div>
-          <div className="text-[13px] font-semibold text-blue-600 mt-2">↑ 12% ovaj mjesec</div>
+          <div className="text-[13px] font-semibold text-blue-600 mt-2">↑ prosjecni napredak</div>
         </div>
-
         <div onClick={() => router.push("/dashboard/core/obligations")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 mb-3">
-            <div className={`w-[8px] h-[8px] rounded-full ${activeObligations.length > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-            <span className="text-[13px] font-semibold text-[#8E8E93]">Otvorene obveze</span>
-          </div>
+          <div className="flex items-center gap-2 mb-3"><div className={`w-[8px] h-[8px] rounded-full ${activeObligations.length > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} /><span className="text-[13px] font-semibold text-[#8E8E93]">Otvorene obveze</span></div>
           <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{activeObligations.length}</div>
-          <div className={`text-[13px] font-semibold mt-2 ${hardGates.length > 0 ? 'text-red-600' : 'text-amber-600'}`}>
-            {hardGates.length > 0 ? `↓ ${hardGates.length} overdue` : `${activeObligations.length} aktivnih`}
-          </div>
+          <div className={`text-[13px] font-semibold mt-2 ${hardGates.length > 0 ? 'text-red-600' : 'text-amber-600'}`}>{hardGates.length > 0 ? `↓ ${hardGates.length} HARD GATE` : `${activeObligations.length} aktivnih`}</div>
         </div>
-
         <div onClick={() => router.push("/dashboard/core/blokade")} className="bg-white rounded-2xl border border-[#E8E8EC] p-6 cursor-pointer hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 mb-3">
-            <div className={`w-[8px] h-[8px] rounded-full ${counts.blockedSpvs > 0 ? 'bg-red-500' : 'bg-emerald-500'}`} />
-            <span className="text-[13px] font-semibold text-[#8E8E93]">Blokade</span>
-          </div>
+          <div className="flex items-center gap-2 mb-3"><div className={`w-[8px] h-[8px] rounded-full ${counts.blockedSpvs > 0 ? 'bg-red-500' : 'bg-emerald-500'}`} /><span className="text-[13px] font-semibold text-[#8E8E93]">Blokade</span></div>
           <div className="text-[36px] font-bold text-[#0B0B0C] tracking-tight leading-none">{counts.blockedSpvs}</div>
-          <div className={`text-[13px] font-semibold mt-2 ${counts.blockedSpvs > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-            {counts.blockedSpvs > 0 ? 'NDA nedostaje' : 'Nema blokada'}
-          </div>
+          <div className={`text-[13px] font-semibold mt-2 ${counts.blockedSpvs > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{counts.blockedSpvs > 0 ? 'NDA nedostaje' : 'Nema blokada'}</div>
         </div>
       </div>
 
       {/* ALERT BANNERS */}
       {hardGates.length > 0 && (
         <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-[#FEF2F2] border border-[#FECACA]">
-          <div className="flex items-center gap-3">
-            <AlertTriangle size={18} className="text-[#DC2626]" />
-            <span className="text-[14px] font-semibold text-[#DC2626]">
-              HARD GATE: {hardGates[0]?.title || 'Blokirana akcija'}. {hardGates[0]?.spvName || ''}
-            </span>
-          </div>
-          <button onClick={() => router.push("/dashboard/core/obligations")} className="text-[13px] font-bold text-[#DC2626] hover:text-[#B91C1C] flex items-center gap-1">
-            Idi na obveze <ChevronRight size={15} />
-          </button>
+          <div className="flex items-center gap-3"><AlertTriangle size={18} className="text-[#DC2626]" /><span className="text-[14px] font-semibold text-[#DC2626]">HARD GATE: {hardGates[0]?.title || 'Blokirana akcija'}. {hardGates[0]?.spvName || ''}</span></div>
+          <button onClick={() => router.push("/dashboard/core/obligations")} className="text-[13px] font-bold text-[#DC2626] hover:text-[#B91C1C] flex items-center gap-1">Idi na obveze <ChevronRight size={15} /></button>
         </div>
       )}
-
       {spvs.some(s => s.status === "aktivan") && (
         <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A]">
-          <div className="flex items-center gap-3">
-            <Clock size={18} className="text-[#D97706]" />
-            <span className="text-[14px] font-semibold text-[#92400E]">
-              Period 01/2026 nije zaključan. {activeSpvs} SPV-a imaju otvorene financijske periode.
-            </span>
-          </div>
-          <button onClick={() => router.push("/dashboard/core/spv-lista")} className="text-[13px] font-bold text-[#D97706] hover:text-[#B45309] flex items-center gap-1">
-            Zaključaj <ChevronRight size={15} />
-          </button>
+          <div className="flex items-center gap-3"><Clock size={18} className="text-[#D97706]" /><span className="text-[14px] font-semibold text-[#92400E]">Period 01/2026 nije zakljucan. {activeSpvs} SPV-a imaju otvorene financijske periode.</span></div>
+          <button onClick={() => router.push("/dashboard/core/spv-lista")} className="text-[13px] font-bold text-[#D97706] flex items-center gap-1">Zakljucaj <ChevronRight size={15} /></button>
         </div>
       )}
 
-      {/* SPV TABLE + ACTIVITY FEED */}
+      {/* SPV HEALTH MATRIX + ACTIVITY FEED */}
       <div className="grid grid-cols-[1fr_360px] gap-5">
-        {/* SPV Table */}
-        <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E8EC]">
-            <h2 className="text-[16px] font-bold text-[#0B0B0C]">SPV Projekti</h2>
-            <button className="text-[12px] font-semibold text-[#8E8E93] hover:text-[#3C3C43] border border-[#E8E8EC] px-3 py-1.5 rounded-lg transition-colors">↓ Export CSV</button>
+        {/* SPV HEALTH MATRIX — grid kartica, ne tablica */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[16px] font-bold text-[#0B0B0C]">SPV Health Matrix</h2>
+            <button onClick={() => router.push("/dashboard/core/spv-lista")} className="text-[12px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1">Svi projekti <ChevronRight size={14} /></button>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#F0F0F3]">
-                <th className="text-left px-6 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">SPV</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Faza</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Status</th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Lifecycle</th>
-                <th className="text-center px-4 py-3 text-[11px] font-semibold text-[#8E8E93] uppercase tracking-[0.05em]">Obveze</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {spvs.map((s) => {
-                const pct = s.completionPct || 0;
-                const barColor = s.status === 'blokiran' ? 'bg-red-500' : pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-400' : 'bg-blue-500';
-                const phaseColors: Record<string, string> = {
-                  'Vertikale aktivne': 'bg-orange-50 text-orange-700 border border-orange-200',
-                  'Strukturirano': 'bg-blue-50 text-blue-700 border border-blue-200',
-                  'CORE pregled': 'bg-purple-50 text-purple-700 border border-purple-200',
-                  'Created': 'bg-gray-50 text-gray-600 border border-gray-200',
-                };
-                const statusDot = s.status === 'aktivan' ? 'bg-emerald-500' : s.status === 'blokiran' ? 'bg-red-500' : 'bg-gray-300';
-                const statusText = s.status === 'blokiran' ? 'text-red-600' : 'text-[#3C3C43]';
-                const spvObligations = activeObligations.filter(o => o.spvName === s.name).length;
-                return (
-                  <tr key={s.id} className="border-b border-[#F5F5F7] hover:bg-[#FAFAFA] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="text-[14px] font-semibold text-[#0B0B0C]">{s.name}</div>
-                      <div className="text-[11px] text-[#8E8E93] mt-0.5">OIB: {s.oib}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-block px-3 py-1 rounded-lg text-[11px] font-bold ${phaseColors[s.phase] || 'bg-gray-50 text-gray-600 border border-gray-200'}`}>
-                        {s.phase?.split(' ')[0] || '—'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-[7px] h-[7px] rounded-full ${statusDot}`} />
-                        <span className={`text-[13px] font-semibold ${statusText}`}>{s.statusLabel}</span>
+          <div className="grid grid-cols-3 gap-3">
+            {spvs.map((s) => {
+              const health = getSpvHealth(s);
+              const pct = s.completionPct || 0;
+              const spvObl = activeObligations.filter(o => o.spvName === s.name).length;
+              return (
+                <div key={s.id} onClick={() => router.push("/dashboard/core/spv/" + s.id)}
+                  className={`rounded-2xl border-2 ${health.color} p-5 cursor-pointer hover:shadow-md transition-all`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-[10px] h-[10px] rounded-full ${health.dot}`} />
+                      <span className="text-[14px] font-bold text-[#0B0B0C]">{s.name}</span>
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-[#8E8E93] mb-3">OIB: {s.oib}</div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      s.phase?.includes('Vertikale') ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                      s.phase?.includes('Struktur') ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                      s.phase?.includes('CORE') ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                      'bg-gray-100 text-gray-600 border border-gray-200'
+                    }`}>{s.phase?.split(' ')[0] || '—'}</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-[7px] h-[7px] rounded-full ${s.status === 'aktivan' ? 'bg-emerald-500' : s.status === 'blokiran' ? 'bg-red-500' : 'bg-gray-300'}`} />
+                      <span className={`text-[11px] font-semibold ${s.status === 'blokiran' ? 'text-red-600' : 'text-[#3C3C43]'}`}>{s.statusLabel}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-[5px] bg-white/80 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${s.status === 'blokiran' ? 'bg-red-500' : pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-400' : 'bg-blue-500'}`} style={{ width: `${pct}%` }} />
                       </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-20 h-[6px] bg-[#F0F0F3] rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="text-[12px] font-semibold text-[#6E6E73]">{pct}%</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <span className={`text-[14px] font-bold ${spvObligations > 0 ? 'text-amber-600' : 'text-[#C7C7CC]'}`}>{spvObligations}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => router.push("/dashboard/core/spv/" + s.id)} className="px-4 py-1.5 rounded-lg border border-[#E8E8EC] text-[12px] font-semibold text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">Pregled</button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {spvs.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-16 text-center text-[14px] text-[#C7C7CC]">Nema projekata</td></tr>
-              )}
-            </tbody>
-          </table>
+                      <span className="text-[10px] font-semibold text-[#6E6E73]">{pct}%</span>
+                    </div>
+                    {spvObl > 0 && <span className="text-[11px] font-bold text-amber-600">{spvObl} obveza</span>}
+                  </div>
+                </div>
+              );
+            })}
+            {spvs.length === 0 && <div className="col-span-3 py-16 text-center text-[14px] text-[#C7C7CC]">Nema projekata</div>}
+          </div>
         </div>
 
         {/* ACTIVITY FEED */}
         <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E8E8EC]">
-            <h2 className="text-[16px] font-bold text-[#0B0B0C]">Nedavna aktivnost</h2>
-          </div>
+          <div className="px-5 py-4 border-b border-[#E8E8EC]"><h2 className="text-[16px] font-bold text-[#0B0B0C]">Nedavna aktivnost</h2></div>
           <div className="divide-y divide-[#F5F5F7]">
-            {!activityLoading && activity.slice(0, 8).map((a) => {
+            {!activityLoading && activity.slice(0, 10).map((a) => {
               const dot = getActColor(a.action || '');
               const timeAgo = a.timestamp ? (() => {
                 const diff = Date.now() - new Date(a.timestamp).getTime();
@@ -228,23 +195,18 @@ export default function CoreDashboardPage() {
                 return new Date(a.timestamp).toLocaleDateString('hr-HR');
               })() : '';
               return (
-                <div key={a.id} className="px-5 py-4 hover:bg-[#FAFAFA] transition-colors">
+                <div key={a.id} className="px-5 py-3.5 hover:bg-[#FAFAFA] transition-colors">
                   <div className="flex items-start gap-3">
                     <div className={`w-[8px] h-[8px] rounded-full ${dot} mt-[6px] flex-shrink-0`} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] text-[#0B0B0C]">
-                        <span className="font-bold">{a.action}</span>
-                        {a.entityType && <span className="text-[#8E8E93]"> — {a.entityType}</span>}
-                      </div>
+                      <div className="text-[13px] text-[#0B0B0C]"><span className="font-bold">{a.action}</span>{a.entityType && <span className="text-[#8E8E93]"> — {a.entityType}</span>}</div>
                       <div className="text-[11px] text-[#C7C7CC] mt-1">{timeAgo}</div>
                     </div>
                   </div>
                 </div>
               );
             })}
-            {(!activity || activity.length === 0) && !activityLoading && (
-              <div className="px-5 py-12 text-center text-[13px] text-[#C7C7CC]">Nema aktivnosti</div>
-            )}
+            {(!activity || activity.length === 0) && !activityLoading && <div className="px-5 py-12 text-center text-[13px] text-[#C7C7CC]">Nema aktivnosti</div>}
           </div>
         </div>
       </div>
@@ -252,7 +214,7 @@ export default function CoreDashboardPage() {
       {/* DISCLAIMER */}
       <p className="text-[11px] text-[#C7C7CC] text-center mt-10 max-w-2xl mx-auto leading-relaxed">
         RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.
+        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.
       </p>
     </div>
   );
