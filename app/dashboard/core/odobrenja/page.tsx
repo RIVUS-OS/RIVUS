@@ -1,136 +1,98 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
 import { usePermission } from "@/lib/hooks/usePermission";
 import { logAudit } from "@/lib/hooks/logAudit";
 import { usePendingApprovals, useApprovals } from "@/lib/hooks/block-c";
+import { StatusNotice, LoadingSkeleton } from "@/components/ui/rivus";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
-const typeColors: Record<string, string> = {
-  LIFECYCLE_TRANSITION: "bg-blue-100 text-blue-700",
-  PERIOD_LOCK: "bg-purple-100 text-purple-700",
-  ASSIGNMENT: "bg-teal-100 text-teal-700",
-  SPV_TERMINATION: "bg-red-100 text-red-700",
-  EXPENSE_APPROVAL: "bg-green-100 text-green-700",
-};
-
-export default function PentagonOdobrenjaPage() {
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading } = usePermission("pentagon_approvals");
-  const writeDisabled = isSafe || isLockdown || isForensic;
-
-  const { data: pending, loading: pLoad, error: pErr, refetch: refetchPending } = usePendingApprovals();
-  const { data: all, loading: aLoad, error: aErr, refetch: refetchAll } = useApprovals();
-
-  const [mutatingId, setMutatingId] = useState<string | null>(null);
-  const [mutateError, setMutateError] = useState<string | null>(null);
-  const [lastSuccess, setLastSuccess] = useState<string | null>(null);
+export default function OdobrenjaPage() {
+  const router = useRouter();
+  const { isSafe, isLockdown, loading: modeLoading } = usePlatformMode();
+  const { allowed, loading: permLoading } = usePermission("core_dashboard");
+  const { data: pending, loading: pendLoading } = usePendingApprovals();
+  const { data: all } = useApprovals();
+  const writeDisabled = isSafe || isLockdown;
 
   useEffect(() => {
-    if (!permLoading && allowed) {
-      logAudit({ action: "PENTAGON_APPROVALS_VIEW", entity_type: "pentagon", details: { context: "global_approvals" } });
-    }
+    if (!permLoading && allowed) logAudit({ action: "PENTAGON_APPROVALS_VIEW", entity_type: "odobrenja", details: {} });
   }, [permLoading, allowed]);
 
-  const handleDecision = useCallback(async (approvalId: string, decision: "APPROVED" | "REJECTED") => {
-    if (mutatingId) return; // prevent double-click
-    setMutatingId(approvalId);
-    setMutateError(null);
-    setLastSuccess(null);
+  if (!permLoading && !allowed) return <StatusNotice type="denied" />;
+  if (!modeLoading && isLockdown) return <StatusNotice type="lockdown" />;
+  if (modeLoading || permLoading || pendLoading) return <LoadingSkeleton type="page" />;
 
-    try {
-      const res = await fetch("/api/approvals/decide", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ approval_id: approvalId, decision }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMutateError(data.error || "Greska pri odluci");
-      } else {
-        setLastSuccess(approvalId + ":" + decision);
-        refetchPending();
-        refetchAll();
-      }
-    } catch {
-      setMutateError("Mrezna greska");
-    } finally {
-      setMutatingId(null);
-    }
-  }, [mutatingId, refetchPending, refetchAll]);
-
-  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
-  if (modeLoading || permLoading || pLoad || aLoad) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
-  if (pErr || aErr) return <div className="flex items-center justify-center h-64"><p className="text-sm text-red-600">Greska: {pErr || aErr}</p></div>;
-
-  const history = all.filter(a => a.status !== "PENDING").slice(0, 20);
+  const resolved = all.filter(a => a.status === "APPROVED" || a.status === "REJECTED");
 
   return (
-    <div className="space-y-6">
-      {isSafe && <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-[13px] text-amber-800 font-medium">Sustav u Safe Mode -- Approve/Reject onemogucen.</div>}
-      {isForensic && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-[13px] text-emerald-800 font-medium">Forenzicki mod -- sve akcije se biljezu.</div>}
-
+    <div className="space-y-5">
+      {isSafe && <StatusNotice type="safe" />}
       <div>
-        <h1 className="text-[22px] font-bold text-black">Pentagon -- Odobrenja</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Platformska odobrenja: lifecycle, period lock, assignments</p>
+        <h1 className="text-[24px] font-bold text-[#0B0B0C] tracking-tight">Odobrenja</h1>
+        <p className="text-[13px] text-[#8E8E93] mt-0.5">Centralna queue za sve pending odluke</p>
       </div>
 
-      {mutateError && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">{mutateError}</div>}
-      {lastSuccess && <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-[12px] text-green-700">Odluka uspjesno zabiljena.</div>}
+      {/* KPI */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
+          <div className="flex items-center gap-2 mb-1"><Clock size={14} className="text-amber-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Cekaju odluku</span></div>
+          <div className="text-[28px] font-bold text-amber-600">{pending.length}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
+          <div className="flex items-center gap-2 mb-1"><CheckCircle size={14} className="text-emerald-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Odobreno</span></div>
+          <div className="text-[28px] font-bold text-emerald-600">{all.filter(a => a.status === "APPROVED").length}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-4">
+          <div className="flex items-center gap-2 mb-1"><XCircle size={14} className="text-red-500" /><span className="text-[11px] font-semibold text-[#8E8E93]">Odbijeno</span></div>
+          <div className="text-[28px] font-bold text-red-600">{all.filter(a => a.status === "REJECTED").length}</div>
+        </div>
+      </div>
 
-      {/* Pending Queue */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-100 text-[14px] font-bold">Na cekanju ({pending.length})</div>
-        {pending.length === 0 && <div className="px-4 py-6 text-center text-[13px] text-black/40">Nema zahtjeva na cekanju.</div>}
-        {pending.map((p, i) => (
-          <div key={p.id} className={`px-4 py-3 ${i < pending.length - 1 ? "border-b border-gray-50" : ""} hover:bg-gray-50`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${typeColors[p.approvalType] || "bg-gray-100 text-gray-600"}`}>{p.approvalType}</span>
-                <span className="text-[13px] font-medium text-black">{p.entityType || p.approvalType}</span>
+      {/* Pending */}
+      <div className="bg-white rounded-xl border border-[#E8E8EC] overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-[#E8E8EC]"><h2 className="text-[14px] font-bold text-[#0B0B0C]">Cekaju odobrenje</h2></div>
+        <div className="divide-y divide-[#F5F5F7]">
+          {pending.length === 0 && <div className="px-5 py-10 text-center text-[13px] text-[#C7C7CC]">Nema pending odobrenja</div>}
+          {pending.map(a => (
+            <div key={a.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] transition-colors">
+              <div>
+                <div className="text-[13px] font-semibold text-[#0B0B0C]">{a.approvalType}</div>
+                <div className="text-[11px] text-[#8E8E93] mt-0.5">{a.spvId || 'Platforma'} · {a.requestedByName || 'Nepoznato'}</div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  disabled={writeDisabled || mutatingId === p.id}
-                  onClick={() => handleDecision(p.id, "APPROVED")}
-                  className={`px-3 py-1 rounded-lg text-[12px] font-semibold transition-colors ${writeDisabled || mutatingId === p.id ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"}`}
-                >{mutatingId === p.id ? "..." : "Odobri"}</button>
-                <button
-                  disabled={writeDisabled || mutatingId === p.id}
-                  onClick={() => handleDecision(p.id, "REJECTED")}
-                  className={`px-3 py-1 rounded-lg text-[12px] font-semibold transition-colors ${writeDisabled || mutatingId === p.id ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-700"}`}
-                >{mutatingId === p.id ? "..." : "Odbij"}</button>
+                <button disabled={writeDisabled} className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-bold hover:bg-emerald-600 disabled:opacity-30 transition-all">Odobri</button>
+                <button disabled={writeDisabled} className="px-3 py-1.5 rounded-lg bg-white border border-red-300 text-red-600 text-[11px] font-bold hover:bg-red-50 disabled:opacity-30 transition-all">Odbij</button>
               </div>
             </div>
-            <div className="text-[11px] text-black/40 mt-1">{(p.spvId || "---")} | {p.requestedByName || "---"} | {p.requestedAt ? new Date(p.requestedAt).toLocaleDateString("hr") : "---"}</div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* History */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-        <div className="px-4 py-3 border-b border-gray-100 text-[14px] font-bold">Povijest ({history.length})</div>
-        {history.length === 0 && <div className="px-4 py-6 text-center text-[13px] text-black/40">Nema povijesti.</div>}
-        <table className="w-full text-[12px]">
-          <thead><tr className="border-b border-gray-100 bg-gray-50/50">
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">SPV</th>
-            <th className="text-center px-3 py-2.5 font-semibold text-black/70">Tip</th>
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Opis</th>
-            <th className="text-center px-3 py-2.5 font-semibold text-black/70">Odluka</th>
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Datum</th>
-          </tr></thead>
-          <tbody>{history.map(h => (
-            <tr key={h.id} className="border-b border-gray-50 hover:bg-gray-50">
-              <td className="px-3 py-2.5 text-black/70">{(h.spvId || "---")}</td>
-              <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${typeColors[h.approvalType] || "bg-gray-100"}`}>{h.approvalType}</span></td>
-              <td className="px-3 py-2.5 text-black">{h.entityType || h.approvalType}</td>
-              <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${h.status === "APPROVED" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{h.status}</span></td>
-              <td className="px-3 py-2.5 text-black/70">{h.decidedAt ? new Date(h.decidedAt).toLocaleDateString("hr") : h.requestedAt ? new Date(h.requestedAt).toLocaleDateString("hr") : "---"}</td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
+      {resolved.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#E8E8EC] overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[#E8E8EC]"><h2 className="text-[14px] font-bold text-[#0B0B0C]">Povijest</h2></div>
+          <div className="divide-y divide-[#F5F5F7] max-h-[300px] overflow-y-auto">
+            {resolved.slice(0, 10).map(a => (
+              <div key={a.id} className="px-5 py-3 flex items-center justify-between">
+                <div>
+                  <div className="text-[12px] font-semibold text-[#3C3C43]">{a.approvalType}</div>
+                  <div className="text-[10px] text-[#8E8E93]">{a.spvId}</div>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${a.status === "APPROVED" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>{a.status === "APPROVED" ? "Odobreno" : "Odbijeno"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="text-[10px] text-[#C7C7CC] text-center mt-6 max-w-2xl mx-auto leading-relaxed">
+        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
+        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.
+      </p>
     </div>
   );
 }
