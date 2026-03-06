@@ -1,137 +1,39 @@
 "use client";
-
 import { useParams, useRouter } from "next/navigation";
-import { useSpvById, useVerticalsBySpv } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-
-// P19 Hooks
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
+import { useVerticalsBySpv } from "@/lib/data-client";
+import { useState } from "react";
+import { Briefcase } from "lucide-react";
+
+const TABS = ["Aktivne", "Deliverables", "Provizije", "Status"] as const;
 
 export default function SpvVertikalePage() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
-  const spvId = id as string;
-
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading, role } = usePermission('vertical_manage');
-  const writeDisabled = isSafe || isLockdown || isForensic;
-
-  const { data: spv } = useSpvById(spvId);
-  const { data: verticals } = useVerticalsBySpv(spvId);
-
-  useEffect(() => {
-    if (!permLoading && allowed && spvId) {
-      logAudit({
-        action: 'SPV_VERTICALS_VIEW',
-        entity_type: 'vertical',
-        spv_id: spvId,
-        details: { context: 'control_room' },
-      });
-    }
-  }, [permLoading, allowed, spvId]);
-
-  if (!permLoading && !allowed) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
-          <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za pregled vertikala.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (modeLoading || permLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
-  const withNda = verticals.filter(v => v.ndaSigned);
-  const withoutNda = verticals.filter(v => !v.ndaSigned);
+  const spvId = params?.id as string;
+  const { data: verticals, loading } = useVerticalsBySpv(spvId);
+  const [tab, setTab] = useState<string>("Aktivne");
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[22px] font-bold text-black">Vertikale</h1>
-          <p className="text-[13px] text-black/50 mt-0.5">{verticals.length} dodijeljenih vertikala</p>
-        </div>
-        {/* P19: Assignment button disabled in SAFE/LOCKDOWN */}
-        <button
-          disabled={writeDisabled}
-          className={`px-4 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-            writeDisabled
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'apple-blue-btn'
-          }`}
-          title={writeDisabled ? 'Novi assignment onemogucen u trenutnom modu' : undefined}
-        >
-          + Dodijeli vertikalu
-        </button>
+    <div>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-1"><Briefcase size={24} strokeWidth={2} className="text-[#2563EB]" /><h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Vertikale</h1></div>
+        <p className="text-[14px] text-[#6E6E73]">{verticals.length} vertikala · NDA/DPA gate obavezan</p>
       </div>
-
-      {/* P19: NDA/DPA status summary */}
-      {withoutNda.length > 0 && (
-        <div className="px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-[12px] text-red-700">
-          <span className="font-semibold">{withoutNda.length} vertikala</span> bez potpisanog NDA — assignment blokiran (HARD BLOCK).
-        </div>
-      )}
-
-      {/* KPI pills */}
-      <div className="flex gap-2">
-        <div className="px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[12px]">
-          <span className="text-black/50">Ukupno:</span> <span className="font-semibold text-black">{verticals.length}</span>
-        </div>
-        <div className="px-3 py-1.5 rounded-full bg-green-50 border border-green-200 text-[12px]">
-          <span className="text-green-600/70">NDA:</span> <span className="font-semibold text-green-700">{withNda.length}</span>
-        </div>
-        {withoutNda.length > 0 && (
-          <div className="px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-[12px]">
-            <span className="text-red-600/70">Bez NDA:</span> <span className="font-semibold text-red-700">{withoutNda.length}</span>
+      <div className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl bg-red-50 border border-red-200"><span className="text-[11px] font-semibold text-red-700">Assignment bez NDA = HARD BLOCK. Assignment bez DPA = HARD BLOCK.</span></div>
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">{TABS.map(t => <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${tab === t ? "text-[#2563EB] border-[#2563EB]" : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"}`}>{t}</button>)}</div>
+      <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+        {loading && <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Učitavanje...</div>}
+        {!loading && verticals.length === 0 && <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema vertikala za ovaj SPV</div>}
+        {verticals.map(v => (
+          <div key={v.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-[#FAFAFA] cursor-pointer" onClick={() => router.push(`/dashboard/core/spv/${spvId}/vertikale/${v.id}`)}>
+            <Briefcase size={14} className="text-[#8E8E93]" />
+            <div className="flex-1"><div className="text-[13px] font-semibold text-[#0B0B0C]">{v.name}</div><div className="text-[11px] text-[#8E8E93]">{v.type} · NDA: {v.ndaStatus} · DPA: {v.dpaStatus}</div></div>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${v.status === "active" || v.active ? "bg-emerald-50 text-emerald-700" : "bg-[#F5F5F7] text-[#8E8E93]"}`}>{v.active ? "Aktivna" : v.status}</span>
           </div>
-        )}
+        ))}
       </div>
-
-      {verticals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {verticals.map(v => (
-            <button
-              key={v.id}
-              onClick={() => router.push(`/dashboard/core/spv/${spvId}/vertikale/${v.id}`)}
-              className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:border-blue-300 hover:shadow-sm transition-all"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[15px] font-bold text-black">{v.name}</h3>
-                <span className="text-[13px] font-bold text-blue-600">{v.commission}%</span>
-              </div>
-              <div className="text-[12px] text-black/50 mb-1">Tip: {v.type}</div>
-              <div className="text-[12px] text-black/50 mb-2">Kontakt: {v.contact}</div>
-              <div className="flex flex-wrap gap-1">
-                {v.sectors.map(s => <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{s}</span>)}
-              </div>
-              <div className="mt-2 flex gap-3 text-[11px]">
-                <span>NDA: {v.ndaSigned ? <span className="text-green-600 font-medium">Da ({v.ndaDate})</span> : <span className="text-red-500 font-medium">Ne</span>}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-[13px] text-black/40">Nema dodijeljenih vertikala</div>
-      )}
-
-      <p className="text-xs text-gray-400 mt-8 text-center">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.</div>
     </div>
   );
 }

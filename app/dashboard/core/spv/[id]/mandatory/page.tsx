@@ -1,100 +1,75 @@
 "use client";
-
 import { useParams } from "next/navigation";
-import { useSpvById, useMandatoryDocs, useMissingDocs } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
+import { useMandatoryItems } from "@/lib/hooks/block-c";
+import { useState } from "react";
+import { AlertCircle, CheckCircle } from "lucide-react";
+
+const TABS = ["Lifecycle", "Dokumenti", "Ugovori", "Blokade"] as const;
 
 export default function SpvMandatoryPage() {
-  const { id } = useParams();
-  const spvId = id as string;
+  const params = useParams();
+  const spvId = params?.id as string;
+  const { mode } = usePlatformMode();
+  const { data: items, loading } = useMandatoryItems(spvId);
+  const [tab, setTab] = useState<string>("Lifecycle");
 
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading, role } = usePermission('mandatory_manage');
-  const writeDisabled = isSafe || isLockdown || isForensic || role === 'Core';
+  const completed = items.filter(i => i.status === "COMPLETED" || i.status === "WAIVED");
+  const pending = items.filter(i => i.status !== "COMPLETED" && i.status !== "WAIVED");
+  const blocking = items.filter(i => i.blocksTransition && i.status !== "COMPLETED" && i.status !== "WAIVED");
 
-  const { data: spv } = useSpvById(spvId);
-  const { data: mandatory } = useMandatoryDocs(spvId);
-  const { data: _raw_missing } = useMissingDocs();
-
-  useEffect(() => {
-    if (!permLoading && allowed && spvId) {
-      logAudit({ action: 'SPV_MANDATORY_VIEW', entity_type: 'mandatory', spv_id: spvId, details: { context: 'control_room' } });
-    }
-  }, [permLoading, allowed, spvId]);
-
-  if (!permLoading && !allowed) {
-    return (<div className="flex items-center justify-center h-64"><div className="text-center">
-      <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
-      <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za pregled mandatory stavki.</p>
-    </div></div>);
-  }
-
-  if (modeLoading || permLoading) {
-    return (<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>);
-  }
-
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
-  const missing = _raw_missing.filter(d => d.spvId === id);
-  const complete = mandatory.filter(d => d.status !== "nedostaje");
+  const filtered = tab === "Lifecycle" ? items
+    : tab === "Blokade" ? blocking
+    : tab === "Dokumenti" ? items.filter(i => i.itemType === "DOCUMENT")
+    : tab === "Ugovori" ? items.filter(i => i.itemType === "TASK")
+    : items;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-black">Mandatory dokumenti</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{complete.length}/{mandatory.length} kompletno | {missing.length} nedostaje</p>
+    <div>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-1">
+          <AlertCircle size={24} strokeWidth={2} className="text-[#2563EB]" />
+          <h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Obvezni uvjeti</h1>
+        </div>
+        <p className="text-[14px] text-[#6E6E73]">{completed.length}/{items.length} ispunjeno{blocking.length > 0 ? ` · ${blocking.length} blokira prijelaz` : ""}</p>
       </div>
 
-      {/* P19: Lifecycle gate warning */}
-      {missing.length > 0 && (
-        <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
-          <div className="text-[14px] font-bold text-red-700">HARD BLOCK: Lifecycle prijelaz blokiran</div>
-          <div className="text-[12px] text-red-600 mt-1">
-            {missing.length} mandatory stavki nedostaje. SPV ne moze preci u sljedecu fazu dok sve nije ispunjeno. (A2 — lifecycle gate)
-          </div>
+      {blocking.length > 0 && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+          <span className="text-[12px] font-semibold text-red-700">⚠ {blocking.length} obaveznih uvjeta blokira lifecycle prijelaz. Bez ispunjenja — HARD BLOCK.</span>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className={`bg-white rounded-xl border p-4 text-center ${missing.length > 0 ? "border-red-200" : "border-green-200"}`}>
-          <div className={`text-3xl font-bold ${missing.length > 0 ? "text-red-600" : "text-green-600"}`}>{missing.length}</div>
-          <div className="text-[12px] text-black/50">Nedostaje</div>
+      {/* Progress bar */}
+      <div className="bg-white rounded-xl border border-[#E8E8EC] px-5 py-3 mb-5 flex items-center gap-4">
+        <span className="text-[13px] font-semibold text-[#0B0B0C]">Napredak</span>
+        <div className="flex-1 h-2 bg-[#F5F5F7] rounded-full overflow-hidden">
+          <div className="h-full bg-[#2563EB] rounded-full" style={{ width: items.length > 0 ? `${Math.round(completed.length / items.length * 100)}%` : "0%" }} />
         </div>
-        <div className="bg-white rounded-xl border border-green-200 p-4 text-center">
-          <div className="text-3xl font-bold text-green-600">{complete.length}</div>
-          <div className="text-[12px] text-black/50">Kompletno</div>
-        </div>
+        <span className="text-[13px] font-bold text-[#2563EB]">{items.length > 0 ? Math.round(completed.length / items.length * 100) : 0}%</span>
       </div>
 
-      <div className="space-y-2">
-        {mandatory.map(d => (
-          <div key={d.id} className={`flex items-center justify-between p-4 rounded-xl border ${d.status === "nedostaje" ? "bg-red-50 border-red-200" : "bg-white border-gray-200"}`}>
-            <div className="flex items-center gap-3">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[14px] ${d.status === "nedostaje" ? "bg-red-100" : "bg-green-100"}`}>
-                {d.status === "nedostaje" ? "X" : "OK"}
-              </div>
-              <div>
-                <div className="text-[13px] font-semibold text-black">{d.name}</div>
-                <div className="text-[11px] text-black/40">{d.type}</div>
-              </div>
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">
+        {TABS.map(t => <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${tab === t ? "text-[#2563EB] border-[#2563EB]" : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"}`}>{t}{t === "Blokade" && blocking.length > 0 ? ` (${blocking.length})` : ""}</button>)}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+        {loading && <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Učitavanje...</div>}
+        {!loading && filtered.length === 0 && <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema stavki</div>}
+        {filtered.map(m => (
+          <div key={m.id} className="px-5 py-3.5 flex items-center gap-4">
+            {m.status === "COMPLETED" || m.status === "WAIVED" ? <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" /> : <div className={`h-3 w-3 rounded-full flex-shrink-0 ${m.blocksTransition ? "bg-red-500" : "bg-amber-500"}`} />}
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-semibold text-[#0B0B0C]">{m.title}</div>
+              <div className="text-[11px] text-[#8E8E93]">{m.itemType || "—"}{m.dueDate ? ` · Rok: ${new Date(m.dueDate).toLocaleDateString("hr")}` : ""}</div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-[11px] font-semibold ${d.status === "nedostaje" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-              {d.status === "nedostaje" ? "NEDOSTAJE" : d.status}
-            </span>
+            <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${m.status === "COMPLETED" ? "bg-emerald-50 text-emerald-700" : m.status === "WAIVED" ? "bg-gray-100 text-gray-600" : m.blocksTransition ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>{m.status === "COMPLETED" ? "ISPUNJENO" : m.status === "WAIVED" ? "IZUZETO" : m.blocksTransition ? "BLOKIRA" : "PENDING"}</span>
           </div>
         ))}
       </div>
 
-      <p className="text-xs text-gray-400 mt-8 text-center">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.</div>
     </div>
   );
 }
+

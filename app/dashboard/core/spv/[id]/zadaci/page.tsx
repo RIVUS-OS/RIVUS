@@ -1,146 +1,69 @@
 "use client";
-
-import { useParams } from "next/navigation";
-import { useSpvById, useTasks } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-
-// P19 Hooks
+import { useParams, useRouter } from "next/navigation";
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
+import { useTasks } from "@/lib/data-client";
+import { useState } from "react";
+import { CheckSquare, Plus } from "lucide-react";
 
-const statusColors: Record<string, string> = {
-  otvoren: "bg-blue-100 text-blue-700", u_tijeku: "bg-amber-100 text-amber-700",
-  "zavrsen": "bg-green-100 text-green-700", blokiran: "bg-red-100 text-red-700", eskaliran: "bg-red-100 text-red-700",
-};
-const priorityColors: Record<string, string> = {
-  critical: "bg-red-100 text-red-700", high: "bg-amber-100 text-amber-700",
-  medium: "bg-blue-100 text-blue-700", low: "bg-gray-100 text-gray-600",
-};
+const TABS = ["Svi", "Otvoreni", "Moji", "Blokirani", "Završeni"] as const;
 
 export default function SpvZadaciPage() {
-  const { id } = useParams();
-  const spvId = id as string;
+  const params = useParams();
+  const spvId = params?.id as string;
+  const { mode } = usePlatformMode();
+  const { data: tasks, loading } = useTasks(spvId);
+  const [tab, setTab] = useState<string>("Svi");
+  const isSafe = mode === "SAFE" || mode === "LOCKDOWN";
 
-  // P19: Platform mode + permission
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading, role } = usePermission('task_write');
-  const writeDisabled = isSafe || isLockdown || isForensic || role === 'Core';
-
-  const { data: spv } = useSpvById(spvId);
-  const { data: tasks } = useTasks(spvId);
-
-  // P19: Audit log
-  useEffect(() => {
-    if (!permLoading && allowed && spvId) {
-      logAudit({
-        action: 'SPV_TASKS_VIEW',
-        entity_type: 'task',
-        spv_id: spvId,
-        details: { context: 'control_room' },
-      });
-    }
-  }, [permLoading, allowed, spvId]);
-
-  // P19: Permission denied
-  if (!permLoading && !allowed) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
-          <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za pregled zadataka.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (modeLoading || permLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
-  const open = tasks.filter(t => (t.status as string) !== "zavrsen");
-  const overdue = tasks.filter(t => {
-    if ((t.status as string) === "zavrsen") return false;
-    if (!t.dueDate) return false;
-    return new Date(t.dueDate) < new Date();
-  });
-  const mandatory = tasks.filter(t => (t as any).is_mandatory && (t.status as string) !== "zavrsen");
+  const filtered = tab === "Svi" ? tasks
+    : tab === "Otvoreni" ? tasks.filter(t => t.status !== "Done")
+    : tab === "Blokirani" ? tasks.filter(t => t.status === "Blocked")
+    : tab === "Završeni" ? tasks.filter(t => t.status === "Done")
+    : tasks;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-black">Zadaci</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{tasks.length} ukupno | {open.length} otvorenih | {overdue.length} kasni</p>
-      </div>
-
-      {/* P19: CORE read-only notice */}
-      {role === 'Core' && (
-        <div className="px-3 py-2 rounded-lg bg-blue-50 border border-blue-100 text-[12px] text-blue-700">
-          CORE pogled — samo citanje. Upravljanje zadacima dostupno je kroz Owner Cockpit.
-        </div>
-      )}
-
-      {/* KPI pills */}
-      <div className="flex gap-2">
-        <div className="px-3 py-1.5 rounded-full bg-white border border-gray-200 text-[12px]">
-          <span className="text-black/50">Otvoreni:</span> <span className="font-semibold text-black">{open.length}</span>
-        </div>
-        {overdue.length > 0 && (
-          <div className="px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-[12px]">
-            <span className="text-red-600/70">Kasni:</span> <span className="font-semibold text-red-700">{overdue.length}</span>
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <CheckSquare size={24} strokeWidth={2} className="text-[#2563EB]" />
+            <h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Zadaci</h1>
           </div>
-        )}
-        {mandatory.length > 0 && (
-          <div className="px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[12px]">
-            <span className="text-amber-600/70">Mandatory:</span> <span className="font-semibold text-amber-700">{mandatory.length}</span>
-          </div>
-        )}
+          <p className="text-[14px] text-[#6E6E73]">{tasks.length} ukupno · {tasks.filter(t => t.status !== "Done").length} otvorenih</p>
+        </div>
+        {!isSafe && <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-semibold hover:bg-[#1d4ed8]"><Plus size={14} /> Novi zadatak</button>}
       </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-        <table className="w-full text-[12px]">
-          <thead><tr className="border-b border-gray-100 bg-gray-50/50">
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Zadatak</th>
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Dodijeljen</th>
-            <th className="text-center px-3 py-2.5 font-semibold text-black/70">Prioritet</th>
-            <th className="text-center px-3 py-2.5 font-semibold text-black/70">Status</th>
-            <th className="text-left px-3 py-2.5 font-semibold text-black/70">Rok</th>
-            <th className="text-center px-3 py-2.5 font-semibold text-black/70">Mandatory</th>
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">
+        {TABS.map(t => <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${tab === t ? "text-[#2563EB] border-[#2563EB]" : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"}`}>{t}</button>)}
+      </div>
+      <div className="bg-white rounded-2xl border border-[#E8E8EC] overflow-hidden">
+        <table className="w-full">
+          <thead><tr className="border-b border-[#E8E8EC]">
+            <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Zadatak</th>
+            <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Status</th>
+            <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Prioritet</th>
+            <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Assignee</th>
+            <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">Rok</th>
           </tr></thead>
-          <tbody>{tasks.map(t => {
-            const isOverdue = (t.status as string) !== "zavrsen" && t.dueDate && new Date(t.dueDate) < new Date();
-            return (
-              <tr key={t.id} className={`border-b border-gray-50 hover:bg-gray-50 ${
-                t.status === "blokiran" || t.status === "eskaliran" ? "bg-red-50/30" :
-                isOverdue ? "bg-amber-50/30" : ""
-              }`}>
-                <td className="px-3 py-2.5 font-medium text-black">{t.title}</td>
-                <td className="px-3 py-2.5 text-black/70 text-[11px]">{t.assignedTo}</td>
-                <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${priorityColors[t.priority]}`}>{t.priority}</span></td>
-                <td className="px-3 py-2.5 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColors[t.status] || "bg-gray-100"}`}>{t.status}</span></td>
-                <td className={`px-3 py-2.5 ${isOverdue ? "text-red-600 font-semibold" : "text-black/50"}`}>{t.dueDate || '-'}</td>
-                <td className="px-3 py-2.5 text-center">
-                  {(t as any).is_mandatory && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">DA</span>}
-                </td>
-              </tr>
-            );
-          })}</tbody>
+          <tbody className="divide-y divide-[#F5F5F7]">
+            {loading && <tr><td colSpan={5} className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Učitavanje...</td></tr>}
+            {!loading && filtered.length === 0 && <tr><td colSpan={5} className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema zadataka</td></tr>}
+            {filtered.map(t => {
+              const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "Done";
+              return (
+                <tr key={t.id} className={`hover:bg-[#FAFAFA] transition-colors ${isOverdue ? "bg-red-50/50" : ""}`}>
+                  <td className="px-5 py-3"><div className="text-[13px] font-semibold text-[#0B0B0C]">{t.title}</div>{t.isMandatory && <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-50 text-amber-700 ml-1">MANDATORY</span>}</td>
+                  <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${t.status === "Done" ? "bg-emerald-50 text-emerald-700" : t.status === "Blocked" ? "bg-red-50 text-red-700" : t.status === "InProgress" ? "bg-blue-50 text-blue-700" : "bg-[#F5F5F7] text-[#3C3C43]"}`}>{t.status}</span></td>
+                  <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${t.priority === "High" ? "bg-red-50 text-red-700" : t.priority === "Normal" ? "bg-[#F5F5F7] text-[#3C3C43]" : "bg-gray-50 text-gray-500"}`}>{t.priority}</span></td>
+                  <td className="px-5 py-3 text-[12px] text-[#6E6E73]">{t.assignee || "—"}</td>
+                  <td className="px-5 py-3 text-[12px] text-[#6E6E73]">{t.dueDate ? new Date(t.dueDate).toLocaleDateString("hr") : "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       </div>
-
-      {/* P19: Disclaimer */}
-      <p className="text-xs text-gray-400 mt-8 text-center">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.</div>
     </div>
   );
 }
