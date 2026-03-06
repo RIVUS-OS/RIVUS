@@ -63,7 +63,7 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
   ];
 
   function handleLogout() {
-    supabaseBrowser.auth.signOut(); window.location.href = "/login";
+    supabaseBrowser.auth.signOut().catch(() => {}); window.location.href = "/login";
   }
 
   function isActive(href: string) {
@@ -218,6 +218,8 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+
+
 
 
 
