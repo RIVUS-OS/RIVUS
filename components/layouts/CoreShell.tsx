@@ -191,8 +191,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       <aside className="w-[232px] border-r border-black/[0.08] bg-white/60 backdrop-blur-xl flex flex-col">
         {/* Logo header */}
         <div className="h-[52px] border-b border-black/[0.06] flex items-center px-4 gap-2.5">
-          <Image src="/logo-icon.png" alt="RIVUS" width={22} height={22} />
-          <span className="text-[14px] font-bold text-black tracking-tight">RIVUS</span>
+          <Image src="/logo-icon.png" alt="RIVUS" width={42} height={42} />
+          <span className="text-[22px] font-bold text-black tracking-tight">RIVUS</span>
           <span className="text-[10px] font-medium text-black/30 tracking-wider">OS</span>
         </div>
 
@@ -251,7 +251,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                           ? "bg-[#2563EB] text-white"
                           : isDisabled
                             ? "text-black/20 cursor-not-allowed"
-                            : "text-black/60 hover:text-black hover:bg-black/[0.04]"
+                            : "text-[#3C3C43] hover:text-black hover:bg-black/[0.04]"
                         }
                       `}
                       title={isDisabled ? item.disabledTooltip : undefined}
@@ -299,8 +299,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                   onClick={() => router.push(item.href)}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
                     isActive
-                      ? "text-black bg-black/[0.06]"
-                      : "text-black/35 hover:text-black/60 hover:bg-black/[0.03]"
+                      ? "text-[#2563EB] bg-[#2563EB]/[0.08] font-bold"
+                      : "text-[#3C3C43] hover:text-black hover:bg-black/[0.03]"
                   }`}
                 >
                   <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -322,7 +322,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="h-8 w-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold hover:bg-black/80 transition-colors"
+                className="h-8 w-8 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[12px] font-bold hover:bg-[#1d4ed8] transition-colors"
               >
                 J
               </button>
@@ -364,6 +364,12 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 
