@@ -1,4 +1,2 @@
 import { redirect } from "next/navigation";
-export default function Page() {
-  redirect("/dashboard/core/dnevnik");
-}
+export default function Page() { redirect("/dashboard/core/tok"); }
