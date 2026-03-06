@@ -56,19 +56,12 @@ export default function LoginPage() {
       <div className="max-w-[400px] w-full">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-5">
-            <rect width="48" height="48" rx="12" fill="#0B0B0C"/>
-            <path d="M24 10C16.268 10 10 16.268 10 24C10 31.732 16.268 38 24 38C31.732 38 38 31.732 38 24C38 16.268 31.732 10 24 10ZM24 14C29.523 14 34 18.477 34 24C34 29.523 29.523 34 24 34C18.477 34 14 29.523 14 24C14 18.477 18.477 14 24 14Z" fill="white" fillOpacity="0.15"/>
-            <path d="M24 16C19.582 16 16 19.582 16 24C16 28.418 19.582 32 24 32C28.418 32 32 28.418 32 24" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-            <path d="M29 19L32 16M32 16H28M32 16V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <div className="flex items-baseline gap-1.5">
+          
+          <div className="flex items-baseline gap-1.5 mb-1">
             <span className="text-[28px] font-bold tracking-[-0.5px] text-[#0B0B0C]">RIVUS</span>
             <span className="text-[13px] font-semibold text-[#8E8E93] tracking-wide">OS</span>
           </div>
-          <div className="mt-2 text-[11px] font-semibold tracking-[0.2em] text-[#8E8E93] uppercase">
-            Governance Engine
-          </div>
+          
         </div>
 
         {/* Platform Status Banners */}
@@ -195,5 +188,6 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
 
