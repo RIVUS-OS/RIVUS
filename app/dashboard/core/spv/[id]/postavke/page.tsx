@@ -1,98 +1,59 @@
 "use client";
-
 import { useParams } from "next/navigation";
-import { useSpvById, formatEur } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
-
+import { useSpvById } from "@/lib/data-client";
+import { useState } from "react";
+import { Settings, AlertTriangle } from "lucide-react";
+const TABS = ["Opće", "Pravni podaci", "Lifecycle", "Danger Zone"] as const;
 export default function SpvPostavkePage() {
-  const { id } = useParams();
-  const spvId = id as string;
-
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading, role } = usePermission('spv_settings');
-  const writeDisabled = isSafe || isLockdown || isForensic;
-
+  const params = useParams();
+  const spvId = params?.id as string;
+  const { mode } = usePlatformMode();
   const { data: spv } = useSpvById(spvId);
-
-  useEffect(() => {
-    if (!permLoading && allowed && spvId) {
-      logAudit({ action: 'SPV_SETTINGS_VIEW', entity_type: 'spv_settings', spv_id: spvId, details: { context: 'control_room' } });
-    }
-  }, [permLoading, allowed, spvId]);
-
-  if (!permLoading && !allowed) {
-    return (<div className="flex items-center justify-center h-64"><div className="text-center">
-      <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
-    </div></div>);
-  }
-
-  if (modeLoading || permLoading) {
-    return (<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>);
-  }
-
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
-  const fields = [
-    ["ID", spv.id], ["Naziv", spv.name], ["Opis", spv.description],
-    ["OIB", spv.oib], ["Sektor", spv.sectorLabel], ["Grad", spv.city],
-    ["Osnovan", spv.founded], ["Faza", spv.phase], ["Status", spv.statusLabel],
-    ["Budzet", formatEur(spv.totalBudget)], ["Proc. profit", formatEur(spv.estimatedProfit)],
-    ["Banka", spv.bankId], ["Knjigovodja", spv.accountantId || "NIJE DODIJELJEN"],
-  ];
-
+  const [tab, setTab] = useState<string>("Opće");
+  const isSafe = mode === "SAFE" || mode === "LOCKDOWN";
+  if (!spv) return <div className="text-[13px] text-[#C7C7CC] py-8 text-center">Učitavanje...</div>;
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-black">Postavke</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">Konfiguracija SPV-a</p>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="space-y-3">
-          {fields.map(([label, val]) => (
-            <div key={label as string} className="flex items-start gap-4 py-2 border-b border-gray-50 last:border-0">
-              <span className="text-[12px] text-black/40 w-36 flex-shrink-0">{label}</span>
-              <span className="text-[13px] font-medium text-black">{val}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {spv.blockReason && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-          <div className="text-[13px] font-bold text-red-700">Razlog blokade:</div>
-          <div className="text-[12px] text-red-600 mt-1">{spv.blockReason}</div>
+    <div>
+      <div className="mb-6"><div className="flex items-center gap-3 mb-1"><Settings size={24} strokeWidth={2} className="text-[#2563EB]" /><h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Postavke</h1></div><p className="text-[14px] text-[#6E6E73]">{spv.projectName} — konfiguracija SPV-a</p></div>
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">{TABS.map(t => <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${tab === t ? (t === "Danger Zone" ? "text-red-600 border-red-500" : "text-[#2563EB] border-[#2563EB]") : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"}`}>{t}</button>)}</div>
+      {tab === "Opće" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] p-5 space-y-4">
+          <Field label="Naziv projekta" value={spv.projectName} />
+          <Field label="Kod" value={spv.code} />
+          <Field label="Grad" value={spv.city || "—"} />
+          <Field label="Adresa" value={spv.address || "—"} />
+          <Field label="Opis" value={spv.description || "—"} />
         </div>
       )}
-
-      {spv.completionDate && (
-        <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
-          <div className="text-[13px] font-bold text-indigo-700">Zavrsen: {spv.completionDate}</div>
+      {tab === "Pravni podaci" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] p-5 space-y-4">
+          <Field label="OIB" value={spv.oib || "—"} />
+          <Field label="Sektor" value={spv.sectorLabel || spv.sector || "—"} />
+          <Field label="Osnivanje" value={spv.founded || "—"} />
+          <Field label="Vlasnik" value={spv.ownerName || spv.owner || "—"} />
         </div>
       )}
-
-      {/* P19: Danger Zone */}
-      <div className="bg-white rounded-xl border-2 border-red-200 p-5">
-        <h3 className="text-[14px] font-bold text-red-700 mb-2">Danger Zone</h3>
-        <p className="text-[12px] text-black/50 mb-3">SPV terminacija zahtijeva dual approval i ispunjenje svih mandatory stavki (A14-§3).</p>
-        <button
-          disabled={writeDisabled}
-          className={`px-4 py-2 rounded-lg text-[13px] font-medium ${writeDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}
-        >
-          Terminiraj SPV
-        </button>
-      </div>
-
-      <p className="text-xs text-gray-400 mt-8 text-center">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+      {tab === "Lifecycle" && (
+        <div className="bg-white rounded-2xl border border-[#E8E8EC] p-5 space-y-4">
+          <Field label="Faza" value={spv.phase || "—"} />
+          <Field label="Status" value={spv.isBlocked ? "Blokiran" : "Aktivan"} />
+          <Field label="Lifecycle %" value={`${spv.completionPct || 0}%`} />
+          <Field label="Platform status" value={spv.platformStatus || "—"} />
+          {spv.blockReason && <Field label="Razlog blokade" value={spv.blockReason} />}
+        </div>
+      )}
+      {tab === "Danger Zone" && (
+        <div className="bg-red-50 rounded-2xl border border-red-200 p-5">
+          <div className="flex items-center gap-2 mb-3"><AlertTriangle size={16} className="text-red-600" /><h2 className="text-[15px] font-bold text-red-700">Opasna zona</h2></div>
+          <p className="text-[13px] text-red-600 mb-4">SPV termination zahtijeva dual approval i ispunjenje svih mandatory uvjeta.</p>
+          <button disabled={isSafe} className="px-4 py-2 rounded-xl bg-red-600 text-white text-[13px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition-colors">Zatraži terminaciju SPV-a</button>
+        </div>
+      )}
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.</div>
     </div>
   );
+}
+function Field({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-center gap-4"><span className="text-[12px] text-[#8E8E93] w-[140px]">{label}</span><span className="text-[13px] font-semibold text-[#0B0B0C]">{value}</span></div>;
 }

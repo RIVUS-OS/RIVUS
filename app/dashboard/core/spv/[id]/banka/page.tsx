@@ -1,102 +1,32 @@
+// === SPV BANKA === app/dashboard/core/spv/[id]/banka/page.tsx
 "use client";
-
 import { useParams } from "next/navigation";
-import { useSpvById, useBanks } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-
-// P19 Hooks
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { usePermission } from "@/lib/hooks/usePermission";
-import { logAudit } from "@/lib/hooks/logAudit";
-
+import { useBanks } from "@/lib/data-client";
+import { useState } from "react";
+import { Landmark } from "lucide-react";
+const TABS = ["Pregled", "Evaluacije", "Tranše", "Dokumenti", "Status"] as const;
 export default function SpvBankaPage() {
-  const { id } = useParams();
-  const spvId = id as string;
-
-  const { isSafe, isLockdown, isForensic, loading: modeLoading } = usePlatformMode();
-  const { allowed, loading: permLoading, role } = usePermission('bank_read');
-
-  const { data: banks, loading: banksLoading } = useBanks();
-  const { data: spv } = useSpvById(spvId);
-
-  useEffect(() => {
-    if (!permLoading && allowed && spvId) {
-      logAudit({
-        action: 'SPV_BANK_VIEW',
-        entity_type: 'bank',
-        spv_id: spvId,
-        details: { context: 'control_room' },
-      });
-    }
-  }, [permLoading, allowed, spvId]);
-
-  if (!permLoading && !allowed) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-gray-700">Pristup odbijen</p>
-          <p className="text-sm text-gray-500 mt-1">Nemate dozvolu za pregled bankovnih podataka.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (modeLoading || permLoading || banksLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  if (!spv) return <div className="p-8 text-center text-red-600">SPV nije pronadjen: {id}</div>;
-
-  const bank = banks.find(b => b.id === spv.bankId);
-
+  const params = useParams();
+  const spvId = params?.id as string;
+  const { mode } = usePlatformMode();
+  const { data: banks } = useBanks();
+  const [tab, setTab] = useState<string>("Pregled");
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-black">Banka</h1>
-        <p className="text-[13px] text-black/50 mt-0.5">{spv.name}</p>
-      </div>
-
-      {/* P19: Bank role notice */}
-      <div className="px-3 py-2 rounded-lg bg-blue-50 border border-blue-100 text-[12px] text-blue-700">
-        Bank rola je evaluacijska — samo citanje. Bank NE SMIJE mijenjati financijske podatke SPV-a. Svaki pristup se logira.
-      </div>
-
-      {bank ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-[18px] font-bold text-black mb-3">{bank.name}</h2>
-          <div className="grid grid-cols-2 gap-y-3 text-[13px]">
-            <div><span className="text-black/40">Status:</span> <span className="font-medium text-green-600 ml-2">{bank.status}</span></div>
-            <div><span className="text-black/40">Tip odnosa:</span> <span className="font-medium ml-2">{bank.relationshipType}</span></div>
-            <div><span className="text-black/40">Kontakt:</span> <span className="ml-2">{bank.contact}</span></div>
-            <div><span className="text-black/40">Email:</span> <span className="ml-2">{bank.contact}</span></div>
+    <div>
+      <div className="mb-6"><div className="flex items-center gap-3 mb-1"><Landmark size={24} strokeWidth={2} className="text-[#2563EB]" /><h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Banka</h1></div><p className="text-[14px] text-[#6E6E73]">Bankovna evaluacija — CORE = READ-ONLY</p></div>
+      <div className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl bg-blue-50 border border-blue-200"><Landmark size={14} className="text-blue-600" /><span className="text-[11px] font-semibold text-blue-700">Bank NE SMIJE mijenjati financijske podatke SPV-a. NDA obavezan za Bank rolu.</span></div>
+      <div className="flex gap-1 mb-6 border-b border-[#E8E8EC]">{TABS.map(t => <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${tab === t ? "text-[#2563EB] border-[#2563EB]" : "text-[#8E8E93] border-transparent hover:text-[#3C3C43]"}`}>{t}</button>)}</div>
+      <div className="bg-white rounded-2xl border border-[#E8E8EC] divide-y divide-[#F5F5F7]">
+        {banks.length === 0 && <div className="px-5 py-8 text-center text-[13px] text-[#C7C7CC]">Nema bankovnih podataka za ovaj SPV</div>}
+        {banks.map(b => (
+          <div key={b.id} className="px-5 py-3.5 flex items-center gap-4">
+            <Landmark size={14} className="text-[#8E8E93]" />
+            <div className="flex-1"><div className="text-[13px] font-semibold text-[#0B0B0C]">{b.name}</div><div className="text-[11px] text-[#8E8E93]">{b.totalEvaluations} evaluacija · {b.approved} odobreno · {b.pending} pending</div></div>
           </div>
-
-          {/* NDA gate */}
-          <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200 text-[12px]">
-            <span className="text-black/40">NDA status:</span>{' '}
-            <span className="font-medium text-amber-600">Provjeri — Bank pristup zahtijeva NDA (A2)</span>
-          </div>
-
-          {bank.evaluationPending === id && (
-            <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-[12px] text-amber-700 font-medium">
-              Evaluacija u tijeku za ovaj SPV
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-[13px] text-black/40">Banka nije dodijeljena</div>
-      )}
-
-      <p className="text-xs text-gray-400 mt-8 text-center">
-        RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat.
-        Odgovornost za izvrsenje obveza ostaje na odgovornoj strani.
-        RIVUS ne pruza pravne, porezne niti financijske savjete.
-      </p>
+        ))}
+      </div>
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvršenje obveza ostaje na odgovornoj strani. RIVUS ne pruža pravne, porezne niti financijske savjete.</div>
     </div>
   );
 }
