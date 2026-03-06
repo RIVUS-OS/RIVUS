@@ -248,7 +248,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                       className={`
                         w-full flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[12px] font-medium transition-all
                         ${isActive
-                          ? "bg-black text-white"
+                          ? "bg-[#2563EB] text-white"
                           : isDisabled
                             ? "text-black/20 cursor-not-allowed"
                             : "text-black/60 hover:text-black hover:bg-black/[0.04]"
@@ -364,3 +364,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+
+
+
