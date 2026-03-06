@@ -1,47 +1,12 @@
 "use client";
-import { useSpvs, useTasks, useTokRequests, formatEur } from "@/lib/data-client";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
-import { usePermission } from "@/lib/hooks/usePermission";
 import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
-import { logAudit } from "@/lib/hooks/logAudit";
-export default function HoldingRizikPage() {
-  // V2.5-7: Platform mode enforcement
-  const { isSafe, isLockdown } = usePlatformMode();
-
-  const { allowed, loading: permLoading } = usePermission("holding_read");
-  useEffect(() => { if (!permLoading && allowed) logAudit({ action: "HOLDING_RIZIK_VIEW", entity_type: "page", details: {} }); }, [permLoading, allowed]);
-
-  const { data: spvs, loading } = useSpvs();
-  const { data: tasks } = useTasks();
-  const { data: tok } = useTokRequests();
-
-  // V2.5-7: Lockdown redirect
-  if (isLockdown) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-red-700">Sustav u Lockdown modu</p>
-          <p className="text-sm text-gray-500 mt-1">Kontaktirajte CORE administratora.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!permLoading && !allowed) return <div className="flex items-center justify-center h-64"><p className="text-lg font-semibold text-gray-700">Pristup odbijen</p></div>;
-  if (permLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
-
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="text-[14px] text-black/40">Ucitavanje...</div></div>;
-  const data = spvs.map(p => {
-    const blocked = tasks.filter(t => t.spvId === p.id && t.status === "blokiran").length;
-    const sla = tok.filter(t => t.spvId === p.id && t.status === "eskaliran").length;
-    const risk = blocked + sla > 2 ? "Visok" : blocked + sla > 0 ? "Srednji" : "Nizak";
-    return { id: p.id, name: p.name, status: p.status, blocked, sla, risk };
-  });
+export default function Page() {
+  const { mode } = usePlatformMode();
   return (
-    <div className="space-y-6">
-      <div><h1 className="text-[22px] font-bold text-black">Holding - Rizik pregled</h1></div>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto"><table className="w-full text-[12px]"><thead><tr className="border-b border-gray-100 bg-gray-50/50"><th className="text-left px-3 py-2.5 font-semibold">SPV</th><th className="text-center px-3 py-2.5 font-semibold">Status</th><th className="text-right px-3 py-2.5 font-semibold">Blokirani</th><th className="text-right px-3 py-2.5 font-semibold">Eskalacije</th><th className="text-center px-3 py-2.5 font-semibold">Rizik</th></tr></thead><tbody>{data.map(d => (<tr key={d.id} className="border-b border-gray-50"><td className="px-3 py-2.5 font-bold">{d.name}</td><td className="px-3 py-2.5 text-center">{d.status}</td><td className="px-3 py-2.5 text-right">{d.blocked}</td><td className="px-3 py-2.5 text-right">{d.sla}</td><td className={`px-3 py-2.5 text-center font-semibold ${d.risk === "Visok" ? "text-red-600" : d.risk === "Srednji" ? "text-amber-600" : "text-green-600"}`}>{d.risk}</td></tr>))}</tbody></table></div>
+    <div>
+      <div className="mb-6"><h1 className="text-[28px] font-bold text-[#0B0B0C] tracking-tight">Rizik</h1><p className="text-[14px] text-[#6E6E73]">Agregirani rizik — READ-ONLY</p></div>
+      <div className="bg-white rounded-2xl border border-[#E8E8EC] p-8 text-center"><div className="text-[48px] mb-3">📄</div><p className="text-[13px] text-[#8E8E93]">Podaci se ucitavaju iz Supabase baze.</p></div>
+      <div className="mt-8 text-[11px] text-[#C7C7CC]">RIVUS prikazuje obveze na temelju zakona i ugovora kao informativni alat. Odgovornost za izvrsenje obveza ostaje na odgovornoj strani. RIVUS ne pruza pravne, porezne niti financijske savjete.</div>
     </div>
   );
 }
