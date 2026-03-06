@@ -10,7 +10,7 @@ import {
   Home, Shield, Building2, Landmark, Euro, FileText,
   FolderOpen, CheckSquare, Users, Bell, Settings, Eye,
   AlertTriangle, CheckCircle, BookOpen, Briefcase,
-  UserCog, AlertCircle, ShieldCheck,
+  UserCog, AlertCircle, ShieldCheck, BarChart3,
   ArrowLeft, Lock, ClipboardList, Receipt, MessageCircle, LogOut, Search,
   Command, Layers,
 } from "lucide-react";
@@ -23,9 +23,9 @@ type NavItem = {
 };
 
 // ============================================================================
-// RIVUS OS — CoreShell v4
-// Architecture: 5 root domains, 4 sidebar sections, command palette
-// Doctrine: OS, not app. No duplicates. Every page = one question.
+// RIVUS OS — CoreShell v5
+// Architecture: 5 root domains, 4 sidebar sections (SIGNAL/GOVERNANCE/EVIDENCIJA/UPRAVLJANJE)
+// MASTER UI SPEC v1.0: 10 stavki, Command Palette, platform status footer
 // ============================================================================
 
 export default function CoreShell({ children }: { children: React.ReactNode }) {
@@ -44,6 +44,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   const { data: spvData } = useSpvById(spvId || "");
   const isInsideCoreDoo = pathname.startsWith("/dashboard/core-company");
   const isInsideModules = pathname.startsWith("/dashboard/modules");
+  const isInsideHolding = pathname.startsWith("/dashboard/holding");
 
   // === ⌘K COMMAND PALETTE ===
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     { label: "Moduli", href: "/dashboard/modules" },
   ];
 
-  // === SIDEBAR: CONTROL ROOM — 9 items, 4 sections ===
+  // === SIDEBAR: CONTROL ROOM — 10 items, 4 sections (MASTER UI SPEC v1.0) ===
   const controlRoomSidebar: { title: string; items: NavItem[] }[] = [
     { title: "SIGNAL", items: [
       { label: "Pregled", href: "/dashboard/core", icon: Home },
@@ -75,59 +76,73 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
       { label: "Pentagon", href: "/dashboard/core/pentagon", icon: Shield },
       { label: "TOK", href: "/dashboard/core/tok", icon: MessageCircle },
       { label: "Odobrenja", href: "/dashboard/core/odobrenja", icon: CheckCircle, badge: 3 },
-      { label: "Obveze", href: "/dashboard/core/obligations", icon: ClipboardList },
+      { label: "Obveze", href: "/dashboard/core/obligations", icon: ClipboardList, badge: 4 },
+    ]},
+    { title: "EVIDENCIJA", items: [
+      { label: "Izvještaji", href: "/dashboard/core/izvjestaji", icon: BarChart3 },
       { label: "GDPR", href: "/dashboard/core/gdpr", icon: ShieldCheck },
     ]},
-    { title: "ACCESS", items: [
+    { title: "UPRAVLJANJE", items: [
       { label: "Korisnici", href: "/dashboard/core/korisnici", icon: Users },
-    ]},
-    { title: "SYSTEM", items: [
       { label: "Platforma", href: "/dashboard/core/platform-mode", icon: Settings },
     ]},
   ];
 
-  // === SIDEBAR: SPV DETAIL — 12 items ===
+  // === SIDEBAR: SPV DETAIL — 12 items, 3 sections (RAD/MREZA/KONTROLA) ===
   const spvSidebar: { title: string; items: NavItem[] }[] = [
-    { title: "", items: [
+    { title: "RAD", items: [
       { label: "Pregled", href: spvBase, icon: Home },
       { label: "Zadaci", href: `${spvBase}/zadaci`, icon: CheckSquare },
       { label: "Dokumenti", href: `${spvBase}/dokumenti`, icon: FolderOpen },
       { label: "Financije", href: `${spvBase}/financije`, icon: Euro },
+    ]},
+    { title: "MREŽA", items: [
       { label: "Vertikale", href: `${spvBase}/vertikale`, icon: Briefcase },
       { label: "Banka", href: `${spvBase}/banka`, icon: Landmark },
       { label: "Knjigovodstvo", href: `${spvBase}/knjigovodstvo`, icon: FileText },
+      { label: "Korisnici", href: `${spvBase}/korisnici`, icon: Users },
+    ]},
+    { title: "KONTROLA", items: [
       { label: "Obvezni uvjeti", href: `${spvBase}/mandatory`, icon: AlertCircle },
       { label: "Odobrenja", href: `${spvBase}/odobrenja`, icon: CheckCircle },
-      { label: "Korisnici", href: `${spvBase}/korisnici`, icon: Users },
       { label: "Dnevnik", href: `${spvBase}/dnevnik`, icon: BookOpen },
       { label: "Postavke", href: `${spvBase}/postavke`, icon: Settings },
     ]},
   ];
 
-  // === SIDEBAR: CORE D.O.O. ===
+  // === SIDEBAR: CORE D.O.O. — 4 sections (PRIHOD/TROSAK/POREZNO/DOKAZI) ===
   const coreDooSidebar: { title: string; items: NavItem[] }[] = [
-    { title: "", items: [
-      { label: "Nadzorna ploca", href: "/dashboard/core-company", icon: Home },
-    ]},
-    { title: "NAPLATA", items: [
+    { title: "PRIHOD", items: [
+      { label: "Nadzorna ploča", href: "/dashboard/core-company", icon: Home },
       { label: "Naplata", href: "/dashboard/core-company/billing", icon: Euro },
       { label: "Prihodi", href: "/dashboard/core-company/prihodi", icon: Euro },
-      { label: "Rashodi", href: "/dashboard/core-company/rashodi", icon: Euro },
+      { label: "Izdani računi", href: "/dashboard/core-company/izdani-racuni", icon: FileText },
     ]},
-    { title: "FAKTURIRANJE", items: [
-      { label: "Izdani racuni", href: "/dashboard/core-company/izdani-racuni", icon: FileText },
-      { label: "Primljeni racuni", href: "/dashboard/core-company/primljeni-racuni", icon: FileText },
-      { label: "eRacuni", href: "/dashboard/core-company/eracuni", icon: FileText },
+    { title: "TROŠAK", items: [
+      { label: "Rashodi", href: "/dashboard/core-company/rashodi", icon: Euro },
+      { label: "Primljeni računi", href: "/dashboard/core-company/primljeni-racuni", icon: FileText },
     ]},
     { title: "POREZNO", items: [
+      { label: "eRačuni", href: "/dashboard/core-company/eracuni", icon: FileText },
       { label: "PDV", href: "/dashboard/core-company/pdv", icon: FileText },
       { label: "Bilanca", href: "/dashboard/core-company/bilanca", icon: FileText },
       { label: "Blagajna", href: "/dashboard/core-company/blagajna", icon: Landmark },
     ]},
-    { title: "DOKUMENTI", items: [
+    { title: "DOKAZI", items: [
       { label: "Dokumenti", href: "/dashboard/core-company/core-dokumenti", icon: FolderOpen },
       { label: "Ugovori", href: "/dashboard/core-company/core-ugovori", icon: FileText },
       { label: "Postavke", href: "/dashboard/core-company/core-postavke", icon: Settings },
+    ]},
+  ];
+
+  // === SIDEBAR: HOLDING ===
+  const holdingSidebar: { title: string; items: NavItem[] }[] = [
+    { title: "", items: [
+      { label: "Nadzorna ploča", href: "/dashboard/holding", icon: Home },
+      { label: "Portfolio", href: "/dashboard/holding/portfolio", icon: Building2 },
+      { label: "Financije", href: "/dashboard/holding/financije", icon: Euro },
+      { label: "Rizik", href: "/dashboard/holding/rizik", icon: AlertTriangle },
+      { label: "Izvještaji", href: "/dashboard/holding/izvjestaji", icon: BarChart3 },
     ]},
   ];
 
@@ -148,13 +163,26 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
   // === DETERMINE ACTIVE SIDEBAR ===
   const activeSidebar = isInsideSpv ? spvSidebar
     : isInsideCoreDoo ? coreDooSidebar
+    : isInsideHolding ? holdingSidebar
     : isInsideModules ? modulesSidebar
     : controlRoomSidebar;
 
-  const showBackButton = isInsideSpv || isInsideCoreDoo || isInsideModules;
+  const showBackButton = isInsideSpv || isInsideCoreDoo || isInsideHolding || isInsideModules;
   const backTarget = isInsideSpv ? "/dashboard/core/spv-lista"
     : isInsideCoreDoo ? "/dashboard/core"
+    : isInsideHolding ? "/dashboard/core"
     : "/dashboard/core";
+
+  // === CONTEXT LABELS ===
+  const contextCard = isInsideSpv
+    ? { tag: "SPV", title: spvData?.code || "...", subtitle: spvData?.name || "" }
+    : isInsideCoreDoo
+    ? { tag: "Firma", title: "RIVUS CORE d.o.o.", subtitle: "Revenue Engine" }
+    : isInsideHolding
+    ? { tag: "Holding", title: "RIVUS Holding d.o.o.", subtitle: "Portfolio nadzor" }
+    : isInsideModules
+    ? { tag: "Platforma", title: "Moduli", subtitle: "Capability Layer" }
+    : null;
 
   async function handleLogout() { await supabaseBrowser.auth.signOut(); router.push("/login"); }
 
@@ -165,12 +193,13 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     { label: "SPV projekti", desc: "Lista svih SPV-ova", href: "/dashboard/core/spv-lista" },
     { label: "Odobrenja", desc: "Pending odluke", href: "/dashboard/core/odobrenja" },
     { label: "Obveze", desc: "Sve obveze", href: "/dashboard/core/obligations" },
-    { label: "TOK", desc: "Real-time dogadjaji", href: "/dashboard/core/tok" },
+    { label: "TOK", desc: "Real-time događaji", href: "/dashboard/core/tok" },
+    { label: "Izvještaji", desc: "Formalni izlazi sustava", href: "/dashboard/core/izvjestaji" },
     { label: "Korisnici", desc: "User management", href: "/dashboard/core/korisnici" },
     { label: "GDPR", desc: "Privacy compliance", href: "/dashboard/core/gdpr" },
     { label: "Platforma", desc: "Platform mode control", href: "/dashboard/core/platform-mode" },
-    { label: "CORE D.O.O.", desc: "Financije firme", href: "/dashboard/core-company" },
-    { label: "Naplata", desc: "Revenue engine", href: "/dashboard/core-company/billing" },
+    { label: "CORE D.O.O.", desc: "Revenue Engine", href: "/dashboard/core-company" },
+    { label: "Naplata", desc: "Billing engine", href: "/dashboard/core-company/billing" },
     { label: "Moduli", desc: "Capability layer", href: "/dashboard/modules" },
     { label: "Holding", desc: "Portfolio nadzor", href: "/dashboard/holding" },
     { label: "Novi SPV", desc: "Kreiraj novi SPV", href: "/dashboard/core/spv-lista" },
@@ -189,7 +218,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           <div className="relative w-[520px] bg-white rounded-2xl border border-[#E8E8EC] shadow-2xl overflow-hidden z-10">
             <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E8E8EC]">
               <Search size={18} className="text-[#8E8E93]" />
-              <input ref={cmdRef} value={cmdQuery} onChange={e => setCmdQuery(e.target.value)} placeholder="Pretrazi RIVUS OS..." className="flex-1 text-[15px] text-[#0B0B0C] placeholder-[#C7C7CC] outline-none bg-transparent" />
+              <input ref={cmdRef} value={cmdQuery} onChange={e => setCmdQuery(e.target.value)} placeholder="Pretraži RIVUS OS..." className="flex-1 text-[15px] text-[#0B0B0C] placeholder-[#C7C7CC] outline-none bg-transparent" />
               <kbd className="text-[10px] bg-[#F5F5F7] border border-[#E8E8EC] rounded px-1.5 py-0.5 font-mono text-[#8E8E93]">ESC</kbd>
             </div>
             <div className="max-h-[320px] overflow-y-auto">
@@ -208,7 +237,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
 
       {/* === SIDEBAR === */}
       <aside className="w-[240px] border-r border-[#E8E8EC] bg-white flex flex-col flex-shrink-0">
-        {/* Logo — Jurke potvrdio velicinu */}
+        {/* Logo — 42x42 + RIVUS 22px — Jurke potvrdio */}
         <div className="h-[56px] border-b border-[#E8E8EC] flex items-center px-4 gap-2.5 flex-shrink-0">
           <Image src="/logo-icon.png" alt="RIVUS" width={42} height={42} />
           <span className="text-[22px] font-bold text-[#0B0B0C] tracking-tight">RIVUS</span>
@@ -223,28 +252,12 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
             </button>
           )}
 
-          {/* SPV context card */}
-          {isInsideSpv && (
+          {/* Context card */}
+          {contextCard && (
             <div className="px-3 py-2.5 mb-4 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/10">
-              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">SPV</div>
-              <div className="text-[14px] font-bold text-[#0B0B0C] mt-0.5">{spvData?.code || "..."}</div>
-              <div className="text-[12px] text-[#6E6E73] truncate">{spvData?.name || ""}</div>
-            </div>
-          )}
-
-          {/* CORE D.O.O. context card */}
-          {isInsideCoreDoo && (
-            <div className="px-3 py-2.5 mb-4 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/10">
-              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">Firma</div>
-              <div className="text-[14px] font-bold text-[#0B0B0C] mt-0.5">RIVUS CORE d.o.o.</div>
-            </div>
-          )}
-
-          {/* Moduli context card */}
-          {isInsideModules && (
-            <div className="px-3 py-2.5 mb-4 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/10">
-              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">Platforma</div>
-              <div className="text-[14px] font-bold text-[#0B0B0C] mt-0.5">Moduli</div>
+              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">{contextCard.tag}</div>
+              <div className="text-[14px] font-bold text-[#0B0B0C] mt-0.5">{contextCard.title}</div>
+              {contextCard.subtitle && <div className="text-[12px] text-[#6E6E73] truncate">{contextCard.subtitle}</div>}
             </div>
           )}
 
@@ -256,7 +269,8 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
               )}
               <div className="space-y-0.5">
                 {section.items.map((item) => {
-                  const needsExact = ["/dashboard/core", "/dashboard/core-company", "/dashboard/modules", spvBase].includes(item.href);
+                  const exactPaths = ["/dashboard/core", "/dashboard/core-company", "/dashboard/modules", "/dashboard/holding", spvBase];
+                  const needsExact = exactPaths.includes(item.href);
                   const isActive = pathname === item.href || (!needsExact && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   return (
@@ -279,8 +293,15 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* User profile + logout */}
+        {/* Platform status + user profile + logout */}
         <div className="border-t border-[#E8E8EC] px-4 py-3 flex-shrink-0">
+          {/* Platform status rail */}
+          <div className="flex items-center gap-2 px-2 py-1.5 mb-3 rounded-lg bg-[#F7F7F8]">
+            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-[11px] font-semibold text-[#3C3C43]">NORMAL</span>
+            <span className="text-[10px] text-[#8E8E93] ml-auto">1 GATE · 4 obveze</span>
+          </div>
+          {/* User */}
           <div className="flex items-center gap-3 mb-3">
             <div className="h-8 w-8 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[13px] font-bold">J</div>
             <div>
@@ -291,7 +312,6 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
           <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-[#8E8E93] hover:text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">
             <LogOut size={14} strokeWidth={1.6} /><span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[10px] font-medium text-[#C7C7CC]">v1.7.1</div>
         </div>
       </aside>
 
@@ -315,16 +335,13 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
             })}
           </div>
           <div className="flex items-center gap-3">
-            {/* Command palette trigger */}
             <button onClick={() => setCmdOpen(true)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F5F5F7] text-[12px] text-[#8E8E93] hover:bg-[#EDEDF0] transition-colors">
-              <Search size={13} /> <span>Pretrazi...</span> <kbd className="text-[10px] bg-white border border-[#E8E8EC] rounded px-1.5 py-0.5 font-mono">&#x2318;K</kbd>
+              <Search size={13} /> <span>Pretraži...</span> <kbd className="text-[10px] bg-white border border-[#E8E8EC] rounded px-1.5 py-0.5 font-mono">&#x2318;K</kbd>
             </button>
-            {/* Notifications */}
             <button onClick={() => router.push("/dashboard/notifications")} className="relative p-2 hover:bg-[#F5F5F7] rounded-lg transition-colors">
               <Bell size={18} strokeWidth={1.6} className="text-[#3C3C43]" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white" />
             </button>
-            {/* Avatar */}
             <div className="relative">
               <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="h-8 w-8 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[12px] font-bold">J</button>
               {userMenuOpen && (<>
@@ -335,7 +352,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
                     <div className="text-[11px] text-[#8E8E93] mt-0.5">CORE Administrator</div>
                   </div>
                   <div className="p-1">
-                    <button onClick={() => { router.push("/dashboard/core/postavke"); setUserMenuOpen(false); }} className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-[#3C3C43] hover:bg-[#F5F5F7]">Postavke</button>
+                    <button onClick={() => { router.push("/dashboard/core/platform-mode"); setUserMenuOpen(false); }} className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-[#3C3C43] hover:bg-[#F5F5F7]">Postavke</button>
                     <button onClick={handleLogout} className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium text-red-600 hover:bg-red-50">Odjava</button>
                   </div>
                 </div>
