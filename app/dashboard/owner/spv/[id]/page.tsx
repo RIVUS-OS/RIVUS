@@ -109,28 +109,6 @@ export default function OwnerSpvPage() {
           <div className="text-[13px] text-red-600 mt-1">{spv.blockReason}</div>
         </div>
       )}
-
-      <div className="flex flex-wrap gap-1 border-b border-gray-200">
-        {[
-          { label: "Pregled", href: base, active: true },
-          { label: "Financije", href: base + "/financije" },
-          { label: "Dokumenti", href: base + "/dokumenti" },
-          { label: "Zadaci", href: base + "/zadaci" },
-          { label: "Vertikale", href: base + "/vertikale" },
-          { label: "Banka", href: base + "/banka" },
-          { label: "Knjigovodstvo", href: base + "/knjigovodstvo" },
-          { label: "Racuni", href: base + "/racuni" },
-          { label: "TOK", href: base + "/tok" },
-          { label: "Mandatory", href: base + "/mandatory" },
-          { label: "Ugovori", href: base + "/ugovori" },
-          { label: "Dnevnik", href: base + "/dnevnik" },
-        ].map((tab) => (
-          <button key={tab.href} onClick={() => router.push(tab.href)} className={`px-3 py-2 text-[12px] font-medium rounded-t-lg ${tab.active ? "bg-white border border-b-white border-gray-200 text-black -mb-px" : "text-black/50 hover:text-black hover:bg-gray-50"}`}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
         {[
           { label: "Racuni", value: issued.length, sub: formatEur(issued.reduce((acc: number, i: any) => acc + i.totalAmount, 0)), alert: false },
@@ -195,3 +173,4 @@ export default function OwnerSpvPage() {
     </div>
   );
 }
+

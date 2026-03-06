@@ -2,16 +2,24 @@
 import { useRouter, usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSpvById } from "@/lib/data-client";
+import { usePlatformMode } from "@/lib/hooks/usePlatformMode";
 import { useState } from "react";
 import { PlatformStatusBanner } from '@/components/ui/PlatformStatusBanner';
 import Image from "next/image";
 import {
   Home, Building2, CheckSquare, FolderOpen, Bell, User, LogOut,
-  Search, ArrowLeft,
+  Search, ArrowLeft, Euro, Briefcase, Landmark, FileText, Users,
+  BookOpen, Settings, MessageCircle, ClipboardList, Shield, AlertTriangle,
 } from "lucide-react";
 
-// Owner globalni sidebar — 5 modula
-const ownerNav = [
+type NavItem = {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+};
+
+// Owner globalni sidebar
+const ownerNav: NavItem[] = [
   { label: "Pregled",       href: "/dashboard/owner",          icon: Home },
   { label: "SPV projekti",  href: "/dashboard/owner/projekti", icon: Building2 },
   { label: "Zadaci",        href: "/dashboard/owner/zadaci",   icon: CheckSquare },
@@ -23,32 +31,62 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { mode } = usePlatformMode();
 
   const spvMatch = pathname.match(/^\/dashboard\/owner\/spv\/([^/]+)/);
   const isInsideSpv = !!spvMatch;
   const spvId = spvMatch ? spvMatch[1] : null;
+  const spvBase = spvId ? `/dashboard/owner/spv/${spvId}` : "";
   const { data: spvData } = useSpvById(spvId || "");
 
+  // SPV sidebar — 3 sections like CoreShell
+  const spvSidebar: { title: string; items: NavItem[] }[] = [
+    { title: "RAD", items: [
+      { label: "Pregled", href: spvBase, icon: Home },
+      { label: "Zadaci", href: `${spvBase}/zadaci`, icon: CheckSquare },
+      { label: "Dokumenti", href: `${spvBase}/dokumenti`, icon: FolderOpen },
+      { label: "Financije", href: `${spvBase}/financije`, icon: Euro },
+      { label: "Računi", href: `${spvBase}/racuni`, icon: FileText },
+    ]},
+    { title: "MREŽA", items: [
+      { label: "Vertikale", href: `${spvBase}/vertikale`, icon: Briefcase },
+      { label: "Banka", href: `${spvBase}/banka`, icon: Landmark },
+      { label: "Knjigovodstvo", href: `${spvBase}/knjigovodstvo`, icon: FileText },
+    ]},
+    { title: "KONTROLA", items: [
+      { label: "Mandatory", href: `${spvBase}/mandatory`, icon: ClipboardList },
+      { label: "TOK", href: `${spvBase}/tok`, icon: MessageCircle },
+      { label: "Dnevnik", href: `${spvBase}/dnevnik`, icon: BookOpen },
+      { label: "Ugovori", href: `${spvBase}/ugovori`, icon: Shield },
+      { label: "Postavke", href: `${spvBase}/postavke`, icon: Settings },
+    ]},
+  ];
+
   async function handleLogout() {
-    await supabaseBrowser.auth.signOut();
+    try { await supabaseBrowser.auth.signOut(); } catch(e) { console.error("signOut error", e); }
     window.location.href = "/login";
   }
 
+  function isActive(href: string) {
+    if (href === spvBase || href === "/dashboard/owner") return pathname === href;
+    return pathname.startsWith(href);
+  }
+
   function renderSidebar() {
-    // SPV kontekst — navigacija je u owner/spv/[id]/layout.tsx
     if (isInsideSpv) {
       return (
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <button
-            onClick={() => router.push("/dashboard/owner/projekti")}
-            className="w-full flex items-center gap-2 px-3 py-2 mb-4 rounded-lg text-[13px] font-semibold text-[#2563EB] hover:bg-[#2563EB]/5 transition-all"
-          >
+          {/* Back button */}
+          <button onClick={() => router.push("/dashboard/owner/projekti")}
+            className="w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-lg text-[13px] font-semibold text-[#2563EB] hover:bg-[#2563EB]/5 transition-all">
             <ArrowLeft size={15} strokeWidth={2.5} />
-            <span>SPV projekti</span>
+            <span>Natrag</span>
           </button>
+
+          {/* SPV context card */}
           {spvData && (
-            <div className="px-3 py-3 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/10">
-              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest mb-1">Aktivni SPV</div>
+            <div className="px-3 py-3 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/10 mb-4">
+              <div className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest mb-1">SPV</div>
               <div className="text-[15px] font-bold text-[#0B0B0C]">{spvData.code}</div>
               <div className="text-[12px] text-[#6E6E73] truncate mt-0.5">{spvData.name}</div>
               {spvData.phase && (
@@ -58,6 +96,28 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
               )}
             </div>
           )}
+
+          {/* SPV navigation sections */}
+          {spvSidebar.map(section => (
+            <div key={section.title} className="mb-4">
+              <div className="px-3 mb-1.5 text-[10px] font-bold text-[#8E8E93] uppercase tracking-[0.08em]">{section.title}</div>
+              <div className="space-y-0.5">
+                {section.items.map(item => {
+                  const active = isActive(item.href);
+                  const Icon = item.icon;
+                  return (
+                    <button key={item.href} onClick={() => router.push(item.href)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-[9px] rounded-lg text-[14px] font-medium transition-all ${
+                        active ? "bg-[#2563EB] text-white shadow-sm" : "text-[#3C3C43] hover:bg-[#F5F5F7]"
+                      }`}>
+                      <Icon size={16} strokeWidth={active ? 2.2 : 1.6} className={active ? "text-white" : "text-[#8E8E93]"} />
+                      <span className="flex-1 text-left">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       );
     }
@@ -67,15 +127,14 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-0.5">
           {ownerNav.map((item) => {
-            const exact = item.href === "/dashboard/owner";
-            const isActive = exact ? pathname === item.href : pathname.startsWith(item.href);
+            const active = isActive(item.href);
             const Icon = item.icon;
             return (
               <button key={item.href} onClick={() => router.push(item.href)}
                 className={`w-full flex items-center gap-2.5 px-3 py-[9px] rounded-lg text-[14px] font-medium transition-all ${
-                  isActive ? "bg-[#2563EB] text-white shadow-sm" : "text-[#3C3C43] hover:bg-[#F5F5F7]"
+                  active ? "bg-[#2563EB] text-white shadow-sm" : "text-[#3C3C43] hover:bg-[#F5F5F7]"
                 }`}>
-                <Icon size={16} strokeWidth={isActive ? 2.2 : 1.6} className={isActive ? "text-white" : "text-[#8E8E93]"} />
+                <Icon size={16} strokeWidth={active ? 2.2 : 1.6} className={active ? "text-white" : "text-[#8E8E93]"} />
                 <span className="flex-1 text-left">{item.label}</span>
               </button>
             );
@@ -84,6 +143,9 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
       </nav>
     );
   }
+
+  // Platform status footer
+  const modeColor = mode === "NORMAL" ? "bg-emerald-500" : mode === "SAFE" ? "bg-amber-500" : mode === "LOCKDOWN" ? "bg-red-500" : "bg-blue-500";
 
   return (
     <div className="flex h-screen bg-[#F7F7F8]"
@@ -99,7 +161,12 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
 
         {renderSidebar()}
 
+        {/* Footer: platform status + user + logout */}
         <div className="border-t border-[#E8E8EC] px-4 py-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 mb-3">
+            <div className={`h-2 w-2 rounded-full ${modeColor}`} />
+            <span className="text-[11px] font-semibold text-[#8E8E93]">{mode}</span>
+          </div>
           <div className="flex items-center gap-3 mb-3">
             <div className="h-8 w-8 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0">O</div>
             <div className="min-w-0">
@@ -111,7 +178,6 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-[#8E8E93] hover:text-[#3C3C43] hover:bg-[#F5F5F7] transition-all">
             <LogOut size={14} strokeWidth={1.6} /><span>Odjava</span>
           </button>
-          <div className="mt-2 px-3 text-[10px] font-medium text-[#8E8E93]/50">v1.7.1</div>
         </div>
       </aside>
 
@@ -153,4 +219,3 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
-

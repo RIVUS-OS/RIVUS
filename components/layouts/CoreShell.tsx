@@ -184,7 +184,7 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     ? { tag: "Platforma", title: "Moduli", subtitle: "Capability Layer" }
     : null;
 
-  async function handleLogout() { await supabaseBrowser.auth.signOut(); window.location.href = "/login"; }
+  async function handleLogout() { try { await supabaseBrowser.auth.signOut(); } catch(e) { console.error("signOut error", e); } window.location.href = "/login"; }
 
   // === COMMAND PALETTE ITEMS ===
   const cmdItems = [
@@ -369,4 +369,5 @@ export default function CoreShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 
