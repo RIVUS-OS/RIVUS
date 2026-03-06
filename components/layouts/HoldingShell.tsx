@@ -21,10 +21,7 @@ export default function HoldingShell({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  async function handleLogout() {
-    await supabaseBrowser.auth.signOut();
-    window.location.href = "/login";
-  }
+  function handleLogout() { supabaseBrowser.auth.signOut().catch(() => {}); window.location.href = "/login"; }
 
   return (
     <div className="flex h-screen bg-[#F7F7F8]"
@@ -104,4 +101,5 @@ export default function HoldingShell({ children }: { children: React.ReactNode }
     </div>
   );
 }
+
 

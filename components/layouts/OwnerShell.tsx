@@ -62,9 +62,8 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     ]},
   ];
 
-  async function handleLogout() {
-    try { await supabaseBrowser.auth.signOut(); } catch(e) { console.error("signOut error", e); }
-    window.location.href = "/login";
+  function handleLogout() {
+    supabaseBrowser.auth.signOut(); window.location.href = "/login";
   }
 
   function isActive(href: string) {
@@ -219,3 +218,6 @@ export default function OwnerShell({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+
+
+

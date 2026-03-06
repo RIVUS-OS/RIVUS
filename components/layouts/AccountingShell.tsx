@@ -24,10 +24,7 @@ export default function AccountingShell({ children }: { children: React.ReactNod
   const spvId = spvMatch ? spvMatch[1] : null;
   const { data: spvData } = useSpvById(spvId || "");
 
-  async function handleLogout() {
-    await supabaseBrowser.auth.signOut();
-    window.location.href = "/login";
-  }
+  function handleLogout() { supabaseBrowser.auth.signOut().catch(() => {}); window.location.href = "/login"; }
 
   return (
     <div className="flex h-screen bg-[#F7F7F8]"
@@ -125,4 +122,5 @@ export default function AccountingShell({ children }: { children: React.ReactNod
     </div>
   );
 }
+
 
